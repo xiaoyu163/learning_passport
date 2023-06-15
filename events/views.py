@@ -34,7 +34,6 @@ def eventListView (request):
             if 'add_event' in request.POST:            
                 event = Events()
             else:
-                print("In if loop")
                 event = Events.objects.all().get(id=request.POST['event_id'])
                 event = Events()
             event.c_name = request.POST['event_name_c']

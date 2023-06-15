@@ -30,7 +30,7 @@ pip-log.txt
 __pycache__/
 local_settings.py
 db.sqlite3
-media/
+
 
 # Secret Key
 .secret_key
