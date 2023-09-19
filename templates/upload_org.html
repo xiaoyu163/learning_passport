@@ -1,0 +1,133 @@
+{% extends "sidebar.html" %} {% block content %} {% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
+<h3>Organisation Comittee List Upload</h3>
+<img src="{% static 'img/Excel.png' %}" alt="Excel Icon"> 
+<a href="{% url 'download_excel' 'organisation_comittee_template' %}"
+  >Download Organisation Committee List Template</a
+>
+<br>
+<br>
+
+<button
+  type="button"
+  class="btn btn-outline-primary"
+  data-toggle="modal"
+  data-target="#upload_org"
+>
+<i class="fas fa-upload"></i>
+
+  Upload
+</button>
+<br><br>
+
+<div class="container-fluid table-responsive">
+    <h3> Organisation Committee List Uploaded</h3>
+    {% if orgs %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Organisation</th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Comittee List</th>
+                <th>Submitted by</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for org in orgs %}
+            <tr>
+                <td>{{org.name}}</td>
+                <td>{{org.year}}</td>
+                {% if org.internal in 'True' %}
+                <td>Internal</td>
+                {% else %}
+                <td>External</td>
+                {% endif %}
+                <td><a href="{{ org.file.url }}">Download File</a></td>
+                <td>{{org.file_by.user.full_name}}</td>
+                <td>
+                    {% if org.status == 1 %}
+                    <span class="badge rounded-pill bg-success">Approved</span>
+                    {% elif org.status == 0 %}
+                    <span class="badge rounded-pill bg-danger">Rejected</span>
+                    {% else %}
+                    <span class="badge rounded-pill bg-secondary">Pending</span>
+                    {% endif %}
+                </td>
+               
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <sub>No uploaded organisation committee file.</sub>
+    {% endif %}
+</div>
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="upload_org" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Upload Organisation Comittee File</h5>
+          <button
+            type="button"
+            class="btn btn-close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Organisation</span>
+            <input
+              type="text"
+              name="org_name"
+              id="org_name"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">Year</span>
+            <input
+              type="year"
+              name="org_year"
+              id="org_year"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="input-group mb-3">
+            <select
+              id="org_internal"
+              class="form-select"
+              name="org_internal"
+            >
+              <option value="1">Internal</option>
+              <option value="0">External</option>
+            </select>
+          </div>
+          <div class="input-group mb-3">
+            
+            <input type="file" name="org_file" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              Close
+            </button>
+            
+            <button type="submit" class="btn btn-primary" name="org_submit">
+              Upload
+            </button>
+        </div>
+    </div>  
+    </div>
+</div>     
+</form>
+
+{% endblock %}

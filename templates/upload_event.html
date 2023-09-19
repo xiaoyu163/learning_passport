@@ -1,0 +1,114 @@
+{% extends "sidebar.html" %} {% block content %} {% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
+<h3>Event Comittee List Upload</h3>
+<img src="{% static 'img/Excel.png' %}" alt="Excel Icon"> 
+<a href="{% url 'download_excel' 'event_comittee_template' %}"
+  >Download Comittee List Template</a
+>
+<br><br>
+
+<button
+  type="button"
+  class="btn btn-outline-primary"
+  data-toggle="modal"
+  data-target="#upload_event"
+>
+<i class="fas fa-upload"></i>
+  Upload
+</button>
+<br><br>
+<div class="container-fluid table-responsive">
+<h3> Event Committee List Uploaded </h3>
+    {% if events %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Year</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Comittee List</th>
+                <th>Submitted by</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{event.e_name}} <br> {{event.c_name}}</td>
+                <td>{{event.year}}</td>
+                <td>{{event.get_type_display}}</td>
+                {% if event.internal in 'True' %}
+                <td>Internal</td>
+                {% else %}
+                <td>External</td>
+                {% endif %}
+                <td><a href="{{ event.file.url }}">Download File</a></td>
+                <td>{{event.file_by.user.full_name}}</td>
+                
+                <td>
+                    {% if event.status == 1 %}
+                    <span class="badge rounded-pill bg-success">Approved</span>
+                    {% elif event.status == 0 %}
+                    <span class="badge rounded-pill bg-danger">Rejected</span>
+                    {% else %}
+                    <span class="badge rounded-pill bg-secondary">Pending</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <sub>No uploaded event committee file.</sub>
+    {% endif %}
+</div>
+    <br><br>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+  <div class="modal fade" id="upload_event" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Upload Event Comittee File</h5>
+            <button
+              type="button"
+              class="btn btn-close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+            </button>
+          </div>
+          <div class="modal-body">
+            
+            <div class="form-floating">
+              
+              <select id="event_name_e" class="form-select" name="event_id" required>
+                {% for event in event_list %}
+                  <option value="{{event.id}}" >{{event.e_name}} </option>
+                {% endfor %}
+              </select>  
+              <label for="event_name_e">Event Name (E)</label>
+              
+            </div>
+            <br>
+            <div class="input-group mb-3">
+              <input type="file" name="event_file" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                Close
+              </button>
+              
+              <button type="submit" class="btn btn-primary" name="event_submit">
+                Upload
+              </button>
+          </div>  
+      </div>
+  </div>
+  </div>       
+  </form>
+
+  {% endblock %}

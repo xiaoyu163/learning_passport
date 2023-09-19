@@ -2,3 +2,8 @@ img {
     height: 5%;
     width: 5%;
 }
+
+.input-group-text {
+    width: 35%;
+    word-wrap: break-word;
+}

@@ -81,5 +81,8 @@ class Organisation(models.Model):
     name = models.CharField(max_length=100)
     year = models.IntegerField()
     internal = models.BooleanField()
-    file = models.FileField(upload_to="org_com/")
+    file = models.FileField(upload_to='org_com/')
+    file_by = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    status = models.BooleanField(null=True)
+
     

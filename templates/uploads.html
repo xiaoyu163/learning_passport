@@ -1,9 +1,6 @@
 {% extends "sidebar.html" %} {% block content %} {% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
-<!DOCTYPE html>
 
-<h1>{{page_name}}</h1>
-<hr />
+<link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
 
 <img src="{% static 'img/Excel.png' %}" alt="Excel Icon"> 
 <a href="{% url 'download_excel' 'organisation_comittee_template' %}"
@@ -11,23 +8,38 @@
 >
 <br>
 <br>
-<h3>Organisation Comittee List Upload</h3>
+<h3><strong>Organisation Comittee List Upload<strong></h3>
 <button
   type="button"
   class="btn btn-outline-primary"
   data-toggle="modal"
   data-target="#upload_org"
 >
+<i class="fas fa-upload"></i>
+
   Upload
 </button>
 <br><br>
-<h3>Event Comittee List Upload</h3>
+<h3><strong>Event Comittee List Upload<strong></h3>
 <button
   type="button"
   class="btn btn-outline-primary"
   data-toggle="modal"
   data-target="#upload_event"
 >
+<i class="fas fa-upload"></i>
+  Upload
+</button>
+<br><br>
+
+<h3><strong>Articles<strong></h3>
+<button
+  type="button"
+  class="btn btn-outline-primary"
+  data-toggle="modal"
+  data-target="#upload_article"
+>
+<i class="fas fa-upload"></i>
   Upload
 </button>
 
@@ -49,7 +61,7 @@
         </div>
         <div class="modal-body">
           <div class="input-group mb-3">
-            <span class="input-group-text">Organisation Name</span>
+            <span class="input-group-text">Organisation</span>
             <input
               type="text"
               name="org_name"
@@ -94,8 +106,11 @@
         </div>
     </div>  
     </div>
-</div>       
+</div>     
+</form>
 
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
 <div class="modal fade" id="upload_event" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -111,38 +126,18 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="input-group mb-3">
-            <span class="input-group-text">Event Name</span>
-            <input
-              type="text"
-              name="event_name"
-              id="event_name"
-              class="form-control"
-              required
-            />
-          </div>
-          <div class="input-group mb-3">
-            <span class="input-group-text">Year</span>
-            <input
-              type="year"
-              name="event_year"
-              id="event_year"
-              class="form-control"
-              required
-            />
-          </div>
-          <div class="input-group mb-3">
-            <select
-              id="event_internal"
-              class="form-select"
-              name="event_internal"
-            >
-              <option value="1">Internal</option>
-              <option value="0">External</option>
-            </select>
-          </div>
-          <div class="input-group mb-3">
+          
+          <div class="form-floating">
+            <label for="event_name_e">Event Name (E)</label>
+            <select id="event_name_e" class="form-select" name="event_id" required>
+              {% for event in event_list %}
+                <option value="{{event.id}}" >{{event.e_name}} </option>
+              {% endfor %}
+            </select>  
             
+          </div>
+          <br>
+          <div class="input-group mb-3">
             <input type="file" name="event_file" required />
           </div>
         </div>
@@ -160,6 +155,101 @@
 </div>       
 </form>
 
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="upload_article" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Upload Articles</h5>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Title</span>
+            <input
+              type="text"
+              name="art_title"
+              id="art_title"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">Publication Year</span>
+            <input
+              type="year"
+              name="art_year"
+              id="art_year"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">Type</span>
+            <input
+              type="text"
+              name="art_type"
+              id="art_type"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">Platform</span>
+            <input
+              type="text"
+              name="art_platform"
+              id="art_platform"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">Competition</span>
+            <input
+              type="text"
+              name="art_comp"
+              id="art_comp"
+              class="form-control"
+            />
+          </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">Award</span>
+              <input
+                type="text"
+                name="art_awd"
+                id="art_awd"
+                class="form-control"
+              />
+            </div>
+          
+        
+          <div class="input-group mb-3">
+            
+            <input type="file" name="art_file" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              Close
+            </button>
+            
+            <button type="submit" class="btn btn-primary" name="art_submit">
+              Upload
+            </button>
+        </div>
+    </div>  
+    </div>
+</div>     
+</form>
 
 
 <br>

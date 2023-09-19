@@ -1,0 +1,92 @@
+{% extends "sidebar.html" %}
+{% block title %} Attendance {% endblock title%}
+{% block content %}
+{% load static %}
+
+<head>    
+<script>
+    function checkAll(o) {
+        var boxes = document.getElementsByTagName("input");
+        for (var x = 0; x < boxes.length; x++) {
+          var obj = boxes[x];
+          if (obj.type == "checkbox") {
+            if (obj.name != "check")
+              obj.checked = o.checked;
+          }
+        }
+      }
+</script>
+</head>
+<h1> Attendance</h1>
+<h5>{{event.e_name}} </h5>
+<br>
+
+<input id="myInput" type="text" class="form-control" placeholder="Search for matric number..." onkeyup="myFunction()">
+    
+
+<br><br>
+<form method="POST">
+    {% csrf_token %}
+ 
+    <table id="attendance_table" class= "table table-striped table-responsive">
+       
+        <thead>
+            <tr>
+                <div class="checkbox select-all">
+                    <input id="check-all" class="form-check-input" type="checkbox" id="cc" onclick="javascript:checkAll(this)"/>
+                    <label for"check-all">Check All</label>
+                  </div>
+                <th>Name</th>
+                <th>Matric No. </th>
+                <th>Attendance</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            {% for participant in participants %}
+                <tr>
+                    <td>{{ participant.student.user.full_name }}</td>
+                    <td>{{ participant.student.matric_no }}</td>
+                    <div class="checkbox rows">
+                    <td><input class="form-check-input" type="checkbox" name="{{ participant.student.user.id }}" {% if participant.attendance %}checked{% endif %}></td>
+                    </div>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Save Attendance</button>
+    <script>
+        $('#all').change(function(e) {
+            if (e.currentTarget.checked) {
+            $('.rows').find('input[type="checkbox"]').prop('checked', true);
+          } else {
+              $('.rows').find('input[type="checkbox"]').prop('checked', false);
+            }
+          });
+    </script>
+</form> 
+<script>
+    function myFunction() {
+      // Declare variables
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("myInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("attendance_table");
+      tr = table.getElementsByTagName("tr");
+    
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[1];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+    </script>
+
+{% endblock %}

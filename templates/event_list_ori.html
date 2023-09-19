@@ -2,10 +2,13 @@
 {% extends "sidebar.html" %} 
 {% block content %}
 {% load static %}
-<head>
+<link rel="stylesheet" href="{% static 'css/event_list.css' %}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
   
   $(document).ready(function() {
+
     $('.reg_button').click(function() {
       var eventId = $(this).data('event-id');
       console.log(eventId)
@@ -13,9 +16,7 @@
     });
     
     $('.edit-button').click(function() {
-      console.log()
       var eventId = $(this).data('event-id');
-      console.log(eventId)
       var event_name_c = '';  // Initialize the event title variable
   
       // Make an AJAX request to retrieve the event details
@@ -58,7 +59,6 @@
           if (event_attendance == true){
             $('#enable').prop('checked',true);
           }
-          
         },
         error: function(xhr, status, error) {
           console.log(error);  // Handle the error if necessary
@@ -69,72 +69,24 @@
   
 </script>
 
-<script>
-  $(document).ready(function() {
-    $('#search-input').on('keyup', function() {
-      var searchText = $(this).val().toLowerCase();
-      $('.card').each(function() {
-        var cardHeader = $(this).find('.card-title').text().toLowerCase();
-        if (cardHeader.includes(searchText)) {
-          $(this).show();
-        } else {
-          $(this).hide();
-        }
-      });
-    });
-  });
-</script>
-
 <h1>{{page_name}}</h1>
 <br />
 
-<div class="container">
-  <div class="row mb-4">
-    <div class="col-md-6 offset-md-3">
-      <div class="input-group">
-        <input id="search-input" type="text" class="form-control" placeholder="Search events...">
-        <button class="btn btn-primary" type="button">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-
+<!-- Event List -->
+{% if not 'Registered' in page_name %}
 
   <!-- Add Event Button for SUPER ADMIN -->
   {% if request.user.role in 'SUPER ADMIN' %}
-    <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#event_modal"> 
-      <i class="fa fa-calendar-plus"></i> &nbsp;
-      Add Event 
-    </button>
-    <br>
-   
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#event_modal"> Add Event </button>
     {% for event in events %}
-      <br>
+      <br><br>
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <a class="card-title" href="{% url 'event-detail' event.id %}" style="vertical-align:middle;">
+          <a href="{% url 'event-detail' event.id %}">
           <strong>{{event.c_name}} {{event.e_name}}</strong>
         </a>
           <!-- Edit Button for SUPER ADMIN -->
-          <form method="POST">  
-            {% csrf_token %}    
-          <div>
-            <a href="{% url 'admin-attendance' event.id %}" id="admin-attendance-button" class="btn btn-light" >
-              <i class="fas fa-calendar-alt"></i>
-            </a> 
-            <button id="edit-button" type="button" class="edit-button btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#edit_modal" data-event-id="{{ event.id }}">
-              <i class="fas fa-edit"></i>
-            </button>  
-            
-              <input name="event_id" value={{event.id}} hidden>  
-              <button class="btn btn-danger" type="submit" name="delete_event" onclick="return confirm('Confirm to delete {{event.e_name}}?')">
-                <i class="fas fa-trash"></i>
-              </button>  
-            
-          </div> 
-        </form>     
+          <button id="edit-button" type="button" class="edit-button btn btn-light" data-toggle="modal" data-target="#edit_modal" data-event-id="{{ event.id }}">Edit</button>
         </div>
         <div class="card-body">
           Date: {{event.start.date}} <br />
@@ -142,8 +94,6 @@
         </div>
       </div>
     {% endfor %}
-    <br>
-
   
   {% else %}
     <!-- Event List for Students -->
@@ -152,9 +102,7 @@
       <div class="card">
         <a href="{% url 'event-detail' event.id %}">
           <div class="card-header">
-            <div class="card-title">
             <strong>{{event.c_name}} {{event.e_name}}</strong>
-            </div>
           </div>
         </a>
         <div class="card-body">
@@ -165,7 +113,7 @@
         <div class="card-footer">   
           <!-- Register Button-->     
           {% if part.registered != 1 %}
-            <button id="reg_button" type="button" class="reg_button btn btn-primary" name="reg_event" data-mdb-toggle="modal" data-mdb-target="#reg_event_modal" data-event-id="{{ event.id }}">
+            <button id="reg_button" type="button" class="reg_button btn btn-primary" name="reg_event" data-toggle="modal" data-target="#reg_event_modal" data-event-id="{{ event.id }}">
               Register
             </button>
           {% else %}
@@ -176,23 +124,70 @@
         </div>
       </div>
     {% endfor %} 
-    <br>
   {% endif %}
 
+{% else %}
+<!-- Registered Event Page for Student -->
+  {% if request.user.role in 'STUDENT' %}
+    {% for part, event in par_events %}
+      <br />
+      <div class="card">
+        <a href="{% url 'events' event.id %}">
+          <div class="card-header">
+            <strong>{{event.c_name}} {{event.e_name}}</strong>
+          </div>
+        </a>
+
+        <div class="card-body">
+          Date: {{event.start.date}} <br />
+          Venue: {{event.venue}}
+        </div>
+        
+        <!-- Take attendance button if attendance is not submitted and event attendance is enabled -->
+        {% if part.attendance != 1 and event.attendance == 1 %}
+        <form method="POST">
+          {% csrf_token %}
+          <div class="card-footer">
+            <input id="event_id" name="event_id" value="{{event.id}}" hidden />
+            <button type="submit" class="btn btn-primary" name="attendance" onclick='return confirm("Confirm to take attendance for {{event.e_name}}?")'>
+              Take Attendance
+            </button>
+          </div>
+        </form>
+        {% elif part.attendance == 1 %}
+          <div class="card-footer">
+            <input id="event_id" name="event_id" value="{{event.id}}" hidden />
+            <button type="button" class="btn btn-primary" name="attendance" disabled>
+              Attendance Submitted
+            </button>
+          </div>      
+        {% endif %} 
+      </div>
+    {% endfor %}
+    <br>
+  {% endif %}
+{% endif %}
+
 <!-- edit event details modal -->
-<form method="POST" enctype="multipart/form-data">
+<form method="POST">
   {% csrf_token %}
   <div class="modal fade" id="edit_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">Edit Event</h5>
-          <button type="button" class="btn btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <div class="form-floating mb-3">
-            
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Name (C)</span>
             <input
               type="text"
               name="event_name_c"
@@ -200,10 +195,9 @@
               class="form-control"
               required
             />
-            <label for="event_name_c">Event Name (C)</label>
           </div>
-          <div class="form-floating mb-3">
-            
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Name (E)</span>
             <input
               type="text"
               name="event_name_e"
@@ -211,10 +205,9 @@
               class="form-control"
               required
             />
-            <label for="event_name_e">Event Name (E)</label>
           </div>
-          <div class="form-floating mb-3">
-        
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Venue</span>
             <input
               type="text"
               name="event_venue"
@@ -222,9 +215,9 @@
               class="form-control"
               required
             />
-            <label for="event_venue">Event Venue</label>
           </div>
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Start</span>
             <input
               type="datetime-local"
               name="event_start"
@@ -232,9 +225,9 @@
               class="form-control"
               required
             />
-            <label for="event_start">Start</label>
           </div>
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text">End</span>
             <input
               type="datetime-local"
               name="event_end"
@@ -242,36 +235,35 @@
               class="form-control"
               required
             />
-            <label for="event_end">End</label>
           </div>
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Speaker</span>
             <input
               type="text"
               name="event_speaker"
               id="event_speaker"
               class="form-control"
             />
-            <label for="event_speaker">Event Speaker</label>
           </div>
-          <div class="form-floating mb-3">
+          <div class="form-group">
+            <label for="event_type" class="col-form-label">Event Type:</label>            
             <select id="event_type" class="form-select" name="event_type" required>
             {% for val,type in option_obj %}
               <option value="{{val}}" >{{type}} </option>
             {% endfor %}
-            </select>   
-            <label for="event_type">Event Type:</label>            
-        
+            </select>           
           </div>
-          <div class="form-floating mb-3">
+          <div class="form-group">
+            <label for="event_desc" class="col-form-label"
+              >Event Desciption:</label
+            >
             <textarea
               class="form-control"
               id="event_desc"
               name="event_desc"
             ></textarea>
-            <label for="event_desc">Event Desciption:</label>
-
           </div>
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
             <select
               id="event_internal"
               class="form-select"
@@ -288,7 +280,7 @@
           <input type="text" id="event_id" name="event_id" class="form-control" hidden>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
             Close
           </button>          
           <button type="submit" class="btn btn-primary" name="edit_event">
@@ -300,21 +292,27 @@
     </div>
   </div>
 </form>   
-
-
+    
 <!-- Add Event Modal -->
-<form method="POST" enctype="multipart/form-data">
+<form method="POST">
   {% csrf_token %}
   <div class="modal fade" id="event_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">Add Event</h5>
-          <button type="button" class="btn btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
         <div class="modal-body">
-          
-          <div class="form-floating mb-3">         
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Name (C)</span>
             <input
               type="text"
               name="event_name_c"
@@ -322,10 +320,9 @@
               class="form-control"
               required
             />
-            <label for="event_name_c">Event Name (C)</label>
           </div>
-          <div class="form-floating mb-3">
-           
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Name (E)</span>
             <input
               type="text"
               name="event_name_e"
@@ -333,10 +330,9 @@
               class="form-control"
               required
             />
-            <label for="event_name_e">Event Name (E)</label>
           </div>
-          
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Venue</span>
             <input
               type="text"
               name="event_venue"
@@ -344,9 +340,9 @@
               class="form-control"
               required
             />
-            <label for="event_venue">Event Venue</label>
           </div>
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Start</span>
             <input
               type="datetime-local"
               name="event_start"
@@ -354,9 +350,9 @@
               class="form-control"
               required
             />
-            <label for="event_start">Start</label>
           </div>
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text">End</span>
             <input
               type="datetime-local"
               name="event_end"
@@ -364,20 +360,24 @@
               class="form-control"
               required
             />
-            <label for="event_end">End</label>
           </div>
-          <div class="form-floating mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Event Speaker</span>
             <input
               type="text"
               name="event_speaker"
               id="event_speaker"
               class="form-control"
             />
-            <label for="event_speaker">Event Speaker</label>
           </div>
-          <div class="form-floating mb-3">
-            <select class="form-select" id="event_type" name="event_type"
-            required>
+          <div class="form-group">
+            <label for="event_type" class="col-form-label">Event Type:</label>
+            <select
+              id="event_type"
+              class="form-select"
+              name="event_type"
+              required
+            >
               <option value="1">Seminar</option>
               <option value="2">Conference</option>
               <option value="3">Proposal Defense</option>
@@ -387,19 +387,19 @@
               <option value="7">Creative Writing</option>
               <option value="8">Others</option>
             </select>
-            <label for="event_type">Event Type:</label>
           </div>
-
-      
-       
-          <div class="form-floating mb-3">
-            <textarea class="form-control" id="event_desc" name="event_desc"></textarea>
-            <label for="event_desc">Event Description</label>
+          <div class="form-group">
+            <label for="event_desc" class="col-form-label"
+              >Event Desciption:</label
+            >
+            <textarea
+              class="form-control"
+              id="event_desc"
+              name="event_desc"
+            ></textarea>
           </div>
-
-     
+          <div class="input-group mb-3">
             <select
-            id="internal"
               class="form-select"
               aria-label="Internal or External"
               name="internal"
@@ -407,20 +407,14 @@
               <option value="1">Internal</option>
               <option value="0">External</option>
             </select>
-    <br>
+          </div>
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="enable" name="enable">
             <label class="form-check-label" for="enable">Enable Attendance</label>
           </div>
-          <br>
-          <div>
-            Upload Event Poster: <br>
-            <input type="file" id="poster" name="poster">
-          </div>
-        
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
             Close
           </button>
           <button type="submit" class="btn btn-primary" name="add_event">
@@ -439,13 +433,14 @@
       <div class="modal-dialog" role="document">
           <div class="modal-content">
               <div class="modal-header">
-                  <h5 class="modal-title" id="register-title">Register Event</h5>
+                  <h5 class="modal-title" id="exampleModalLabel">Register Event</h5>
                   <button
                   type="button"
-                  class="btn-close"
-                  data-mdb-dismiss="modal"
+                  class="close"
+                  data-dismiss="modal"
                   aria-label="Close"
                   >
+                  <span aria-hidden="true">&times;</span>
                   </button>
               </div>
               <div class="modal-body">
@@ -454,7 +449,7 @@
               <div class="modal-footer">
                 <input id="reg_event_id" name="event_id" hidden />
                   <button type="submit" class="btn btn-success" name="register">Yes</button>
-                  <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
+                  <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
               </div>
           </div>
       </div>

@@ -8,6 +8,20 @@ from .models import User, Student
 from django.contrib.auth.hashers import make_password
 from datetime import datetime
 
+from django.urls import reverse_lazy
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
+
+class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+    template_name = 'password_reset.html'
+    email_template_name = 'password_reset_email.html'
+    subject_template_name = 'password_reset_subject.txt'
+    success_message = "We've emailed you instructions for setting your password, " \
+                      "if an account exists with the email you entered. You should receive them shortly." \
+                      " If you don't receive an email, " \
+                      "please make sure you've entered the address you registered with, and check your spam folder."
+    success_url = reverse_lazy('login')
+
 # Create your views here.
 
 
@@ -120,3 +134,24 @@ def editProfile(request, id):
         
     return render(request, "edit_profile.html", context)
 
+def resetPasswordView(request):
+
+    context = {
+        "page_name": "Change Password",
+    }
+
+    if request.method == 'POST':
+        old_pw = request.POST['old_pw']        
+        new_pw = request.POST['new_pw']
+        if not request.user.check_password(old_pw):
+            print("incorrect")
+            messages.error(request, "Incorrect existing password!")
+            return redirect("change-password")
+        else:
+            user = User.objects.get(id=request.user.id)
+            user.password = make_password(new_pw)
+            user.save()
+            logout(request)
+            messages.success(request, "Password changed successfully. Please login again.")
+            return redirect ("login")
+    return render (request, "change_password.html",context)

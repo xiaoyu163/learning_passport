@@ -2,8 +2,8 @@ from django.db import models
 from users.models import Student, User, Organisation
 # Create your models here.
 class Events(models.Model):
-    c_name = models.CharField(unique=True, max_length=50)
-    e_name = models.CharField(unique=True, max_length=50)
+    c_name = models.CharField(max_length=50)
+    e_name = models.CharField(max_length=50)
     TYPE = (
         (1, 'Seminar'),
         (2, 'Conference'),
@@ -17,13 +17,16 @@ class Events(models.Model):
     type = models.SmallIntegerField(choices=TYPE)
     start = models.DateTimeField()
     end = models.DateTimeField()
+    year = models.IntegerField()
     venue = models.CharField(max_length=100)
     desc = models.CharField(max_length=200)
     internal = models.BooleanField()
     speaker = models.CharField(max_length=50)    
     attendance = models.BooleanField()
-    file = models.FileField(upload_to="event_com/")
-
+    poster = models.FileField(upload_to='event_poster/')
+    file = models.FileField(upload_to='event_com/')
+    file_by = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    status = models.BooleanField(null=True)
 
 class Event_Participants(models.Model):
     event = models.ForeignKey(Events, on_delete=models.PROTECT, null=True)
@@ -38,6 +41,7 @@ class Comittee(models.Model):
     organisation = models.ForeignKey(Organisation, on_delete=models.PROTECT, null=True)
     position = models.CharField(max_length=50)
     award = models.CharField(max_length=50)
+
 class OtherComp (models.Model):
     student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
     year = models.IntegerField()
@@ -45,13 +49,19 @@ class OtherComp (models.Model):
     award = models.CharField(max_length=50)
 
 class Announcement (models.Model):
+    title = models.CharField(max_length=100)
     content = models.CharField(max_length=500)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     TYPE = (
-        ("General", "General"),
-        ("Event", "Event"),
-        ("Others", "Others"),
+        (1, "General"),
+        (2, "Event"),
+        (3, "Others"),
     )
-    category = models.CharField(max_length=10,choices=TYPE)
-    display_to = models.CharField(max_length=100)
+    category = models.SmallIntegerField(choices=TYPE)
+    LEVEL = (
+        (1, "All"),
+        (2, "Undergrad"),
+        (3, "Postgrad"),
+    )
+    display_to = models.SmallIntegerField(choices=LEVEL)
     created_time = models.DateTimeField(auto_now=True)

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+{% extends "sidebar.html" %} 
+{% block content %}
+{% load static %}
+<head>
+<link rel="stylesheet" href="{% static 'css/event_list.css' %}">
+
+
+
+</head>
+<h1>{{page_name}}</h1>
+<br />
+{% if request.user.role in 'STUDENT' %}
+    {% for part, event in par_events %}
+      <br />
+      <div class="card">
+        <a href="{% url 'event-detail' event.id %}">
+          <div class="card-header">
+            <strong>{{event.c_name}} {{event.e_name}}</strong>
+          </div>
+        </a>
+
+        <div class="card-body">
+          Date: {{event.start.date}} <br />
+          Venue: {{event.venue}}
+        </div>
+        
+        <!-- Take attendance button if attendance is not submitted and event attendance is enabled -->
+        {% if part.attendance != 1 and event.attendance == 1 %}
+        <form method="POST">
+          {% csrf_token %}
+          <div class="card-footer">
+            <input id="event_id" name="event_id" value="{{event.id}}" hidden />
+            <button type="submit" class="btn btn-primary" name="attendance" onclick='return confirm("Confirm to take attendance for {{event.e_name}}?")'>
+              Take Attendance
+            </button>
+          </div>
+        </form>
+        {% elif part.attendance == 1 %}
+          <div class="card-footer">
+            <input id="event_id" name="event_id" value="{{event.id}}" hidden />
+            <button type="button" class="btn btn-primary" name="attendance" disabled>
+              Attendance Submitted
+            </button>
+          </div>      
+        {% endif %} 
+      </div>
+    {% endfor %}
+    <br>
+  {% endif %}
+
+ <!-- Modal for Register Event -->
+ <form method="POST">
+    {% csrf_token %}
+    <div class="modal fade" id="reg_event_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Register Event</h5>
+                    <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Confirm to register in this event?</p>
+                </div>
+                <div class="modal-footer">
+                  <input id="reg_event_id" name="event_id" hidden />
+                    <button type="submit" class="btn btn-success" name="register">Yes</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    <div>
+  </form>
+
+{% endblock %}

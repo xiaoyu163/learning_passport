@@ -1,0 +1,45 @@
+/* .header {
+    background-color: #f0ecf4;
+} */
+
+.icon {
+    color: #3479ff;
+}
+/* Style for the announcement container */
+.announcement {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px; /* Adjust as needed */
+}
+
+/* Style for the date on the left */
+.announcement-date {
+    flex:  0.5;/* Takes up one-third of the available width */
+    padding-right: 10px; /* Spacing between date and divider */
+    text-align: right; /* Align date to the right */
+}
+
+/* Style for the vertical divider */
+.announcement-divider {
+    width: 5px;
+    background-color: #0a0a0a; /* Divider color */
+    height: 100%;
+    margin: 0 10px; /* Adjust as needed */
+}
+
+/* Style for the title and content on the right */
+.announcement-content {
+    flex: 2.5; /* Takes up two-thirds of the available width */
+}
+
+/* Style for the announcement title */
+.announcement-title {
+    font-size: 18px; /* Adjust as needed */
+    margin: 0;
+}
+
+/* Style for the announcement content */
+.announcement-description {
+    margin-top: 5px; /* Adjust as needed */
+    font-size: 14px; /* Adjust as needed */
+}

@@ -1,0 +1,330 @@
+{% extends "sidebar.html" %}
+
+{% block content %}
+{% load static %}
+<head>
+
+  <link rel="stylesheet" type="text/css" href="{% static 'css/announcement.css' %}">
+<script>
+
+    $(document).ready(function() {
+        $('.edit-button').click(function() {
+            console.log()
+            var annId = $(this).data('ann-id');
+            console.log(annId)
+        
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+              url: '/get-ann-details/'+ annId + '/',  // URL to your Django view for fetching event details
+              type: 'GET',
+              
+              success: function(response) {
+                ann_id = response.id;  
+                $('#ann_id').val(ann_id); 
+                console.log(ann_id)
+              
+                ann_title = response.title;  
+                $('#ann_title').val(ann_title); 
+
+                ann_content = response.content;  
+                $('#ann_content').val(ann_content);
+
+                ann_type = response.category;  
+                $('#ann_type').val(ann_type);
+
+                ann_for = response.display_to;  
+                $('#ann_for').val(ann_for);
+              
+                
+              },
+              error: function(xhr, status, error) {
+                console.log(error);  // Handle the error if necessary
+              }
+            });
+          });
+    });
+ 
+    
+</script>
+</head>
+<div class="container-fluid header">
+    <br>
+    <h1><strong><center> 
+        <i class="fa fa-bullhorn icon" aria-hidden="true"></i> 
+        &nbsp;
+        Announcement
+    </center></strong></h1>
+    <br>
+
+</div>
+<br>
+
+<!-- Add Annnouncement Button for SUPER ADMIN -->
+{% if request.user.role in 'SUPER ADMIN' %}
+    <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#ann_modal"> 
+      <i class="fas fa-plus"></i> &nbsp;
+      Add Announcement 
+    </button>
+    <br><br>
+{% endif %}
+    <div class="announcement-tabs">
+        <ul class="nav nav-tabs" id="announcementTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab">All</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="general-tab" data-toggle="tab" href="#general" role="tab">General</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="event-tab" data-toggle="tab" href="#event" role="tab">Event</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="others-tab" data-toggle="tab" href="#others" role="tab">Others</a>
+            </li>
+        </ul>
+        <br>
+        <div class="tab-content" id="announcementTabContent">
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                <!-- Content for "All" tab goes here -->
+                {% for ann in anns %}
+                <div class="announcement">
+                    <div class="announcement-date">
+                        <!-- Date goes here -->
+                        <span class="date">{{ann.created_time.date}}</span>
+                    </div>
+                    <div class="announcement-divider"></div>
+                    <div class="announcement-content">
+                        <!-- Title and Content go here -->
+                        <h3 class="announcement-title">{{ann.title}}</h3>
+                        
+                        <p class="announcement-description">{{ann.content}}</p>
+                        {% if request.user.role in 'SUPER ADMIN' %}
+                        <form method="POST">  
+                          {% csrf_token %} 
+                        <input name="ann_id" value={{ann.id}} hidden>  
+                        <button id="edit-button" type="button" class="edit-button btn btn-light" data-mdb-toggle="modal" data-mdb-target="#edit_modal" data-ann-id="{{ ann.id }}"><i class="fas fa-edit"></i></button>
+                        <button id="delete-button" class="btn btn-light" type="submit" name="delete_ann" onclick="return confirm('Confirm to delete {{ann.title}}?')"><i class="fas fa-trash"></i></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                   
+                </div>
+                <br>
+                {% endfor %}
+            </div>
+            <div class="tab-pane fade" id="general" role="tabpanel">
+                <!-- Content for "General" tab goes here -->
+                {% for ann in general_anns %}
+                <div class="announcement">
+                    <div class="announcement-date">
+                        <!-- Date goes here -->
+                        <span class="date">{{ann.created_time.date}}</span>
+                    </div>
+                    <div class="announcement-divider"></div>
+                    <div class="announcement-content">
+                        <!-- Title and Content go here -->
+                        <h3 class="announcement-title">{{ann.title}}</h3>
+                        <p class="announcement-description">{{ann.content}}</p>
+                        {% if request.user.role in 'SUPER ADMIN' %}
+                        <form method="POST">  
+                          {% csrf_token %} 
+                        <input name="ann_id" value={{ann.id}} hidden>  
+                        <button id="edit-button" type="button" class="edit-button btn btn-light" data-mdb-toggle="modal" data-mdb-target="#edit_modal" data-ann-id="{{ ann.id }}"><i class="fas fa-edit"></i></button>
+                        <button id="delete-button" class="btn btn-light" type="submit" name="delete_ann" onclick="return confirm('Confirm to delete {{ann.title}}?')"><i class="fas fa-trash"></i></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <br>
+                {% endfor %}
+            </div>
+       
+            <div class="tab-pane fade" id="event" role="tabpanel">
+                <!-- Content for "Event" tab goes here -->
+                {% for ann in event_anns %}
+                <div class="announcement">
+                    <div class="announcement-date">
+                        <!-- Date goes here -->
+                        <span class="date">{{ann.created_time.date}}</span>
+                    </div>
+                    <div class="announcement-divider"></div>
+                    <div class="announcement-content">
+                        <!-- Title and Content go here -->
+                        <h3 class="announcement-title">{{ann.title}}</h3>
+                        <p class="announcement-description">{{ann.content}}</p>
+                        {% if request.user.role in 'SUPER ADMIN' %}
+                        <form method="POST">  
+                          {% csrf_token %} 
+                        <input name="ann_id" value={{ann.id}} hidden>  
+                        <button id="edit-button" type="button" class="edit-button btn btn-light" data-mdb-toggle="modal" data-mdb-target="#edit_modal" data-ann-id="{{ ann.id }}"><i class="fas fa-edit"></i></button>
+                        <button id="delete-button" class="btn btn-light" type="submit" name="delete_ann" onclick="return confirm('Confirm to delete {{ann.title}}?')"><i class="fas fa-trash"></i></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <br>
+                {% endfor %}
+            </div>
+            <div class="tab-pane fade" id="others" role="tabpanel">
+                <!-- Content for "Others" tab goes here -->
+                {% for ann in others_anns %}
+                <div class="announcement">
+                    <div class="announcement-date">
+                        <!-- Date goes here -->
+                        <span class="date">{{ann.created_time.date}}</span>
+                    </div>
+                    <div class="announcement-divider"></div>
+                    <div class="announcement-content">
+                        <!-- Title and Content go here -->
+                        <h3 class="announcement-title">{{ann.title}}</h3>
+                        <p class="announcement-description">{{ann.content}}</p>
+                        {% if request.user.role in 'SUPER ADMIN' %}
+                        <form method="POST">  
+                          {% csrf_token %} 
+                        <input name="ann_id" value={{ann.id}} hidden>  
+                        <button id="edit-button" type="button" class="edit-button btn btn-light" data-mdb-toggle="modal" data-mdb-target="#edit_modal" data-ann-id="{{ ann.id }}"><i class="fas fa-edit"></i></button>
+                        <button id="delete-button" class="btn btn-light" type="submit" name="delete_ann" onclick="return confirm('Confirm to delete {{ann.title}}?')"><i class="fas fa-trash"></i></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+
+{% comment %} Add Announcement Modal {% endcomment %}
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="ann_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Add Announcement</h5>
+            <button type="button" class="btn btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+            <div class="form-floating mb-3">         
+              <input
+                type="text"
+                name="title"
+                id="title"
+                class="form-control"
+                required
+              />
+              <label for="title">Title</label>
+            </div>
+            
+            <div class="form-floating mb-3">
+                <textarea class="form-control content" id="content" name="content" rows="4" style="height: auto;"></textarea>
+                <label for="event_desc">Content</label>
+            </div>
+     
+            <div class="form-floating mb-3">
+              <select class="form-select" id="type" name="type"
+              required>
+                <option value="1">General</option>
+                <option value="2">Event</option>
+                <option value="3">Others Defense</option>
+              </select>
+              <label for="type">Announcement Type:</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select class="form-select" id="for" name="for"
+                required>
+                  <option value="1">All</option>
+                  <option value="2">Undergraduates</option>
+                  <option value="3">Postgraduates</option>
+                </select>
+                <label for="type">Announcement For:</label>
+              </div>          
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary" name="add_ann">
+              Save changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  {% comment %} Edit Announcement Modal {% endcomment %}
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="edit_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Announcement</h5>
+            <button type="button" class="btn btn-close" data-mdb-dismiss="modal" aria-label="Close">
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-floating mb-3">
+              
+              <input
+                type="text"
+                name="ann_title"
+                id="ann_title"
+                class="form-control"
+                required
+              />
+              <label for="ann_title">Title</label>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea
+                  class="form-control"
+                  id="ann_content"
+                  name="ann_content"
+                  rows="4" style="height: auto;"
+                ></textarea>
+                <label for="ann_content">Content:</label>
+    
+              </div>
+            <div class="form-floating mb-3">
+              <select id="ann_type" class="form-select" name="ann_type" required>
+              {% for val,type in cat_obj %}
+                <option value="{{val}}" >{{type}} </option>
+              {% endfor %}
+              </select>   
+              <label for="ann_type">Category:</label>            
+          
+            </div>
+            <div class="form-floating mb-3">
+                <select id="ann_for" class="form-select" name="ann_for" required>
+                {% for val,type in for_obj %}
+                  <option value="{{val}}" >{{type}} </option>
+                {% endfor %}
+                </select>   
+                <label for="ann_for">Announcement For:</label>            
+            
+              </div>
+            
+            
+            <input type="text" id="ann_id" name="ann_id" class="form-control" hidden>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+              Close
+            </button>          
+            <button type="submit" class="btn btn-primary" name="edit_ann">
+              Save changes
+            </button>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>   
+
+  <br>
+{% endblock %}
