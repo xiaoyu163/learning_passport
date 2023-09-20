@@ -85,4 +85,7 @@ class Organisation(models.Model):
     file_by = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
     status = models.BooleanField(null=True)
 
-    
+class OrgComittee(models.Model):
+    student = models.ForeignKey(Student,on_delete=models.PROTECT)
+    org = models.ForeignKey(Organisation,on_delete=models.PROTECT)
+    position = models.CharField(max_length=100)

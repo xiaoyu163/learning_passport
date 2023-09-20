@@ -30,7 +30,7 @@
                 <th>Type</th>
                 <th>Comittee List</th>
                 <th>Submitted by</th>
-                <th></th>
+                <th>Download File</th>
             </tr>
         </thead>
         <tbody>
@@ -44,7 +44,11 @@
                 {% else %}
                 <td>External</td>
                 {% endif %}
+                {% if event.status != 1 %}
                 <td><a href="{{ event.file.url }}">Download File</a></td>
+                {% else %}
+                <td></td>
+                {% endif %}
                 <td>{{event.file_by.user.full_name}}</td>
                 
                 <td>

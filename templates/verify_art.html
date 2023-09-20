@@ -4,65 +4,36 @@
 
 <h1>{{page_name}}</h1>
 <hr />
-<div class="container-fluid table-responsive">
-    <form method='POST'>
-        {% csrf_token %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Year</th>
-                <th>Type</th>
-                <th>Platform</th>
-                <th>Author</th>
-                <th>File</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for art in articles %}
-            <tr>
-                <td>{{art.title}} <br></td>
-                <td>{{art.year}}</td>
-                <td>{{art.type}}</td>
-                <td>{{art.platform}}</td>
-                <td>{{art.file_by.user.full_name}}</td>
-                <td><a href="{{ art.file.url }}">Download File</a></td>
-                {% if 'ADMIN' in request.user.get_role_display  and art.status != 0 and art.status != 1 %}
-                <td>
-                    <div class="button-container">
-                    <input value="{{art.id}}" name="art" hidden>
-                    <button
-                        type="submit"
-                        class="approve-button btn btn-success"
-                        name="approve"
-                        >
-                        Approve
-                    </button>               
-                    <button
-                        type="submit"
-                        class="reject-button btn btn-danger"
-                        name="reject"
-                        >
-                        Reject
-                    </button>
-                </div>
-                </td>
-                {% else %}
-                <td>
-                    {% if art.status == 1 %}
-                    <span class="badge rounded-pill bg-success">Approved</span>
-                    {% elif art.status == 0 %}
-                    <span class="badge rounded-pill bg-danger">Rejected</span>
-                    {% else %}
-                    <span class="badge rounded-pill bg-secondary">Pending</span>
-                    {% endif %}
-                </td>
-               {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</form>
+<ul class="nav nav-tabs" id="myTabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#Pending">Pending</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#Approved">Approved</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#Rejected">Rejected</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div id="Pending" class="tab-pane fade show active">
+        <!-- Display pending documents here -->
+        <form method='POST'>
+            {% csrf_token %}
+            {% include 'ver_art_template.html' with tab_data=pending_data %}
+        </form>
+    </div>
+    <div id="Approved" class="tab-pane fade">
+        <!-- Display approved documents here -->
+        {% include 'ver_art_template.html' with tab_data=approved_data %}
+    </div>
+    <div id="Rejected" class="tab-pane fade">
+        <!-- Display rejected documents here -->
+        <form method='POST'>
+            {% csrf_token %}
+            {% include 'ver_art_template.html' with tab_data=rejected_data %}
+        </form>
+    </div>
 </div>
 {% endblock %}

@@ -1,0 +1,57 @@
+<br>
+{% if tab_data.orgs %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Organisation</th>
+            <th>Year</th>
+            <th>Type</th>
+            <th>Submitted by</th>
+            {% if tab_data.pending or tab_data.rejected %}
+            <th>Comittee List</th>
+            <th>Action</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for org in tab_data.orgs %}
+        <tr>
+            <td>{{org.name}}</td>
+            <td>{{org.year}}</td>
+            {% if org.internal in 'True' %}
+            <td>Internal</td>
+            {% else %}
+            <td>External</td>
+            {% endif %}
+            <td>{{org.file_by.user.full_name}}</td>
+            {% if tab_data.pending or tab_data.rejected %}
+            <td><a href="{{ org.file.url }}">Download File</a></td>
+            <td>
+                <div class="button-container">
+                <input value="{{org.id}}" name="org" hidden>
+                <button
+                    type="submit"
+                    class="approve-button btn btn-success"
+                    name="approve"
+                    >
+                    Approve
+                </button> 
+                {% if not tab_data.rejected %}              
+                <button
+                    type="submit"
+                    class="reject-button btn btn-danger"
+                    name="reject"
+                    >
+                    Reject
+                </button>
+                {% endif %}
+            </div>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<sub>No documents.</sub>
+{% endif %}

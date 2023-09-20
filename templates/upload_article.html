@@ -35,7 +35,11 @@
                 <td>{{art.type}}</td>
                 <td>{{art.platform}}</td>
                 <td>{{art.file_by.user.full_name}}</td>
+                {% if art.status!=1 %}
                 <td><a href="{{ art.file.url }}">Download File</a></td>
+                {% else %}
+                <td></td>
+                {% endif %}
                 <td>
                     {% if art.status == 1 %}
                     <span class="badge rounded-pill bg-success">Approved</span>

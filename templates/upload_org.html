@@ -32,7 +32,7 @@
                 <th>Type</th>
                 <th>Comittee List</th>
                 <th>Submitted by</th>
-                <th></th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
@@ -45,7 +45,11 @@
                 {% else %}
                 <td>External</td>
                 {% endif %}
+                {% if org.status != 1 %}
                 <td><a href="{{ org.file.url }}">Download File</a></td>
+                {% else %}
+                <td></td>
+                {% endif %}
                 <td>{{org.file_by.user.full_name}}</td>
                 <td>
                     {% if org.status == 1 %}
