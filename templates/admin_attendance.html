@@ -18,11 +18,22 @@
 </script>
 </head>
 <h1> Attendance</h1>
-<h5>{{event.e_name}} </h5>
+<br>
+<h5>{{event.e_name}} ({{event.start.year}}) </h5>
+<br>
+<form method="POST">
+  {% csrf_token %}
+  {% if not event.enable_attendance %}
+  <button type="submit" name="enable" class="btn btn-success" value="{{event.id}}" onclick="return confirm('Confirm to enable attendance for {{event.e_name}}?')">Enable Attendance</button>
+  {% else %}
+  <button type="disable" name="disable" class="btn btn-danger" value="{{event.id}}" onclick="return confirm('Confirm to disable attendance for {{event.e_name}}?')">Disable Attendance</button>
+  {% endif %}
+</form>
 <br>
 
 <input id="myInput" type="text" class="form-control" placeholder="Search for matric number..." onkeyup="myFunction()">
     
+
 
 <br><br>
 <form method="POST">
@@ -34,7 +45,7 @@
             <tr>
                 <div class="checkbox select-all">
                     <input id="check-all" class="form-check-input" type="checkbox" id="cc" onclick="javascript:checkAll(this)"/>
-                    <label for"check-all">Check All</label>
+                    <label for="check-all">Check All</label>
                   </div>
                 <th>Name</th>
                 <th>Matric No. </th>
@@ -48,7 +59,16 @@
                     <td>{{ participant.student.user.full_name }}</td>
                     <td>{{ participant.student.matric_no }}</td>
                     <div class="checkbox rows">
-                    <td><input class="form-check-input" type="checkbox" name="{{ participant.student.user.id }}" {% if participant.attendance %}checked{% endif %}></td>
+                    <td><input class="form-check-input" type="checkbox" name="{{ participant.student.id }}" {% if participant.attendance %}checked{% endif %}></td>
+                    </div>
+                </tr>
+            {% endfor %}
+            {% for student in students %}
+                <tr>
+                    <td>{{ student.user.full_name }}</td>
+                    <td>{{ student.matric_no }}</td>
+                    <div class="checkbox rows">
+                    <td><input class="form-check-input" type="checkbox" name="{{ student.id }}" {% if participant.attendance %}checked{% endif %}></td>
                     </div>
                 </tr>
             {% endfor %}

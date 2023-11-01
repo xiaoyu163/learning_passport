@@ -1,0 +1,243 @@
+{% extends "sidebar.html" %} {% block content %} {% load static %}
+<head>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
+
+  <script>
+    $(document).ready(function() {
+        $('.edit-button').click(function() {
+            var compId = $(this).data('comp-id');
+        
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+              url: '/get-other-comp-details/'+ compId + '/',  // URL to your Django view for fetching event details
+              type: 'GET',
+              
+              success: function(response) {
+                console.log(response)
+                comp_id = response.id;  
+                $('#other_edit').val(comp_id);                
+                name = response.name
+                $('#edit_name').val(name)
+                year = response.year
+                $('#edit_year').val(year)
+                award = response.award
+                $('#edit_award').val(award)
+                file = response.file
+                filename = response.filename
+                $('#ex_file').attr('href', file)
+                $('#ex_file').text(filename);              
+              },
+              error: function(xhr, status, error) {
+                console.log(error);  // Handle the error if necessary
+              }
+            });
+          });
+    });
+  </script>
+</head>
+<h3>Upload Co-Curricular Awards</h3>
+<br>
+<button type="button" class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#upload_other">
+  <i class="fas fa-upload"></i>
+  Upload
+</button>
+<br>
+
+
+{% if comps %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Year</th>
+      <th>Competition</th>
+      <th>Award</th>
+      <th>File</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for comp in comps %}
+    <tr>
+      <td>{{comp.year}}</td>
+      <td>{{comp.name}}</td>
+      <td>{{comp.award}}</td>
+      {% if comp.status != 1 %}
+      <td><a href="{{ comp.file.url }}">Download File</a></td>
+      {% else %}
+      <td>-</td>
+      {% endif %}
+      <td>
+        {% if comp.status == 1 %}
+        <span class="badge rounded-pill bg-success">Approved</span>
+        {% elif comp.status == 0 %}
+        <span class="badge rounded-pill bg-danger">Rejected</span>
+        {% else %}
+        <span class="badge rounded-pill bg-secondary">Pending</span>
+        {% endif %}
+      </td>
+      {% if not comp.status == 1 %}
+      <td>
+        <div class="button-container">
+          <button id="edit-button" type="button" class="edit-button btn btn-floating" data-mdb-toggle="modal"
+            data-mdb-target="#edit_comp" data-comp-id="{{ comp.id }}">
+            <i class="fas fa-edit"></i>
+          </button>
+          &nbsp;&nbsp;&nbsp;
+
+          <form method="POST">
+            {% csrf_token %}
+            <button id="comp_delete" type="submit" class="btn btn-floating" value="{{comp.id}}"
+              name="other_delete"
+              onclick="return confirm('Confirm to delete record for {{comp.name}} {{comp.year}}?')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </div>
+      </td>
+      {% else %}
+      <td>
+        <div class="button-container">
+        <button 
+        class="btn btn-floating" 
+        disabled>
+        <i class="fas fa-edit"></i>
+        </button>
+        &nbsp;
+        <button 
+        class="btn btn-floating" 
+        disabled
+        >
+        <i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<sub>No uploaded co-curricular award.</sub>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="upload_other" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Upload Co-curricular Awards</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-outline">
+            <input type="text" id="comp" name="name" class="form-control" required>
+            <label class="form-label" for="comp" style="margin-left: 0px;">Competition Name</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="text" id="art_year" name="year" class="form-control" required>
+            <label class="form-label" for="year" style="margin-left: 0px;">Year</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="text" id="award" name="award" class="form-control" required>
+            <label class="form-label" for="award" style="margin-left: 0px;">Award</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <label class="form-label" for="file">Certification of Award:</label>
+          <input type="file" class="form-control" name="file" id="file" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" class="btn btn-primary" name="other_submit">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="edit_comp" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="edit_title">Edit Co-curricular Awards</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-outline">
+            <input type="text" id="edit_name" name="name" class="form-control active" required>
+            <label class="form-label" for="edit_comp" style="margin-left: 0px;">Competition Name</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="text" id="edit_year" name="year" class="form-control active" required>
+            <label class="form-label" for="edit_year" style="margin-left: 0px;">Year</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="text" id="edit_award" name="award" class="form-control active" required>
+            <label class="form-label" for="award" style="margin-left: 0px;">Award</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div>
+            <label for="file" class="form-label">Existing File</label>
+            <a href="#" class="form-control" type="text" id="ex_file" disabled></a>
+          </div>
+          <br>
+          <label class="form-label" for="file">Update Certification of Award:</label>
+          <input type="file" class="form-control" name="file" id="file" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" id="other_edit" class="btn btn-primary" name="other_edit">
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

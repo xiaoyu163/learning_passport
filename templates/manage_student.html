@@ -1,0 +1,195 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+<head>
+    <script>
+         <link rel="stylesheet" type="text/css" href="{% static 'css/manage.css' %}"></link>
+    </script>
+</head>
+<script>
+    $(document).ready(function () {
+        $('.manage-student').click(function () {
+            console.log()
+            var studentId = $(this).data('student-id');
+
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+                url: '/get-student-details/' + studentId + '/',  // URL to your Django view for fetching event details
+                type: 'GET',
+
+                success: function (response) {
+                    student_id = response.id;
+                    $('#manage-student').val(student_id);
+                    student_name = response.name;
+                    $('#student_name').val(student_name);
+                    student_matric = response.matric;
+                    $('#student_matric').val(student_matric);
+
+                    student_enrol = new Date(response.enrol)
+                    var formattedEnrol = student_enrol.toISOString().substring(0, 7);
+                    console.log(formattedEnrol)
+                    $('#student_enrol').val(formattedEnrol);
+
+                    student_grad = new Date(response.grad)
+                    var formattedGrad = student_grad.toISOString().substring(0, 7);
+                    $('#student_grad').val(formattedGrad);
+                    student_lect = response.student_lect;
+                    $('#student_lect').val(student_lect);
+
+                    var student_active = response.active
+                    console.log(student_active)
+                    if (student_active == true) {
+                        $('#student_active').prop('checked', true);
+                    }
+                    else {
+                        $('#student_active').prop('checked', false);
+                    }
+
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);  // Handle the error if necessary
+                }
+            });
+        });
+    });
+
+</script>
+
+<h1>Manage Student</h1>
+<br>
+<form method="POST">
+    {% csrf_token %}
+    <h5>Student Status</h5>
+    <table class="table table-striped">
+        <thead class="bg-light">
+            <tr>
+                <th>Name</th>
+                <th>Enrol - Graduate</th>
+                <th>Advisor</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        {% for student in students %}
+        <tr>
+            <td>
+                <div class="ms-3">
+                    <p class="fw-bold mb-1">{{student.user.full_name}}</p>
+                    <p class="text-muted mb-0">{{student.matric_no}}</p>
+                </div>
+            </td>
+            <td>
+                <div class="ms-3">
+                    <p class="mb-0">{{student.enrol_year}}</p>
+                    <p class="mb-0">{{student.grad_year}}</p>
+                </div>
+            </td>
+            <td>
+                <div class="ms-3">
+                    <p class="text-muted mb-0">{{student.lecturer.get_position_display}}</p>
+                    <p class="fw-bold mb-1">{{student.lecturer.user.full_name}}</p>
+                </div>
+            </td>
+           
+            {% if student.user.is_active %}
+            <td><span class="badge rounded-pill badge-success">Active</span></td>
+            {% else %}
+            <td><span class="badge rounded-pill badge-danger">Inactive</span></td>
+            {% endif %}
+            <td>
+                <button type="button" class="manage-student btn btn-floating" data-mdb-toggle="modal" data-mdb-target="#edit_modal"
+                    data-student-id="{{ student.id }}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                &nbsp;
+                <button type="submit" class="btn btn-danger btn-floating" value="{{student.id}}" name="delete-student" onclick="return confirm('Confirm to delete student {{student.matric_no}}?')">
+                    <i class="fas fa-trash"></i>
+                    
+                </button>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+</form>
+
+
+<!-- Edit Modal -->
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="edit_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Manage Student Details</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-outline">
+                        <input class="form-control active" id="student_name" name="student_name" type="text">
+                        <label class="form-label" for="student_name" style="margin-left: 0px;">Name</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 40px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-outline">
+                        <input class="form-control active" id="student_matric" name="student_matric" type="text">
+                        <label class="form-label" for="art_year" style="margin-left: 0px;">Matric Number</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 90px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="student_enrol">Enrolment Month</label>
+                    <div class="form-outline">
+                        <input type="month" name="student_enrol" id="student_enrol" class="form-control" required />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="student_grad">Graduation Month</label>
+                    <div class="form-outline">
+                        <input type="month" name="student_grad" id="student_grad" class="form-control" required />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-outline">
+                        <select class="form-control active" name="student_lect" id="student_lect">
+                        {% for lecturer in lecturers %}
+                        <option value="{{lecturer.id}}">{{lecturer.user.full_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <label class="form-label" for="student_lect" style="margin-left: 0px;">Advisor</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 50px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="student_active" name="student_active"/>
+                        <label class="form-check-label" for="student_active">Active Student</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+                    <button id="manage-student" type="submit" class="btn btn-primary" name="manage-student">Save
+                        changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

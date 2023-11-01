@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect
-from .models import Events, Event_Participants, Comittee, Announcement
+from .models import Events, Event_Participants, Announcement
 from django.conf import settings
 from django.http import FileResponse
 from users.models import User,Student
 from datetime import datetime
 from django.utils import timezone
-import pytz
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import os
@@ -18,7 +17,11 @@ import os
 def eventListView (request):
     # base_dir = settings.BASE_DIR
     # print("Base dir: ", base_dir)
-    events = Events.objects.all().order_by("-id")
+    current_date = datetime.now()
+    if request.user.role in 'STUDENT':
+        events = Events.objects.filter(internal=1, start__gte=current_date).order_by("-id")
+    else:
+        events = Events.objects.filter(internal=1).order_by("-id")
     option_obj = Events.type.field.choices
     parts = list()
     if request.user.role in 'STUDENT':
@@ -36,7 +39,6 @@ def eventListView (request):
         "events": events,
         "event_parts": event_parts,
         "option_obj": option_obj,
-        "page_name": "Events",
     }
     if request.method == 'POST':
         if 'add_event' in request.POST or 'edit_event' in request.POST:
@@ -54,6 +56,7 @@ def eventListView (request):
             event.type = request.POST['event_type']
             event.desc = request.POST['event_desc']
             event.internal = request.POST['internal']
+            event.enable_attendance = 1 if 'on_time' in request.POST else 0
             attendance = 1 if 'enable' in request.POST else 0
             print(request.FILES)
             if 'poster' in request.FILES:
@@ -79,9 +82,7 @@ def eventListView (request):
             parts = Event_Participants.objects.filter(event=event)
             if parts:
                 parts.delete()
-            comm = Comittee.objects.filter(event=event)
-            if comm:
-                comm.delete()
+            
             event.delete()
             base_dir = str(settings.BASE_DIR).replace("\\","/")
             if event.file:
@@ -95,24 +96,38 @@ def eventListView (request):
         return redirect ("events")
     return render (request, "event_list.html", context) 
 
+
 def eventDetailView (request, id):
     event = Events.objects.get(id=id)
     if request.user.role in 'STUDENT':
         student = Student.objects.get(user=request.user.id)
         print(student)
-        parts = Event_Participants.objects.filter(student=student, event=event)
+        parts = Event_Participants.objects.get(student=student, event=event) if Event_Participants.objects.filter(student=student, event=event).exists() else None
         print(parts)
+        print(parts.attendance)
+        current_time = datetime.now()
+        if event.enable_attendance == 1:
+            curr_event = 1
+        else:
+            if event.start and event.end:
+                if event.start.replace(tzinfo=None) <= current_time <= event.end.replace(tzinfo=None) and event.attendance==1:
+                    curr_event = 1
+                else:
+                    curr_event = 0
+            else:
+                curr_event = 0
     else:
         parts = ''
     context = {
         "event": event,
-        "start_date": event.start.strftime("%d %b %Y"),
-        "start_time": event.start.strftime("%I:%M %p"),
-        "start_day": event.start.strftime("%A"),
-        "end_date": event.end.strftime("%d %b %Y"),
-        "end_time": event.end.strftime("%I:%M %p"),
-        "end_day": event.end.strftime("%A"),
+        "start_date": event.start.strftime("%d %b %Y") if event.start else None,
+        "start_time": event.start.strftime("%I:%M %p") if event.start else None,
+        "start_day": event.start.strftime("%A") if event.start else None,
+        "end_date": event.end.strftime("%d %b %Y") if event.end else None,
+        "end_time": event.end.strftime("%I:%M %p") if event.end else None,
+        "end_day": event.end.strftime("%A") if event.end else None,
         "parts": parts,
+        "curr_event" : curr_event,
         "page_name": "Event Detail"
     }
     if request.method == 'POST':
@@ -130,6 +145,13 @@ def eventDetailView (request, id):
             event.poster = request.FILES['poster']
             event.save()
             return redirect (request.get_full_path())
+
+        elif 'attendance' in request.POST:      
+            attendance = Event_Participants.objects.get(student=student, event=event)
+            attendance.event = event            
+            attendance.attendance = 1
+            attendance.save()
+            return redirect (request.get_full_path())
        
     return render (request, "event_detail.html", context)
 
@@ -138,16 +160,23 @@ def takeAttendanceView (request):
     if request.user.role in 'STUDENT':
         events = list()
         student = Student.objects.get(user=request.user.id)
-        enable_att = Events.objects.filter(attendance=1)
-        parts = Event_Participants.objects.filter(student=student, event__in=enable_att)
-       
+        parts = Event_Participants.objects.filter(student=student, registered=1)
+        reg_events = list()
         # Get the current time in Malaysia's timezone
         current_time = datetime.now()
         for part in parts:
-            start_time = part.event.start.replace(tzinfo=None)
-            end_time = part.event.end.replace(tzinfo=None)
-            if start_time <= current_time <= end_time:
+            print(part)
+            start_time = part.event.start.replace(tzinfo=None) if part.event.start else None
+            end_time = part.event.end.replace(tzinfo=None) if part.event.end else None
+            if part.event.enable_attendance==1:
                 events.append(part.event)
+            elif start_time and end_time :
+                if start_time <= current_time <= end_time and part.event.attendance==1:
+                    events.append(part.event)
+                else:
+                    reg_events.append(part.event)
+            else:
+                    reg_events.append(part.event)
             
         parts = parts.filter(event__in=events)
         print("Participation")
@@ -157,9 +186,28 @@ def takeAttendanceView (request):
         par_events = zip(parts, events)
         context = {
             "par_events": par_events,
+            "reg_events": reg_events,
             "page_name": "Registered Event"
         }
-
+    elif request.user.role in 'SUPER ADMIN':
+        all_event = Events.objects.order_by("-start")
+        att_event = list()
+        for event in all_event:
+            current_time = datetime.now()
+            start = event.start.replace(tzinfo=None) if event.start else None
+            end = event.end.replace(tzinfo=None) if event.end else None
+            if event.enable_attendance == 1:
+                att_event.append(event)
+            elif start and end:
+                if start <= current_time <= end:
+                    att_event.append(event)
+                
+                
+        
+        context = {
+            "all_event": all_event,
+            "att_event": att_event,
+        }
     if request.method == 'POST':
         
         if 'attendance' in request.POST:
@@ -174,18 +222,44 @@ def takeAttendanceView (request):
 
 def adminAttendaceView (request, event_id):
     event = Events.objects.get(id=event_id)
-    participants = Event_Participants.objects.filter(event_id=event_id)
-    print(participants)
+    par_id = list()
+    participants = Event_Participants.objects.filter(event_id=event_id, attendance=1)
+    for par in participants:
+        par_id.append(par.student_id)
+    students = Student.objects.filter(user__is_active=True).exclude(id__in=par_id)
+   
     context = {
         "event": event,
         "participants": participants,
+        "students": students
     }
     if request.method == 'POST':
-        print(request.POST)
-        for participant in participants:
-            print(participant.student.user.id)
-            participant.attendance = str(participant.student.user.id) in request.POST
-            participant.save()
+        if 'enable' in request.POST:
+            event = Events.objects.get(id=request.POST['enable'])
+            event.enable_attendance = 1
+            event.save()
+        elif 'disable' in request.POST:
+            event = Events.objects.get(id=request.POST['disable'])
+            event.enable_attendance = 0
+            event.save()
+        else:
+            for elem in request.POST:
+                if elem.isnumeric():
+                    elem = int(elem)
+        
+                    if Event_Participants.objects.filter(student_id=elem, event_id=event_id).exists():
+                        par = Event_Participants.objects.get(student_id=elem, event_id=event_id)
+                    else:
+                        par = Event_Participants()
+                        par.student_id = elem
+                        par.event_id = event_id
+                    par.attendance = 1
+                    par.save()
+            for par in participants:
+                if str(par.student_id) not in request.POST:
+                    par.attendance = 0
+                    par.save()
+        return redirect ("admin-attendance", event_id=event_id)
     return render (request, "admin_attendance.html", context)
 
 def get_event_details(request, event_id):
@@ -205,6 +279,7 @@ def get_event_details(request, event_id):
             'internal': event.internal,
             'speaker': event.speaker,
             'attendance': event.attendance,
+            'on_time': event.enable_attendance,
             # Include other event details in the response as needed
         }
         return JsonResponse(response_data)

@@ -1,5 +1,5 @@
 <br>
-{% if tab_data.events %}
+{% if tab_data.events or tab_data.externals %}
 <table class="table table-striped">
     <thead>
         <tr>
@@ -7,49 +7,112 @@
             <th>Year</th>
             <th>Category</th>
             <th>Type</th>
+            <th>Position</th>
             <th>Submitted by</th>
             {% if tab_data.pending or tab_data.rejected %}
             <th>Comittee List</th>
             <th>Action</th>
             {% endif %}
+            <th></th>
         </tr>
     </thead>
     <tbody>
+
         {% for event in tab_data.events %}
         <tr>
-            <td>{{event.e_name}} <br> {{event.c_name}}</td>
+            <td>{{event.e_name}} <br>{% if event.c_name %} {{event.c_name}}{% endif %}</td>
             <td>{{event.year}}</td>
             <td>{{event.get_type_display}}</td>
-            {% if event.internal in 'True' %}
+            {% if event.internal == 1 %}
             <td>Internal</td>
             {% else %}
             <td>External</td>
-            <td>{{event.file_by.user.full_name}}</td>
             {% endif %}
+            <td>Committee List</td>
+            <td>{{event.file_by.user.full_name}}</td>
             {% if tab_data.pending or tab_data.rejected %}
-            <td><a href="{{ event.file.url }}">Download File</a></td>     
+            <td><a href="{{ event.file.url }}">Download File</a></td>
             <td>
-                <div class="button-container">
-                    <input value="{{event.id}}" name="event" hidden>
-                    <button
-                        type="submit"
-                        class="approve-button btn btn-success"
-                        name="approve"
-                        >
-                        Approve
-                    </button>   
-                    {% if not tab_data.rejected %}            
-                    <button
-                        type="submit"
-                        class="reject-button btn btn-danger"
-                        name="reject"
-                        >
-                        Reject
-                    </button>
-                    {% endif %}
-                </div>
+                <form method='POST'>
+                    {% csrf_token %}
+                    <div class="button-container">
+                        <button type="submit" class="approve-button btn btn-success" name="approve_in"
+                            value="{{event.id}}">
+                            Approve
+                        </button>
+                        {% if not tab_data.rejected %}
+                        <button type="submit" class="reject-button btn btn-danger" name="reject_in"
+                            value="{{event.id}}">
+                            Reject
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
             </td>
             {% endif %}
+            <td>
+                <form method='POST'>
+                    {% csrf_token %}
+                    <button id="delete-internal" type="submit" class="btn btn-floating" value="{{event.id}}"
+                        name="internal_delete"
+                        onclick="return confirm('Confirm to delete file uploaded for {{event.e_name}} by {{event.file_by.user.full_name}}?')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+
+
+        {% for external in tab_data.externals %}
+        <tr>
+
+            <td>{{external.event.e_name}} <br>{% if external.event.c_name %} {{external.event.c_name}}{% endif %}
+            </td>
+            <td>{{external.event.year}}</td>
+            <td>{{external.event.get_type_display}}</td>
+            {% if external.event.internal == 1 %}
+            <td>Internal</td>
+            {% else %}
+            <td>External</td>
+            {% endif %}
+            <td>{{external.position}}</td>
+
+            <td>{{external.student.user.full_name}}</td>
+
+            {% if tab_data.pending or tab_data.rejected %}
+            <td><a href="{{ external.file.url }}">Download File</a></td>
+
+            <td>
+                <form method='POST'>
+                    {% csrf_token %}
+                    <div class="button-container">
+
+                        <button type="submit" class="approve-button btn btn-success" name="approve_ex"
+                            value="{{external.id}}">
+                            Approve
+                        </button>
+                        {% if not tab_data.rejected %}
+                        <button type="submit" class="reject-button btn btn-danger" name="reject_ex"
+                            value="{{external.id}}">
+                            Reject
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+
+            </td>
+            {% endif %}
+            <td>
+                <form method='POST'>
+                    {% csrf_token %}
+                    <button id="delete-external" type="submit" class="btn btn-floating" value="{{external.id}}"
+                        name="external_delete"
+                        onclick="return confirm('Confirm to delete file uploaded for {{external.event.e_name}} by {{external.student.user.full_name}}?')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

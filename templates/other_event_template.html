@@ -1,0 +1,48 @@
+<div class="form-outline">
+    <input type="text" id="otherOption" name="otherOption" class="form-control">
+    <label class="form-label" for="otherOption" style="margin-left: 0px;">Event Name</label>
+    <div class="form-notch">
+        <div class="form-notch-leading" style="width: 9px;"></div>
+        <div class="form-notch-middle" style="width: 87.2px;"></div>
+        <div class="form-notch-trailing"></div>
+    </div>
+</div>
+<br>
+<div class="form-floating">
+    <input type="datetime-local" class="form-control" id="otherOptionDate" name="otherOptionDate"/>
+    <label for="otherOptionDate" class="form-label">Select date and time</label>
+
+</div>
+<br>
+<div class="form-outline">
+    <input type="text" id="otherOptionSpeaker" name="otherOptionSpeaker" class="form-control">
+    <label class="form-label" for="otherOptionSpeaker" style="margin-left: 0px;">Speaker (If applicable)</label>
+    <div class="form-notch">
+        <div class="form-notch-leading" style="width: 9px;"></div>
+        <div class="form-notch-middle" style="width: 87.2px;"></div>
+        <div class="form-notch-trailing"></div>
+    </div>
+</div>
+<br>
+<div class="form-outline mb-3">
+    <label for="event_type">Event Type:</label>
+    <select id="event_type" class="form-select" name="otherOptionType">
+        {% for val,type in option_obj %}
+        <option value="{{val}}">{{type}} </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-outline">
+    <select id="otherOptionInternal" name="otherOptionInternal" class="form-select" disabled>
+        <option value="1" {% if internal %}selected{% endif %}>Internal</option>
+        <option value="0" {% if not internal %}selected{% endif %}>External</option>
+
+    </select>
+    <div class="form-notch">
+        <div class="form-notch-leading" style="width: 9px;"></div>
+        <div class="form-notch-middle" style="width: 87.2px;"></div>
+        <div class="form-notch-trailing"></div>
+    </div>
+</div>
+<br>

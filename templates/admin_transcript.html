@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+{% extends "sidebar.html" %}
+
+{% block content %}
+{% load static %}
+
+<body>
+    <div class="input-group">
+    <div class="form-outline" style="width: 30%;">
+        <input type="text" id="matric" name="matric" class="form-control">
+        <label class="form-label" for="art_title" style="margin-left: 0px;">Student Matric Number</label>
+        <div class="form-notch">
+            <div class="form-notch-leading" style="width: 9px;"></div>
+            <div class="form-notch-middle" style="width: 87.2px;"></div>
+            <div class="form-notch-trailing"></div>
+        </div>
+    </div>
+    <button class="btn btn-outline-primary"><i class="fas fa-search"></i></button>
+</div>
+</body>
+
+{% endblock %}

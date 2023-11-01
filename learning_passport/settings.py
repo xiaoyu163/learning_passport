@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 
 import os
-
+import django_heroku
+django_heroku.settings(locals())
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -149,3 +150,14 @@ EMAIL_HOST_PASSWORD = 'u201697a3a6'
 # EMAIL_HOST_PASSWORD = '1632001'
 # EMAIL_HOST_PASSWORD = 'FASS_chinesestudies'
 EMAIL_PORT = 587
+
+WKHTMLTOPDF_CMD = 'Downloads'  # Replace with the path to wkhtmltopdf executable
+PDFKIT_OPTIONS = {
+    'page-size': 'A4',
+    'margin-top': '0mm',
+    'margin-right': '0mm',
+    'margin-bottom': '0mm',
+    'margin-left': '0mm',
+}
+
+

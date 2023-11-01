@@ -1,0 +1,43 @@
+{% extends "sidebar.html" %} {% block content %} {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/verify.css' %}">
+<!DOCTYPE html>
+
+<h1>{{page_name}}</h1>
+<hr />
+<ul class="nav nav-tabs" id="myTabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#Pending">Pending</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#Approved">Approved</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#Rejected">Rejected</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div id="Pending" class="tab-pane fade show active">
+        <!-- Display pending documents here -->
+        <form method='POST'>
+            {% csrf_token %}
+            {% include 'ver_other_template.html' with tab_data=pending_data %}
+        </form>
+    </div>
+    <div id="Approved" class="tab-pane fade">
+        <!-- Display approved documents here -->
+        <form method='POST'>
+            {% csrf_token %}
+            {% include 'ver_other_template.html' with tab_data=approved_data %}
+        </form>
+    </div>
+    <div id="Rejected" class="tab-pane fade">
+        <!-- Display rejected documents here -->
+        <form method='POST'>
+            {% csrf_token %}
+            {% include 'ver_other_template.html' with tab_data=rejected_data %}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

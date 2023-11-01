@@ -1,118 +1,511 @@
 {% extends "sidebar.html" %} {% block content %} {% load static %}
+<head>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
+<script>
+  $(document).ready(function() {
+        $('.edit-internal').click(function() {
+            var intId = $(this).data('int-id');
+        
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+              url: '/get-internal-com-details/'+ intId + '/',  // URL to your Django view for fetching event details
+              type: 'GET',
+              
+              success: function(response) {
+                int_id = response.id;  
+                $('#internal_edit_btn').val(int_id); 
+                console.log(int_id)                
 
-<link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
-<h3>Event Comittee List Upload</h3>
-<img src="{% static 'img/Excel.png' %}" alt="Excel Icon"> 
-<a href="{% url 'download_excel' 'event_comittee_template' %}"
-  >Download Comittee List Template</a
->
+                event_name = response.e_name
+                $('#event_name_edit').val(event_name)
+                file = response.file
+                filename = response.filename
+                $('#int_ex_file').attr('href', file)
+                $('#int_ex_file').text(filename);
+
+                            
+                
+              },
+              error: function(xhr, status, error) {
+                console.log(error);  // Handle the error if necessary
+              }
+            });
+          });
+    });
+    $(document).ready(function() {
+        $('.edit-external').click(function() {
+            var exId = $(this).data('ex-id');
+        
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+              url: '/get-external-com-details/'+ exId + '/',  // URL to your Django view for fetching event details
+              type: 'GET',
+              
+              success: function(response) {
+                ex_id = response.id;  
+                $('#external_edit_btn').val(ex_id); 
+                console.log(ex_id)                
+
+                event_name = response.event_name
+                $('#event_name_ex_edit').val(event_name)
+
+                position = response.position
+                $('#position_edit').val(position)
+                
+                file = response.file
+                filename = response.filename
+                $('#ex_ex_file').attr('href', file)
+                $('#ex_ex_file').text(filename);
+
+                            
+                
+              },
+              error: function(xhr, status, error) {
+                console.log(error);  // Handle the error if necessary
+              }
+            });
+          });
+    });
+ 
+</script>
+</head>
+<h3>Curricular Event Comittee Upload</h3>
+<br>
+<img src="{% static 'img/Excel.png' %}" alt="Excel Icon">
+<a href="{% url 'download_excel' 'event_comittee_template' %}">Download Comittee List Template</a>
 <br><br>
 
-<button
-  type="button"
-  class="btn btn-outline-primary"
-  data-toggle="modal"
-  data-target="#upload_event"
->
-<i class="fas fa-upload"></i>
-  Upload
+<button type="button" class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#upload_event">
+  <i class="fas fa-upload"></i>
+  Internal Event Committee List
 </button>
+&nbsp;
+<button type="button" class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#external_event">
+  <i class="fas fa-upload"></i>
+  External Event Commitment
+</button>
+
 <br><br>
 <div class="container-fluid table-responsive">
-<h3> Event Committee List Uploaded </h3>
-    {% if events %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Event</th>
-                <th>Year</th>
-                <th>Category</th>
-                <th>Type</th>
-                <th>Comittee List</th>
-                <th>Submitted by</th>
-                <th>Download File</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for event in events %}
-            <tr>
-                <td>{{event.e_name}} <br> {{event.c_name}}</td>
-                <td>{{event.year}}</td>
-                <td>{{event.get_type_display}}</td>
-                {% if event.internal in 'True' %}
-                <td>Internal</td>
-                {% else %}
-                <td>External</td>
-                {% endif %}
-                {% if event.status != 1 %}
-                <td><a href="{{ event.file.url }}">Download File</a></td>
-                {% else %}
-                <td></td>
-                {% endif %}
-                <td>{{event.file_by.user.full_name}}</td>
-                
-                <td>
-                    {% if event.status == 1 %}
-                    <span class="badge rounded-pill bg-success">Approved</span>
-                    {% elif event.status == 0 %}
-                    <span class="badge rounded-pill bg-danger">Rejected</span>
-                    {% else %}
-                    <span class="badge rounded-pill bg-secondary">Pending</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <sub>No uploaded event committee file.</sub>
-    {% endif %}
-</div>
-    <br><br>
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-  <div class="modal fade" id="upload_event" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Upload Event Comittee File</h5>
-            <button
-              type="button"
-              class="btn btn-close"
-              data-dismiss="modal"
-              aria-label="Close"
+  <h3> Event Committee List Uploaded </h3>
+  {% if events or event_pars %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Year</th>
+        <th>Category</th>
+        <th>Type</th>
+        <th>Comittee List</th>
+        <th>Status</th>
+        <th></th>
+        
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <td>{{event.e_name}} <br> {% if event.c_name %}{{event.c_name}}{% endif %}</td>
+        <td>{{event.year}}</td>
+        <td>{{event.get_type_display}}</td>
+        {% if event.internal == 1 %}
+        <td>Internal</td>
+        {% else %}
+        <td>External</td>
+        {% endif %}
+        {% if event.status != 1 %}
+        <td><a href="{{ event.file.url }}">Download File</a></td>
+        {% else %}
+        <td>-</td>
+        {% endif %}
+        <td>
+          {% if event.status == 1 %}
+          <span class="badge rounded-pill bg-success">Approved</span>
+          {% elif event.status == 0 %}
+          <span class="badge rounded-pill bg-danger">Rejected</span>
+          {% else %}
+          <span class="badge rounded-pill bg-secondary">Pending</span>
+          {% endif %}
+        </td>
+        {% if not event.status == 1 %}
+        <td>
+          <div class="button-container">
+          <button 
+            id="edit-internal" 
+            type="button" 
+            class="edit-internal btn btn-floating" 
+            data-mdb-toggle="modal" 
+            data-mdb-target="#edit_internal" 
+            data-int-id="{{ event.id }}"
             >
-            </button>
-          </div>
-          <div class="modal-body">
-            
-            <div class="form-floating">
-              
-              <select id="event_name_e" class="form-select" name="event_id" required>
-                {% for event in event_list %}
-                  <option value="{{event.id}}" >{{event.e_name}} </option>
-                {% endfor %}
-              </select>  
-              <label for="event_name_e">Event Name (E)</label>
-              
-            </div>
-            <br>
-            <div class="input-group mb-3">
-              <input type="file" name="event_file" required />
-            </div>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                Close
-              </button>
-              
-              <button type="submit" class="btn btn-primary" name="event_submit">
-                Upload
-              </button>
-          </div>  
+            <i class="fas fa-edit"></i>
+          </button>
+          &nbsp;&nbsp;&nbsp;
+        
+          <form method="POST">
+            {% csrf_token %}
+          <button 
+            id="delete-internal" 
+            type="submit" 
+            class="btn btn-floating" 
+            value="{{event.id}}"
+            name="internal_delete"
+            onclick="return confirm('Confirm to delete committee list for {{event.e_name}}?')"
+            >
+            <i class="fas fa-trash"></i>
+          </button>
+        </form>
       </div>
-  </div>
-  </div>       
-  </form>
+        </td>
+        {% else %}
+        <td>
+          <div class="button-container">
+          <button 
+          class="btn btn-floating" 
+          disabled>
+          <i class="fas fa-edit"></i>
+          </button>
+          &nbsp;
+          <button 
+          class="btn btn-floating" 
+          disabled
+          >
+          <i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      
+        {% endif %}
+      </tr>
+      {% endfor %}
+      {% for event_par in event_pars %}
+      <tr>
+        <td>{{event_par.event.e_name}} <br> {% if event_par.event.c_name %}{{event_par.event.c_name}}{% endif %}</td>
+        <td>{{event_par.event.year}}</td>
+        <td>{{event_par.event.get_type_display}}</td>
+        {% if event_par.event.internal == 1 %}
+        <td>Internal</td>
+        {% else %}
+        <td>External</td>
+        {% endif %}
+        {% if event_par.status != 1 %}
+        <td><a href="{{ event_par.file.url }}">Download File</a></td>
+        {% else %}
+        <td>-</td>
+        {% endif %}
+        <td>
+          {% if event_par.status == 1 %}
+          <span class="badge rounded-pill bg-success">Approved</span>
+          {% elif event_parstatus == 0 %}
+          <span class="badge rounded-pill bg-danger">Rejected</span>
+          {% else %}
+          <span class="badge rounded-pill bg-secondary">Pending</span>
+          {% endif %}
+        </td>
+        {% if not event_par.status == 1 %}
+        <td>
+          <div class="button-container">
+            <button 
+              id="edit-external" 
+              type="button" 
+              class="edit-external btn btn-floating" 
+              data-mdb-toggle="modal" 
+              data-mdb-target="#edit_external" 
+              data-ex-id="{{ event_par.id }}"
+              >
+              <i class="fas fa-edit"></i>
+            </button>
+            &nbsp;&nbsp;&nbsp;
+          
+            <form method="POST">
+              {% csrf_token %}
+            <button 
+              id="delete-external" 
+              type="submit" 
+              class="btn btn-floating" 
+              value="{{event_par.id}}"
+              name="external_delete"
+              onclick="return confirm('Confirm to delete committment proof submitted for {{event_par.event.e_name}}?')"
+              >
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </td>
+        {% else %}
+        <td>
+          <div class="button-container">
+          <button 
+          class="btn btn-floating" 
+          disabled>
+          <i class="fas fa-edit"></i>
+          </button>
+          &nbsp;
+          <button 
+          class="btn btn-floating" 
+          disabled
+          >
+          <i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <sub>No uploaded event committee file.</sub>
+  {% endif %}
+</div>
+<br><br>
 
-  {% endblock %}
+<form method="POST" enctype="multipart/form-data" id="internal_form">
+  {% csrf_token %}
+  <div class="modal fade" id="upload_event" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Upload Event Comittee File</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          {% if events_in %}
+          <div class="form-floating">
+            <select id="event_name_e" class="form-select" name="event_id" onchange="checkOtherOption(this)" required>
+              {% for event in events_in %}
+              <option value="{{event.id}}">{{event.e_name}} </option>
+              {% endfor %}
+              <option value="other">Other</option>
+            </select>
+            <label for="event_name_e">Event Name (E)</label>
+          </div>
+          <br>
+          <div id="templateContainer" style="display: none;">
+            {% include 'other_event_template.html' with internal=1 %}
+          </div>
+          {% else %}
+          {% include 'other_event_template.html' with internal=1 %}
+          {% endif %}
+
+          <label class="form-label" for="event_file">Upload Committee List</label>
+          <input type="file" class="form-control" id="event_file" name="event_file" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" class="btn btn-primary" name="internal">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form method="POST" enctype="multipart/form-data" id="external_form">
+  {% csrf_token %}
+  <div class="modal fade" id="external_event" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">External Event Commitment</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          {% if events_ex %}
+          <div class="form-floating">
+            <select id="event_name_e" class="form-select" name="event_id" onchange="checkOtherOption2(this)" required>
+              {% for event in events_ex %}
+              <option value="{{event.id}}">{{event.e_name}} </option>
+              {% endfor %}
+              <option value="other">Other</option>
+            </select>
+            <label for="event_name_e">Event Name (E)</label>
+          </div>
+          <br>
+          <div id="templateContainer2" style="display: none;">
+            {% include 'other_event_template_ex.html' with internal=0 %}
+          </div>
+          {% else %}
+
+          {% include 'other_event_template_ex.html' with internal=0 %}
+          {% endif %}
+
+          <div class="form-outline">
+            <input type="text" id="position" name="position" class="form-control" required>
+            <label class="form-label" for="otherOption" style="margin-left: 0px;">Position</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+
+          <label class="form-label" for="event_file">Upload Commitment Certification</label>
+          <input type="file" class="form-control" id="event_file" name="event_file" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" class="btn btn-primary" name="external">
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="edit_internal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Internal Event Comittee List Uploaded</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-outline">
+            <input class="form-control active" id="event_name_edit" name="art_title" type="text" disabled>
+            <label class="form-label" for="event_name_edit" style="margin-left: 0px;">Event Name (E)</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div>
+            <label for="file" class="form-label">Existing File</label>
+            <a href="#" class="form-control" type="text" id="int_ex_file" disabled></a>
+          </div>
+          <br>
+          <label class="form-label" for="event_file">Update Committee List</label>
+          <input type="file" class="form-control" id="event_file" name="event_file" required/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" id="internal_edit_btn" class="btn btn-primary" name="internal_edit">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="edit_external" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit External Event Comittment Uploaded</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-outline">
+            <input class="form-control active" id="event_name_ex_edit" name="event_name_ex_edit" type="text" disabled>
+            <label class="form-label" for="event_name_ex_edit" style="margin-left: 0px;">Event Name (E)</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="position_edit" name="position" type="text">
+            <label class="form-label" for="position_edit" style="margin-left: 0px;">Position</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div>
+            <label for="file" class="form-label">Existing File</label>
+            <a href="#" class="form-control" type="text" id="ex_ex_file" disabled></a>
+          </div>
+          <br>
+          <label class="form-label" for="event_file">Update Commitment Certification</label>
+          <input type="file" class="form-control" id="edit_ex_file" name="file"/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" id="external_edit_btn" class="btn btn-primary" name="external_edit">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+
+<script>
+  function checkOtherOption(select) {
+
+    var templateContainer = document.getElementById("templateContainer");
+    var otherOption = document.getElementById("otherOption");
+    var otherOptionDate = document.getElementById("otherOptionDate");
+    var event_type = document.getElementById("event_type");
+    
+
+
+    if (select.value === "other") {
+      templateContainer.style.display = "block";
+      otherOption.required = true;
+      otherOptionDate.required = true;
+      event_type.required = true;
+      
+
+    } else {
+      templateContainer.style.display = "none";    
+      otherOption.required = false;
+      otherOptionDate.required = false;
+      event_type.required = false;
+    }
+  }
+
+  function checkOtherOption2(select) {
+
+    var templateContainer2 = document.getElementById("templateContainer2");
+    var otherOption = document.getElementById("otherOptionEx");
+    var otherOptionDate = document.getElementById("otherOptionDateEx");
+    var event_type = document.getElementById("event_type_ex");
+    console.log(otherOption)
+
+    if (select.value === "other") {
+      templateContainer2.style.display = "block";
+      otherOption.required = true;
+      otherOptionDate.required = true;
+      event_type.required = true;
+
+
+    } else {
+      templateContainer2.style.display = "none";
+      otherOption.required = false;
+      otherOptionDate.required = false;
+      event_type.required = false;
+    }
+  }
+
+</script>
+
+
+{% endblock %}

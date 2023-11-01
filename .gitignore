@@ -40,3 +40,5 @@ db.sqlite3
 
 # Virtual environment
 venv/
+
+node_modules/

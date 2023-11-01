@@ -1,0 +1,74 @@
+<br>
+<table class="table table-bordered border border-dark" style="width:100%">
+    <thead>
+        <tr>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;" colspan="2" style="text-align: center;">Types</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;">Event Name</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;">Date</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;">Time</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;">Speaker</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if event_pars_in %}
+            {% for par in event_pars_in %}
+                {% if forloop.first %}
+                    <tr>
+                        <td style="padding: 2px 10px;" rowspan="{{ event_pars_in|length }}">Internal</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{par.event.get_type_display}}</td>
+                        <td style="padding: 2px 10px;">{{ par.event.e_name }}</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.date }} </td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.time }}</td>
+                        {% if par.event.speaker %}
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.speaker }}</td>
+                        {% else %}
+                        <td style="padding: 2px 10px;" >-</td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr> 
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{par.event.get_type_display}}</td>
+                        <td style="padding: 2px 10px;"  >{{ par.event.e_name }}</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.date }}</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.time }}</td>
+                        {% if par.event.speaker %}
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.speaker }}</td>
+                        {% else %}
+                        <td style="padding: 2px 10px;" >-</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% if event_pars_ex %}
+            {% for par in event_pars_ex %}
+                {% if forloop.first %}
+                    <tr>
+                        <td style="padding: 2px 10px;" rowspan="{{ event_pars_ex|length }}">External</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{par.event.get_type_display}}</td>
+                        <td style="padding: 2px 10px;" >{{ par.event.e_name }}</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.date }}</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.time }}</td>
+                        {% if par.event.speaker %}
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.speaker }}</td>
+                        {% else %}
+                        <td style="padding: 2px 10px;" >-</td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{par.event.get_type_display}}</td>
+                        <td style="padding: 2px 10px;"  >{{ par.event.e_name }}</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.date }}</td>
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.start.time }}</td>
+                        {% if par.event.speaker %}
+                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.speaker }}</td>
+                        {% else %}
+                        <td style="padding: 2px 10px;" >-</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>

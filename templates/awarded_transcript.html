@@ -1,0 +1,25 @@
+<br>
+<table class="table table-bordered border border-dark" style="width:100%">
+    <thead>
+        <tr>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;" style="text-align: center;">Year</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;" style="text-align: center;">Type</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;" style="text-align: center;">Title</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;" style="text-align: center;">Competition</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;" style="text-align: center;">Award</th>
+        </tr>
+    </thead>
+    <tbody>
+  
+            {% for art in awarded_arts %}
+            <tr>
+                <td style="padding: 2px 10px;" class="text-nowrap">{{art.date.year}}</td>
+                <td style="padding: 2px 10px;" class="text-nowrap">{{art.type}}</td>
+                <td style="padding: 2px 10px;">{{art.title}}</td>
+                <td style="padding: 2px 10px;">{{art.comp}}</td>
+                <td style="padding: 2px 10px;" class="text-nowrap">{{art.award}}</td>
+            </tr>
+            {% endfor %}
+ 
+    </tbody>
+</table>

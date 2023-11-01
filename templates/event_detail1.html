@@ -1,0 +1,58 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/detail.css' %}">
+</head>
+<img src="{{event.poster.url}}" alt="Event Poster">
+<br><br>
+<div class="container">
+    <div class="left-side">
+        <div class="card">
+            <div class="card-body">
+                <h2>
+                    {{event.c_name}}
+                    <br>
+                    {{event.e_name}}
+                </h2>
+            </div>
+        </div>
+    </div>
+    <div class="gap"></div>
+    <div class="right-side">
+        <div class="card-container">
+            <div class="card border border-primary">
+                <div class="card-header bg-transparent border-primary">
+                    <h3>Event Details</h3>
+                </div>
+                <div class="card-body">
+                    {% if start_date not in end_date %}
+                    <h5>Start</h5>
+                    <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
+                    <br>
+                    <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}}
+                    <br>
+                    <h5>End</h5>
+                    <i class="fa-solid fa-calendar"></i> &nbsp; {{end_date}} ({{end_day}})
+                    <br>
+                    <i class="fa-solid fa-clock"></i> &nbsp; {{end_time}}
+                    {% else %}
+                    <h5>Date</h5>
+                    <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
+                    <br><br>
+                    <h5>Time</h5>
+                    <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}} - {{end_time}}
+                    {% endif %}
+                    <br><br>
+                    <h5>Venue</h5>
+                    <i class="fa-solid fa-location-dot"></i> &nbsp; {{event.venue}}
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

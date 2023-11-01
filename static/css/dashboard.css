@@ -1,0 +1,94 @@
+.container {
+    display: flex;
+}
+
+.right{
+    width: 70%;
+    display: flex;
+}
+
+
+.left{
+    width: 40%;
+}
+
+.gap {
+    width: 5%;
+}
+
+.dashboard {
+    display: flex;
+    width: 100%;
+}
+
+.left-side {
+    flex: 2.3;
+    background-color: #fff; /* Light grey background for analytics */
+    padding: 20px;
+}
+
+.right-side {
+    flex: 0.7;
+    background-color: #fff; /* White background for events and announcements */
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.event-con {
+    border-radius: 10px;
+}
+
+.event-con p {
+    margin: 10px;
+}
+.event-con sub {
+    margin: 10px;
+}
+
+.profile-card {
+    width: 40%;
+    border-color:#dfa8a6;
+    background-color: #fafbe6;
+    color: black;
+  
+}
+
+
+
+.card-link{
+    color:grey;
+}
+
+.info-cards {
+    width: 70%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.info-card {
+    width: calc(50% - 5px); /* 50% width with a 5px gap */
+    padding: 10px;
+    
+}
+
+.info-card .card-body {
+    vertical-align: middle;
+}
+.info-title {
+    font-size: 20px;
+}
+
+.card1 {
+    background-color: #e7e6fb;
+}
+.card2 {
+    background-color: #f9e5ea;
+}
+.card3 {
+    background-color: #dfedf7;
+}
+.card4 {
+    background-color: #fbedd9;
+}
+

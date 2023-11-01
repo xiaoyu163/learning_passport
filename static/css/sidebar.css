@@ -1,6 +1,7 @@
 * {
-    font-family: 'Mona-Sans', sans-serif;
-  } 
+    font-family: 'Times New Roman', Times, serif
+}
+
 @keyframes swing {
     0% {
         transform: rotate(0deg);
@@ -156,12 +157,12 @@ body {
 .sidebar-content {
     max-height: calc(100% - 30px);
     height: calc(100% - 30px);
-    overflow-y: auto;
+    overflow-y: scroll;
     position: relative;
 }
 
 .sidebar-content.desktop {
-    overflow-y: hidden;
+    overflow-y: scroll;
 }
 
 /*--------------------sidebar-brand----------------------*/

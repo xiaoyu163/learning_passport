@@ -1,73 +1,266 @@
 {% extends "sidebar.html" %} {% block content %} {% load static %}
-
+<head>
 <link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
+<script>
+  $(document).ready(function() {
+        $('.edit-internal').click(function() {
+            var intId = $(this).data('int-id');
+        
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+              url: '/get-internal-org-details/'+ intId + '/',  // URL to your Django view for fetching event details
+              type: 'GET',
+              
+              success: function(response) {
+                int_id = response.id;  
+                $('#internal_edit_btn').val(int_id); 
+                console.log(int_id)                
+                
+                org_name = response.name
+                $('#org_name_edit').val(org_name)
+                org_year = response.year
+                $('#org_year_edit').val(org_year)
+                file = response.file
+                filename = response.filename
+                $('#int_ex_file').attr('href', file)
+                $('#int_ex_file').text(filename);
+
+                            
+                
+              },
+              error: function(xhr, status, error) {
+                console.log(error);  // Handle the error if necessary
+              }
+            });
+          });
+    });
+    $(document).ready(function() {
+        $('.edit-external').click(function() {
+            var exId = $(this).data('ex-id');
+        
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+              url: '/get-external-org-details/'+ exId + '/',  // URL to your Django view for fetching event details
+              type: 'GET',
+              
+              success: function(response) {
+                ex_id = response.id;  
+                $('#external_edit_btn').val(ex_id); 
+                console.log(ex_id)                
+             
+                org_name = response.name
+                $('#org_name_ex_edit').val(org_name)
+
+                org_year = response.year
+                $('#org_year_ex_edit').val(org_year)
+
+                position = response.position
+                $('#position_edit').val(position)
+                
+                file = response.file
+                filename = response.filename
+                $('#ex_ex_file').attr('href', file)
+                $('#ex_ex_file').text(filename);
+
+                            
+                
+              },
+              error: function(xhr, status, error) {
+                console.log(error);  // Handle the error if necessary
+              }
+            });
+          });
+    });
+ 
+</script>
+</head>
 <h3>Organisation Comittee List Upload</h3>
-<img src="{% static 'img/Excel.png' %}" alt="Excel Icon"> 
-<a href="{% url 'download_excel' 'organisation_comittee_template' %}"
-  >Download Organisation Committee List Template</a
->
+<br>
+<img src="{% static 'img/Excel.png' %}" alt="Excel Icon">
+<a href="{% url 'download_excel' 'organisation_comittee_template' %}">Download Organisation Committee List Template</a>
 <br>
 <br>
 
-<button
-  type="button"
-  class="btn btn-outline-primary"
-  data-toggle="modal"
-  data-target="#upload_org"
->
-<i class="fas fa-upload"></i>
+<button type="button" class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#upload_org">
+  <i class="fas fa-upload"></i>
 
-  Upload
+  Internal Organisation Committee List
+</button>
+&nbsp;
+<button type="button" class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#external_org">
+  <i class="fas fa-upload"></i>
+  External Organisation Commitment
 </button>
 <br><br>
 
 <div class="container-fluid table-responsive">
-    <h3> Organisation Committee List Uploaded</h3>
-    {% if orgs %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Organisation</th>
-                <th>Year</th>
-                <th>Type</th>
-                <th>Comittee List</th>
-                <th>Submitted by</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for org in orgs %}
-            <tr>
-                <td>{{org.name}}</td>
-                <td>{{org.year}}</td>
-                {% if org.internal in 'True' %}
-                <td>Internal</td>
-                {% else %}
-                <td>External</td>
-                {% endif %}
-                {% if org.status != 1 %}
-                <td><a href="{{ org.file.url }}">Download File</a></td>
-                {% else %}
-                <td></td>
-                {% endif %}
-                <td>{{org.file_by.user.full_name}}</td>
-                <td>
-                    {% if org.status == 1 %}
-                    <span class="badge rounded-pill bg-success">Approved</span>
-                    {% elif org.status == 0 %}
-                    <span class="badge rounded-pill bg-danger">Rejected</span>
-                    {% else %}
-                    <span class="badge rounded-pill bg-secondary">Pending</span>
-                    {% endif %}
-                </td>
-               
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <h3> Organisation Committee List Uploaded</h3>
+  {% if orgs_in or orgs_ex %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Organisation</th>
+        <th>Year</th>
+        <th>Type</th>
+        <th>Submitted Document</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for org in orgs_in %}
+      <tr>
+        <td>{{org.name}}</td>
+        <td>{{org.year}}</td>
+        {% if org.internal == 1 %}
+        <td>Internal</td>
+        {% else %}
+        <td>External</td>
+        {% endif %}
+        {% if org.status != 1 %}
+        <td><a href="{{ org.file.url }}">Download File</a></td>
+        {% else %}
+        <td>-</td>
+        {% endif %}
+        <td>
+          {% if org.status == 1 %}
+          <span class="badge rounded-pill bg-success">Approved</span>
+          {% elif org.status == 0 %}
+          <span class="badge rounded-pill bg-danger">Rejected</span>
+          {% else %}
+          <span class="badge rounded-pill bg-secondary">Pending</span>
+          {% endif %}
+        </td>
+        
+        {% if not org.status == 1 %}
+        <td>
+        <div class="button-container">
+          <button 
+            id="edit-internal" 
+            type="button" 
+            class="edit-internal btn btn-floating" 
+            data-mdb-toggle="modal" 
+            data-mdb-target="#edit_internal" 
+            data-int-id="{{ org.id }}"
+            >
+            <i class="fas fa-edit"></i>
+          </button>
+          &nbsp;&nbsp;&nbsp;
+        
+          <form method="POST">
+            {% csrf_token %}
+          <button 
+            id="delete-internal" 
+            type="submit" 
+            class="btn btn-floating" 
+            value="{{org.id}}"
+            name="internal_delete"
+            onclick="return confirm('Confirm to delete committee list for {{org.name}} {{org.year}}?')"
+            >
+            <i class="fas fa-trash"></i>
+          </button>
+        </form>
+      </div>
+      </td>
+      {% else %}
+      <td>
+        <div class="button-container">
+        <button 
+        class="btn btn-floating" 
+        disabled>
+        <i class="fas fa-edit"></i>
+        </button>
+        &nbsp;
+        <button 
+        class="btn btn-floating" 
+        disabled
+        >
+        <i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+        {% endif %}
+      
+      </tr>
+      {% endfor %}
+      
+      {% for org in orgs_ex %}
+      <tr>
+        <td>{{org.org.name}}</td>
+        <td>{{org.org.year}}</td>
+        {% if org.org.internal == 1 %}
+        <td>Internal</td>
+        {% else %}
+        <td>External</td>
+        {% endif %}
+        {% if org.status != 1 %}
+        <td><a href="{{ org.file.url }}">Download File</a></td>
+        {% else %}
+        <td>-</td>
+        {% endif %}
+        <td>
+          {% if org.status == 1 %}
+          <span class="badge rounded-pill bg-success">Approved</span>
+          {% elif org.status == 0 %}
+          <span class="badge rounded-pill bg-danger">Rejected</span>
+          {% else %}
+          <span class="badge rounded-pill bg-secondary">Pending</span>
+          {% endif %}
+        </td>
+        {% if not org.status == 1 %}
+        <td>
+        <div class="button-container">
+          <button 
+            id="edit-external" 
+            type="button" 
+            class="edit-external btn btn-floating" 
+            data-mdb-toggle="modal" 
+            data-mdb-target="#edit_external" 
+            data-ex-id="{{ org.id }}"
+            >
+            <i class="fas fa-edit"></i>
+          </button>
+          &nbsp;&nbsp;&nbsp;
+        
+          <form method="POST">
+            {% csrf_token %}
+          <button 
+            id="delete-external" 
+            type="submit" 
+            class="btn btn-floating" 
+            value="{{org.id}}"
+            name="external_delete"
+            onclick="return confirm('Confirm to delete committee list for {{org.org.name}} {{org.org.year}}?')"
+            >
+            <i class="fas fa-trash"></i>
+          </button>
+        </form>
+      </div>
+    </td>
     {% else %}
-    <sub>No uploaded organisation committee file.</sub>
-    {% endif %}
+    <td>
+      <div class="button-container">
+      <button 
+      class="btn btn-floating" 
+      disabled>
+      <i class="fas fa-edit"></i>
+      </button>
+      &nbsp;
+      <button 
+      class="btn btn-floating" 
+      disabled
+      >
+      <i class="fas fa-trash"></i></button>
+      </div>
+    </td>
+        {% endif %}
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <sub>No uploaded organisation committee file.</sub>
+  {% endif %}
 </div>
 <form method="POST" enctype="multipart/form-data">
   {% csrf_token %}
@@ -76,62 +269,267 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">Upload Organisation Comittee File</h5>
-          <button
-            type="button"
-            class="btn btn-close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
           </button>
         </div>
         <div class="modal-body">
-          <div class="input-group mb-3">
-            <span class="input-group-text">Organisation</span>
-            <input
-              type="text"
-              name="org_name"
-              id="org_name"
-              class="form-control"
-              required
-            />
+          <div class="form-outline">
+            <input type="text" id="org_name" name="org_name" class="form-control" required>
+            <label class="form-label" for="org_name" style="margin-left: 0px;">Organisation Name</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
           </div>
-          <div class="input-group mb-3">
-            <span class="input-group-text">Year</span>
-            <input
-              type="year"
-              name="org_year"
-              id="org_year"
-              class="form-control"
-              required
-            />
+          <br>
+          <div class="form-outline">
+            <input type="year" id="org_year" name="org_year" class="form-control" required>
+            <label class="form-label" for="org_year" style="margin-left: 0px;">Year</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
           </div>
+
+          <br>
           <div class="input-group mb-3">
-            <select
-              id="org_internal"
-              class="form-select"
-              name="org_internal"
-            >
+            <select id="org_internal" class="form-select" name="org_internal" disabled>
               <option value="1">Internal</option>
-              <option value="0">External</option>
+
             </select>
           </div>
-          <div class="input-group mb-3">
-            
-            <input type="file" name="org_file" required />
-          </div>
+          <br>
+
+          <label class="form-label" for="event_file">Upload Committee List</label>
+          <input type="file" class="form-control" name="org_file" required />
         </div>
+
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-              Close
-            </button>
-            
-            <button type="submit" class="btn btn-primary" name="org_submit">
-              Upload
-            </button>
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" class="btn btn-primary" name="internal">
+            Upload
+          </button>
         </div>
-    </div>  
+      </div>
     </div>
-</div>     
+  </div>
 </form>
 
+<!-- External Org Modal -->
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="external_org" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">External Organisation Commitment</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          {% if org_list_ex %}
+          <div class="form-floating">
+            <select id="org_id" class="form-select" name="org_id" onchange="checkOtherOption(this)" required>
+              {% for org in org_list_ex %}
+              <option value="{{org.id}}">{{org.name}} </option>
+              {% endfor %}
+              <option value="other">Other</option>
+            </select>
+            <label for="org">Organisation Name</label>
+          </div>
+
+          <div id="templateContainer" style="display: none;">
+            <br>
+            {% include 'other_org_template.html' %}
+          </div>
+          {% else %}
+          
+          
+            {% include 'other_org_template.html' %}
+        
+          {% endif %}
+          
+
+          <br>
+          <div class="form-outline">
+            <input type="text" id="position" name="position" class="form-control" required>
+            <label class="form-label" for="otherOption" style="margin-left: 0px;">Position</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+           
+          </div>
+          <br>
+          <div class="input-group mb-3">
+            <select id="org_internal" class="form-select" name="org_internal" disabled>
+              <option value="0">External</option>
+
+            </select>
+          </div>
+          
+          <br>
+          <label class="form-label" for="event_file">Upload Commitment Certification </label>
+          <input type="file" class="form-control" name="org_file" required />
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" class="btn btn-primary" name="external">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="edit_internal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Internal Organisation Comittee List Uploaded</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-outline">
+            <input class="form-control active" id="org_name_edit" type="text" disabled>
+            <label class="form-label" for="org_name_edit" style="margin-left: 0px;">Organisation Name</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="org_year_edit" type="text" disabled>
+            <label class="form-label" for="org_year_edit" style="margin-left: 0px;">Year</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div>
+            <label for="file" class="form-label">Existing File</label>
+            <a href="#" class="form-control" type="text" id="int_ex_file" disabled></a>
+          </div>
+          <br>
+          <label class="form-label" for="event_file">Update Committee List</label>
+          <input type="file" class="form-control" id="org_file" name="file" required/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" id="internal_edit_btn" class="btn btn-primary" name="internal_edit">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="edit_external" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit External Organisation Comittment Uploaded</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-outline">
+            <input class="form-control active" id="org_name_ex_edit" name="org_name_ex_edit" type="text" disabled>
+            <label class="form-label" for="org_name_ex_edit" style="margin-left: 0px;">Organisation Name</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="org_year_ex_edit" name="org_year_ex_edit" type="text" disabled>
+            <label class="form-label" for="org_year_ex_edit" style="margin-left: 0px;">Year</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="position_edit" name="position" type="text">
+            <label class="form-label" for="position_edit" style="margin-left: 0px;">Position</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div>
+            <label for="file" class="form-label">Existing File</label>
+            <a href="#" class="form-control" type="text" id="ex_ex_file" disabled></a>
+          </div>
+          <br>
+          <label class="form-label" for="event_file">Update Commitment Certification</label>
+          <input type="file" class="form-control" id="edit_ex_file" name="file"/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" id="external_edit_btn" class="btn btn-primary" name="external_edit">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+
+<script>
+  function checkOtherOption(select) {
+
+  var templateContainer = document.getElementById("templateContainer");
+  var org_name = document.getElementById("org_name");
+  var org_year = document.getElementById("org_year");
+  
+
+
+
+  if (select.value === "other") {
+    templateContainer.style.display = "block";
+    org_name.required = true;
+    org_year.required = true;
+    
+
+  } else {
+    templateContainer.style.display = "none";    
+    console.log(otherOption)
+  }
+}
+</script>
 {% endblock %}

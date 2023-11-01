@@ -8,11 +8,13 @@
             <th>Year</th>
             <th>Type</th>
             <th>Platform</th>
+            <th>Status</th>
             <th>Author</th>
             {% if tab_data.pending or tab_data.rejected %}
             <th>File</th>
             <th>Action</th>
             {% endif %}
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -22,16 +24,21 @@
             <td>{{art.year}}</td>
             <td>{{art.type}}</td>
             <td>{{art.platform}}</td>
-            <td>{{art.file_by.user.full_name}}</td>
+            {% if art.published == 1 %}
+            <td>Published</td>
+            {% else %}
+            <td>Yet To Be Published</td>
+            {% endif %}
+            <td>{{art.student.user.full_name}}</td>
             {% if tab_data.pending or tab_data.rejected %}
             <td><a href="{{ art.file.url }}">Download File</a></td>
             <td>
                 <div class="button-container">
-                <input value="{{art.id}}" name="art" hidden>
                 <button
                     type="submit"
                     class="approve-button btn btn-success"
-                    name="approve"
+                    name="art_approve"
+                    value="{{art.id}}"
                     >
                     Approve
                 </button>   
@@ -39,7 +46,8 @@
                 <button
                     type="submit"
                     class="reject-button btn btn-danger"
-                    name="reject"
+                    name="art_reject"
+                    value="{{art.id}}"
                     >
                     Reject
                 </button>
@@ -47,6 +55,16 @@
             </div>
             </td>
             {% endif %}
+            <td>
+                <button 
+                class="btn btn-floating" 
+                type="submit" 
+                name="art_delete" 
+                value="{{art.id}}" 
+                onclick="return confirm('Confirm to delete {{art.title}} by {{art.file_by.user.full_name}}?')"
+                >
+                <i class="fas fa-trash"></i>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

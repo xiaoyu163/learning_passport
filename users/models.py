@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 # Create your models here.
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -38,6 +39,7 @@ class User(AbstractUser):
     last_name = None
     username = None
     full_name = models.CharField(max_length=50)
+    name_chi = models.CharField(max_length=50, null=True)
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(auto_now=True)
     ROLES = (
@@ -51,23 +53,19 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True)
     contact = models.CharField(max_length=20, null=True)
     address = models.CharField(max_length=100, null=True)
+    date_inactive = models.DateField(null=True)
 
-class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.PROTECT)
-    matric_no = models.CharField(max_length=10)
-    enrol_year = models.DateField()
-    grad_year = models.DateField()
-    Program = (
-        (1, "Bachelor of Arts Chinese Studies"),
-        (2, "Master of Chinese Studies (Coursework)"),
-        (3, "Master of Arts (Research)"),
-        (4, "Doctor of Philosophy (Ph.D)"),
-    )
-    program = models.SmallIntegerField(choices=Program)
+
+
+
+class Semester (models.Model):
+    academic_year = models.CharField(max_length=7)
+    semester = models.SmallIntegerField()
+    start = models.DateField()
+    end = models.DateField()
     
-class Teacher(models.Model):
-    lecturer = models.OneToOneField(User, on_delete=models.PROTECT)
-    students = models.ManyToManyField(Student)
+class Lecturer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     Position = (
         (1, "Adjunct Professor"),
         (2, "Associate Professor"),
@@ -77,15 +75,33 @@ class Teacher(models.Model):
     )
     position = models.SmallIntegerField(choices=Position)
 
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    matric_no = models.CharField(max_length=10)
+    enrol_year = models.DateField(null=True)
+    grad_year = models.DateField(null=True)
+    Program = (
+        (1, "Bachelor of Arts Chinese Studies"),
+        (2, "Master of Chinese Studies (Coursework)"),
+        (3, "Master of Arts (Research)"),
+        (4, "Doctor of Philosophy (Ph.D)"),
+    )
+    program = models.SmallIntegerField(choices=Program)
+    lecturer = models.ForeignKey(Lecturer, on_delete=models.PROTECT)
+
 class Organisation(models.Model):
     name = models.CharField(max_length=100)
     year = models.IntegerField()
     internal = models.BooleanField()
     file = models.FileField(upload_to='org_com/')
+    filename = models.CharField(max_length=100, null = True)
     file_by = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
     status = models.BooleanField(null=True)
 
 class OrgComittee(models.Model):
-    student = models.ForeignKey(Student,on_delete=models.PROTECT)
-    org = models.ForeignKey(Organisation,on_delete=models.PROTECT)
+    student = models.ForeignKey(Student,on_delete=models.CASCADE)
+    org = models.ForeignKey(Organisation,on_delete=models.CASCADE)
     position = models.CharField(max_length=100)
+    file = models.FileField(upload_to='org_external/', null=True)
+    filename = models.CharField(max_length=100, null=True)
+    status = models.BooleanField(null=True)

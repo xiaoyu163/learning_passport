@@ -53,10 +53,19 @@
             </div>
             <div class="col-md-12 custom_margin_top">
                 <label for="role" class="form-label">Role</label>
-                <select class="form-control" id="role" name="role" required>
+                <select class="form-control" id="role" name="role" onchange="checkRole(this)" required>
                     <option value="STUDENT">Student</option>
                     <option value="LECTURER">Lecturer</option>
                 </select>
+            </div>
+            <div class="col-md-12 custom_margin_top" id="templateContainer" style="display:none;">
+                <label for="lecturer_position">Position:</label>
+                    <select id="lecturer_position" class="form-select" name="lecturer_position">
+                        {% for val,type in option_position %}
+                        <option value="{{val}}">{{type}} </option>
+                        {% endfor %}
+                    </select>
+                    
             </div>
         </div>
         <div class="form-text">Please use your siswamail for registration.</div>
@@ -66,5 +75,23 @@
         </div>
     </form>
 </div>
+
+<script>
+    function checkRole(select) {
+
+        var templateContainer = document.getElementById("templateContainer");
+        var position = document.getElementById("position");
+       
+        if (select.value === "LECTURER") {
+        templateContainer.style.display = "block";
+        position.required = true;
+    
+        } else {
+        templateContainer.style.display = "none";    
+        position.required = false;
+       
+        }
+}
+</script>
 
 {% endblock %}

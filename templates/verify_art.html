@@ -26,7 +26,10 @@
     </div>
     <div id="Approved" class="tab-pane fade">
         <!-- Display approved documents here -->
+        <form method='POST'>
+            {% csrf_token %}
         {% include 'ver_art_template.html' with tab_data=approved_data %}
+        </form>
     </div>
     <div id="Rejected" class="tab-pane fade">
         <!-- Display rejected documents here -->

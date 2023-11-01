@@ -7,9 +7,8 @@
             <h3><center>Edit Profile Details</center></h3>
         </div>
         <div class="input-group mb-3">
-            
                 <span class="input-group-text">Matric Number</span>
-            <input type="text" class="form-control" id="matric" name="matric" value="{{matric}}" required>
+            <input type="text" class="form-control" id="matric" name="matric" {% if not student %} value="{{matric}}" {% else %} value="{{student.matric_no}}" {% endif %} required>
         </div>
         <div class="input-group mb-3">
             
@@ -20,32 +19,41 @@
             
                 <span class="input-group-text">Program</span>
             <select class="form-control" id="program" name="program" required>
-                <option value="1">Bachelor of Arts Chinese Studies</option>
-                <option value="2">Master of Chinese Studies (Coursework)</option>
-                <option value="3">Master of Arts (Research)</option>
-                <option value="4">Doctor of Philosophy (Ph.D)</option>
+                <option value="1" {% if student and student.program == 1 %} selected {% endif %}>Bachelor of Arts Chinese Studies</option>
+                <option value="2" {% if student and student.program == 2 %} selected {% endif %}>Master of Chinese Studies (Coursework)</option>
+                <option value="3" {% if student and student.program == 3 %} selected {% endif %}>Master of Arts (Research)</option>
+                <option value="4" {% if student and student.program == 4 %} selected {% endif %}>Doctor of Philosophy (Ph.D)</option>
             </select>
         </div>
         <div class="input-group mb-3">
             
                 <span class="input-group-text">Enrolment</span>
-            <input type="month" class="form-control" id="enrol" name="enrol" required>
+            <input type="month" class="form-control" id="enrol" name="enrol" value="{{enrol_year}}" required>
         </div>
         <div class="input-group mb-3">
             
                 <span class="input-group-text">Graduation</span>
-            <input type="month" class="form-control" id="grad" name="grad" required>
+            <input type="month" class="form-control" id="grad" name="grad" value="{{grad_year}}" required>
         </div>
         <div class="input-group mb-3">
             
                 <span class="input-group-text">Contact</span>
-            <input type="text" class="form-control" id="contact" name="contact" value="{{contact}}" required>
+            <input type="text" class="form-control" id="contact" name="contact" value="{{student.user.contact}}" required>
         </div>
         <div class="input-group mb-3">
             
                 <span class="input-group-text">Address</span>
-            <input type="text" class="form-control" id="address" name="address" value="{{address}}" required>
+            <input type="text" class="form-control" id="address" name="address" value="{{student.user.address}}" required>
         </div>
+        <div class="input-group mb-3">
+            
+            <span class="input-group-text">Advisor</span>
+        <select class="form-control" id="lecturer" name="lecturer" required>
+            {% for lecturer in lecturers %}
+            <option value="{{lecturer.id}}" {% if student and student.lecturer_id == lecturer.id %} selected {% endif %}>{{lecturer.user.full_name}}</option>
+            {% endfor %}
+        </select>
+    </div>
         <div class="row custom_margin_top">
             <button type='submit' class='btn btn-outline-primary' style='width:95%; margin:10px auto;'>Submit</button>
         </div>

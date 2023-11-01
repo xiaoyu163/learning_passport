@@ -1,0 +1,144 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+</head>
+<h1>Dashboard</h1>
+<br>
+<div class="container">
+  <div class="left-side">
+    <div class="container">
+
+      <div class="card profile-card">
+        <div class="card-header">
+          <h4 class="card-title">My Profile</h4>
+        </div>
+        <div class="card-body">
+          <sub>Name</sub>
+          <p><strong>{{student.user.full_name}}</strong></p>
+          <sub>Matric Number</sub>
+          <p><strong>{{student.matric_no}}</strong></p>
+          <sub>Program</sub>
+          <p><strong>{{student.get_program_display}}</strong></p>
+          <sub>Enrolment</sub>
+          <p><strong>{{student.enrol_year}}</strong></p>
+          <sub>Graduation</sub>
+          <p><strong>{{student.grad_year}}</strong></p>
+          <sub>Contact</sub>
+          <p><strong>{{student.user.contact}}</strong></p>
+          <sub>Address</sub>
+          <p><strong>{{student.user.address}}</strong></p>
+        </div>
+        <div class="card-footer">
+          <center>
+            <a href="{% url 'edit-profile' student.user.id %}">Edit Profile Details</a>
+          </center>
+          </div>
+      </div>
+
+      <div class="gap"></div>
+      <div class="info-cards">
+
+        <div class="card info-card card1">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-calendar-check" style="color: #6151fb"></i></h1>
+                <strong>
+                  <p class="info-title">Events<br>Participated </p>
+                </strong>
+                <h3>{{par_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+
+        <div class="card info-card card2">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-handshake" style="color: #ed1d4d"></i></h1>
+                <strong>
+                  <p class="info-title">Event<br>Commitments </p>
+                </strong>
+                <h3>{{com_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+        
+        
+        <div class="card info-card card3">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-users" style="color: #1b8be3"></i></h1>
+                <strong>
+                  <p class="info-title">Organisation<br>Commitments </p>
+                </strong>
+                <h3>{{org_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+
+        <div class="card info-card card4">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-file-lines" style="color: #ffa01f"></i></h1>
+                <strong>
+                  <p class="info-title">Articles<br>Published </p>
+                </strong>
+                <h3>{{art_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="right-side">
+    <div style="display:flex;">
+      <h5><strong>Registered Event</strong></h5>
+      &nbsp; &nbsp;
+      <a href="{% url 'attendance' %}"><sub>View all</sub></a>
+    </div>
+
+    {% for event in registered_events %}
+    <a href="{% url 'event-detail' event.id %}">
+      <div class="card border border-info">
+        <div class="card-body">
+          <p><strong>{{event.e_name}}</strong>
+            <br>{{event.start.date}}
+          </p>
+        </div>
+      </div>
+    </a>
+    <br>
+    {% endfor %}
+
+    <div style="display:flex;">
+      <h5><strong>Announcement</strong></h5>
+      &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="{% url 'announcements' %}"><sub>View all</sub></a>
+    </div>
+    {% for ann in announcements %}
+    <div class="card border border-info">
+      <div class="card-header">
+        <strong>{{ann.title}}</strong>
+      </div>
+      <div class="card-body">
+        {{ann.content}}
+      </div>
+    </div>
+    <br>
+    {% endfor %}
+  </div>
+</div>
+</div>
+{% endblock %}

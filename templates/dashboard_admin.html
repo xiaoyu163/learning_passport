@@ -1,0 +1,171 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+</head>
+<h1>Dashboard</h1>
+<br>
+
+<body>
+    <div class="dashboard">
+        <div class="left-side">
+            <div class="container container-fluid">
+                <div class="left">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="form-floating">
+                            <select class="form-select" id="academic_year" name="academic_year"
+                                aria-label="Default select example" onchange="submit()">
+                                {% for semester in years %}
+                                <option value="{{semester.academic_year}}" 
+                                    {% if semester.academic_year == selected_year.academic_year %} selected {% endif %}>
+                                    {{semester.academic_year}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <label for="academic_year">Academic Year</label>
+                        </div>
+                        <br>
+                        <div class="form-floating">
+                            <select class="form-select" id="semester" name="semester"
+                                aria-label="Default select example" onchange="submit()">
+                                <option value="1" {% if selected_year.semester == 1 %} selected {% endif %}>1</option>
+                                <option value="2" {% if selected_year.semester == 2 %} selected {% endif %}>2</option>
+                            </select>
+                            <label for="semester">Semester</label>
+                        </div>
+                        <br>
+                        <div class="form-floating">
+                            <select class="form-select" id="study_level" name="study_level"
+                                aria-label="Default select example" onchange="submit()">
+                                <option value="1" {% if study_level == '1' %} selected {% endif %}>All</option>
+                                <option value="2" {% if study_level == '2' %} selected {% endif %}>Undergraduate</option>
+                                <option value="3" {% if study_level == '3' %} selected {% endif %}>Postgraduate</option>
+                            </select>
+                            <label for="study_level">Student Study Level</label>
+                        </div>
+                        <br>
+                    </form>
+                    <br>
+
+                </div>
+                <div class="gap"></div>
+                <div class="right">
+              
+                        <div class="card card border border-primary">
+                            <div class="card-body" style="text-align: right;">
+
+                                <h3 class="card-title" style="color: #2e4b7a"><i class="fa-solid fa-graduation-cap"></i>
+                                    &nbsp;
+                                    {{num_active}}</h3>
+                                <div class="card-text">
+                                    <sub>Active Students </sub>
+                                    <p><strong>Year {{selected_year.academic_year}} Semester
+                                            {{selected_year.semester}}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="card card border border-primary">
+                            <div class="card-body" style="text-align: right;">
+
+                                <h3 class="card-title" style="color: #2e4b7a"><i class="fa-solid fa-calendar-check"></i>
+                                    &nbsp;
+                                    {{num_event}}</h3>
+                                <div class="card-text">
+                                    <sub>Internal Events </sub>
+                                    <p><strong>Year {{selected_year.academic_year}} Semester
+                                            {{selected_year.semester}}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                  
+                        <div class="card card border border-primary">
+                            <div class="card-body" style="text-align: right;">
+                                <h3 class="card-title" style="color: #2e4b7a"><i class="fa-solid fa-file-lines"></i>
+                                    &nbsp;
+                                    {{num_article}}</h3>
+                                <div class="card-text">
+                                    <sub>Articles Published </sub>
+                                    <p><strong>Year {{selected_year.academic_year}} Semester
+                                            {{selected_year.semester}}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                 
+                </div>
+            </div>
+            <br>
+            <div>
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="form-floating">
+                        <select class="form-select" id="event_select" name="event_name"
+                            aria-label="Default select example" onchange="submit()">
+                            {% for event in event_selection %}
+                            <option value="{{event.e_name}}" {% if event.e_name == selected %} selected {% endif %}>
+                                {{event.e_name}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label for="event_select">Select Event Name</label>
+                    </div>
+                </form>
+                <div id="plotly-graph"></div>
+            </div>
+        </div>
+        <div class="right-side">
+            <div style="display:flex;">
+                <h5><strong>Upcoming Event</strong></h5> 
+                &nbsp; &nbsp;
+                <a href="{% url 'events' %}"><sub>View all</sub></a>
+            </div>
+           
+            {% for event in upcoming_events %}
+            <a href="{% url 'event-detail' event.id %}">
+            <div class="card border border-info">
+                <div class="card-body">
+                  <p><strong>{{event.e_name}}</strong>
+                    <br>{{event.start.date}}</p>
+              </div>
+            </div>
+            </a>
+            <br>
+            {% endfor %}
+            
+            <div style="display:flex;">
+                <h5><strong>Announcement</strong></h5> 
+                &nbsp; &nbsp; &nbsp; &nbsp;
+                <a href="{% url 'announcements' %}"><sub>View all</sub></a>
+            </div>
+            {% for ann in announcements %}
+            <div class="card border border-info">
+                <div class="card-header">
+                 <strong>{{ann.title}}</strong>
+                </div>
+                <div class="card-body">
+                    {{ann.content}}
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+
+
+
+<script>
+    // Load the Plotly graph from the JSON data
+    var graphData = {{ graph_json| safe }};
+    Plotly.newPlot('plotly-graph', graphData);
+</script>
+{% endblock %}

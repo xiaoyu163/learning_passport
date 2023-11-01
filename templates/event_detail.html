@@ -1,33 +1,124 @@
-<!DOCTYPE html>
-{% extends "sidebar.html" %} 
+{% extends "sidebar.html" %}
 {% block content %}
 {% load static %}
+
 <head>
-  
-  <!-- MDB -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.css" rel="stylesheet" />
-  <!-- MDB -->
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"></script> 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="{% static 'css/event_detail.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/detail.css' %}">
 </head>
+<h1>Event Details</h1>
+<br>
+{% if 'ADMIN' in request.user.role %}
+<button class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#poster_modal">Edit Event Poster</button>
+<br><br>
+{% endif %}
+{% if event.poster %}
+<div class="img-container">
+    <img src="{{event.poster.url}}" alt="Event Poster">
+</div>
+<br>
+{% endif %}
+<div class="container">
 
-<body>
-
-<div class="container mt-5">
-    <div class="row">
-        <h2><strong> {{event.c_name}}<br> {{event.e_name}}</strong> </h2>
+    <div class="left-side">
+        <div class="card profile-card">
+            <div class="card-body">
+                <h4 class="card-title">{{event.c_name}}</h4>
+                <h4 class="card-title">{{event.e_name}}</h4>
+            </div>
+        </div>
         <br>
-       
-        <!-- Left Side (Event Poster and Description) -->
-        <div class="col-md-6">
-            {% if event.poster %}
-            {% if 'ADMIN' in request.user.role %}
-            <button class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#poster_modal">Edit Event Poster</button>
-            <br><br>
+        <div class="card profile-card">
+            <div class="card-body">
+                <p class="card-text">{{event.desc}}</p>
+            </div>
+        </div>
+        <br>
+        <div>
+            {% if request.user.role in 'SUPER ADMIN' %}
+            <a href="{% url 'admin-attendance' event.id %}" id="admin-attendance-button" class="btn btn-primary"><i
+                    class="fas fa-calendar-alt"></i> Attendance</a>
             {% endif %}
-            <img src="{{event.poster.url}}" class="card-img-top" alt="Event Poster">
-            
+            {% if request.user.role in 'STUDENT' %}
+                {% if curr_event and parts %}
+                    {% if parts.attendance == 1 %} 
+                        <button  class="btn btn-primary" disabled>
+                            Attendance Submitted
+                        </button>
+                    {% else %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <button type="submit" name="attendance" class="btn btn-primary" onclick='return confirm("Confirm to take attendance for {{event.e_name}}?")' >
+                                Take Attendance 
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    {% if parts %}
+                    <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#reg_event_modal"
+                        disabled>
+                        Registered
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#reg_event_modal">
+                        Register
+                    </button>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="right-side">
+        <div class="card border border-info">
+            <div class="card-body">
+                {% if start_date not in end_date %}
+                <h5>Start</h5>
+                <p class="body-text">
+                    <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
+                </p>
+
+                <p class="body-text">
+                    <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}}
+                </p>
+
+
+                <h5>End</h5>
+                <p class="body-text">
+                    <i class="fa-solid fa-calendar"></i> &nbsp; {{end_date}} ({{end_day}})
+                </p>
+                <p class="body-text">
+                    <i class="fa-solid fa-clock"></i> &nbsp; {{end_time}}
+                </p>
+                {% else %}
+                <h5>Date</h5>
+                <p class="body-text">
+                    <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
+                </p>
+
+                <h5>Time</h5>
+                <p class="body-text">
+                    <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}} - {{end_time}}
+                </p>
+                {% endif %}
+
+                <h5>Venue</h5>
+                <p class="body-text">
+                    <i class="fa-solid fa-location-dot"></i> &nbsp; {{event.venue}}
+                </p>
+
+                {% if event.speaker %}
+                <h5>Speaker</h5>
+                <p class="body-text">
+                    <i class="fa-solid fa-microphone"></i> &nbsp; {{event.speaker}}
+                </p>
+                {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Edit Poster Modal -->
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
@@ -46,97 +137,13 @@
                 </div>
                 <div class="modal-footer">
                     <input name="event_id" hidden />
-                      <button type="submit" class="btn btn-success" name="poster">Yes</button>
-                      <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
-                  </div>
-            </div>
-        </div>
-    </div>       
-
-</form>
-            {% endif %}
-            <br><br>
-            <p>{{event.desc}}</p>
-        
-            {% if event.speaker %}
-            <p>Speaker: {{event.speaker}}</p>
-            {% endif %}
-        <br>
-        </div>
-
-        <!-- Right Side (Event Details) -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    {% if start_date not in end_date %}
-                    <h4><strong>
-                        <i class="fas fa-minus vertical-stroke"></i>
-                        Start
-                    </strong></h4>
-                    <p>{{start_date}} ({{start_day}})</p>
-                    <p>{{start_time}}</p>
-                    <h4><strong>
-                        <i class="fas fa-minus vertical-stroke"></i>
-                        End
-                    </strong></h4>
-                    <p>{{end_date}} ({{end_day}})</p>
-                    <p>{{end_time}}</p>
-                    {% else %}
-                    <h4>
-                        <strong>
-                            <i class="fas fa-minus vertical-stroke"></i>
-                            Date 
-                        </strong>
-                    </h4>
-                    <p>{{start_date}} {{start_day}}</p>
-                    <h4><strong>
-                        <i class="fas fa-minus vertical-stroke"></i>
-                        Start
-                    </strong></h4>
-                    <p>{{start_time}}</p>
-                    <h4><strong>
-                        <i class="fas fa-minus vertical-stroke"></i>
-                        End
-                    </strong></h4>
-                    <p>{{end_time}}</p>
-                    {% endif %}
-                    <h4><strong>
-                        <i class="fas fa-minus vertical-stroke"></i>
-                        Location
-                    </strong></h4>
-                    <p>{{event.venue}}</p>
-                    {% if request.user.role in 'SUPER ADMIN' %}
-                    <a href="{% url 'admin-attendance' event.id %}" id="admin-attendance-button" class="btn btn-primary" ><i class="fas fa-calendar-alt"></i> Attendance</a>
-                    {% endif %}
-                    {% if request.user.role in 'STUDENT' %}
-                        {% if parts %}
-                            <button
-                            type="button"
-                            class="btn btn-primary"
-                            data-mdb-toggle="modal"
-                            data-mdb-target="#reg_event_modal"
-                            disabled
-                            >
-                            Registered
-                            </button>
-                        {% else %}
-                            <button
-                            type="button"
-                            class="btn btn-primary"
-                            data-toggle="modal"
-                            data-target="#reg_event_modal"
-                            >
-                            Register
-                            </button>
-                        {% endif %}
-                    {% endif %}
-                    <br>
+                    <button type="submit" class="btn btn-success" name="poster">Yes</button>
+                    <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
                 </div>
             </div>
-            <br>
         </div>
     </div>
-</div>
+</form>
 
 <!-- Modal for Register Event -->
 <form method="POST">
@@ -146,26 +153,20 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="register-title">Register Event</h4>
-                    <button
-                    type="button"
-                    class="btn-close"
-                    data-mdb-dismiss="modal"
-                    aria-label="Close"
-                    >
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
                     </button>
                 </div>
                 <div class="modal-body">
                     <p>Confirm to register in this event?</p>
                 </div>
                 <div class="modal-footer">
-                  <input id="reg_event_id" name="event_id" hidden />
+                    <input id="reg_event_id" name="event_id" hidden />
                     <button type="submit" class="btn btn-success" name="register">Yes</button>
                     <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
                 </div>
             </div>
         </div>
-    <div>
-  </form>
-
+        <div>
+</form>
 
 {% endblock %}

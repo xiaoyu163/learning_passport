@@ -1,0 +1,21 @@
+<br>
+<table class="table table-bordered border border-dark" style="width:100%">
+    <thead>
+        <tr>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;">Year</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;">Competition</th>
+            <th style="padding: 2px 8px; font-weight:bold; text-align:center;">Award</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+            {% for comp in other %}
+            <tr>
+                <td style="padding: 2px 10px;" class="text-nowrap">{{comp.year}}</td>
+                <td style="padding: 2px 10px;">{{comp.name}}</td>
+                <td style="padding: 2px 10px;">{{comp.award}}</td>
+            </tr>
+            {% endfor %}
+      
+    </tbody>
+</table>

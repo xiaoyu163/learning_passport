@@ -7,3 +7,8 @@ img {
     width: 35%;
     word-wrap: break-word;
 }
+
+.button-container {
+    display: flex;
+  }
+  

@@ -1,0 +1,66 @@
+<br>
+{% if tab_data.comps %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Competition</th>
+            <th>Award</th>
+            <th>Submitted by</th>
+            {% if tab_data.pending or tab_data.rejected %}
+            <th>File</th>
+            <th>Action</th>
+            {% endif %}
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for comp in tab_data.comps %}
+        <tr>
+            <td>{{comp.year}}</td>
+            <td>{{comp.name}}</td>
+            <td>{{comp.award}}</td>
+            <td>{{comp.student.user.full_name}}</td>
+            {% if tab_data.pending or tab_data.rejected %}
+            <td><a href="{{ comp.file.url }}">Download File</a></td>
+            <td>
+                <div class="button-container">
+                <button
+                    type="submit"
+                    class="approve-button btn btn-success"
+                    name="approve"
+                    value="{{comp.id}}"
+                    >
+                    Approve
+                </button> 
+                {% if not tab_data.rejected %}              
+                <button
+                    type="submit"
+                    class="reject-button btn btn-danger"
+                    name="reject"
+                    value="{{comp.id}}"
+                    >
+                    Reject
+                </button>
+                {% endif %}
+            </div>
+            </td>
+            {% endif %}
+            <td>
+                <button 
+                class="btn btn-floating" 
+                type="submit" 
+                name="other_delete" 
+                value="{{comp.id}}" 
+                onclick="return confirm('Confirm to delete record for {{comp.name}} {{comp.year}} by {{comp.student.user.full_name}}?')"
+                >
+                <i class="fas fa-trash"></i>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+{% else %}
+<sub>No co-curricular award.</sub>
+{% endif %}

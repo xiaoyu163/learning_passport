@@ -1,16 +1,18 @@
 <br>
-{% if tab_data.orgs %}
+{% if tab_data.orgs or tab_data.externals %}
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Organisation</th>
             <th>Year</th>
             <th>Type</th>
+            <th>Position</th>
             <th>Submitted by</th>
             {% if tab_data.pending or tab_data.rejected %}
             <th>Comittee List</th>
             <th>Action</th>
             {% endif %}
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -18,21 +20,22 @@
         <tr>
             <td>{{org.name}}</td>
             <td>{{org.year}}</td>
-            {% if org.internal in 'True' %}
+            {% if org.internal == 1 %}
             <td>Internal</td>
             {% else %}
             <td>External</td>
             {% endif %}
+            <td>Committee List</td>
             <td>{{org.file_by.user.full_name}}</td>
             {% if tab_data.pending or tab_data.rejected %}
             <td><a href="{{ org.file.url }}">Download File</a></td>
             <td>
                 <div class="button-container">
-                <input value="{{org.id}}" name="org" hidden>
                 <button
                     type="submit"
                     class="approve-button btn btn-success"
-                    name="approve"
+                    name="approve_in"
+                    value="{{org.id}}"
                     >
                     Approve
                 </button> 
@@ -40,7 +43,59 @@
                 <button
                     type="submit"
                     class="reject-button btn btn-danger"
-                    name="reject"
+                    name="reject_in"
+                    value="{{org.id}}"
+                    >
+                    Reject
+                </button>
+                {% endif %}
+            </div>
+            </td>
+           
+            {% endif %}
+            <td>
+                <button 
+                class="btn btn-floating" 
+                type="submit" 
+                name="delete_in" 
+                value="{{org.id}}" 
+                onclick="return confirm('Confirm to delete committee list for {{org.name}} {{org.year}} by {{org.file_by.user.full_name}}?')"
+                >
+                <i class="fas fa-trash"></i>
+            </td>
+        </tr>
+        {% endfor %}
+
+        {% for org in tab_data.externals %}
+        <tr>
+            <td>{{org.org.name}}</td>
+            <td>{{org.org.year}}</td>
+            {% if org.org.internal == 1 %}
+            <td>Internal</td>
+            {% else %}
+            <td>External</td>
+            {% endif %}
+            <td>{{org.position}}</td>
+            
+            <td>{{org.student.user.full_name}}</td>
+            {% if tab_data.pending or tab_data.rejected %}
+            <td><a href="{{ org.file.url }}">Download File</a></td>
+            <td>
+                <div class="button-container">
+                <button
+                    type="submit"
+                    class="approve-button btn btn-success"
+                    name="approve_ex"
+                    value="{{org.id}}"
+                    >
+                    Approve
+                </button> 
+                {% if not tab_data.rejected %}              
+                <button
+                    type="submit"
+                    class="reject-button btn btn-danger"
+                    name="reject_ex"
+                    value="{{org.id}}"
                     >
                     Reject
                 </button>
@@ -48,6 +103,16 @@
             </div>
             </td>
             {% endif %}
+            <td>
+                <button 
+                class="btn btn-floating" 
+                type="submit" 
+                name="delete_ex" 
+                value="{{org.id}}" 
+                onclick="return confirm('Confirm to delete committee list for {{org.org.name}} {{org.org.year}} by {{org.student.user.full_name}}?')"
+                >
+                <i class="fas fa-trash"></i>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
