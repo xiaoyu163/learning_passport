@@ -29,11 +29,6 @@ pip-log.txt
 *.pyc
 __pycache__/
 local_settings.py
-db.sqlite3
-<<<<<<< HEAD
-
-=======
->>>>>>> 4dd0a19f4a41829bea29cfda9fc7971ba833fa43
 
 # Secret Key
 .secret_key
