@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+{% extends "sidebar.html" %}
+{% block title %} Attendance {% endblock title%}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Input Form</title>
+    <style>
+        table {
+            width: 100%;
+            border: 1px solid #ddd;
+
+        }
+
+        thead {
+
+            background-color: rgb(184, 207, 228);
+        }
+
+        td {
+            /* border: 1px solid #ddd; */
+            padding: 8px;
+            text-align: left;
+        }
+
+        .delete-button {
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Event Comittee List Form</h1>
+    <br>
+    <form method="POST">
+        {% csrf_token %}
+        {% if 'Edit' in page_name %}
+        <div class="form-floating" style="width:40%">
+            <input class="form-control" type="text" name="event_name" value="{{event_name}}" required disabled>
+            <!-- <input class="form-control" type="text" name="event_id" value="{{event_name}}" required> -->
+                
+            <label for="event_name_e">Event Name</label>
+
+        </div>
+        
+        {% else %}
+        <div class="form-floating" style="width:40%">
+
+            <select id="event_name_e" class="form-select" name="event_id" value="{{event_name}}" required>
+                {% for event in events %}
+                <option value="{{event.id}}">{{event.e_name}} </option>
+                {% endfor %}
+            </select>
+            <label for="event_name_e">Event Name</label>
+
+        </div>
+        {% endif %}
+      
+        <br>
+        <table class="table"">
+        <thead>
+            <tr>
+                <th style=" width: 45%;">Position</th>
+            <th style="width: 35% ;">Name</th>
+            <th style="width: 30%;">Matric Number</th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody id="dynamic-form">
+                <!-- Initially, you can have one row as a template -->
+
+                {% if coms_students %}
+
+                {% for com, student in coms_students %}
+                <tr>
+                    <td><input class="form-control" type="text" name="position[]" value="{{com.position}}" required>
+                    </td>
+                    <td><input class="form-control" type="text" name="name[]" value="{{student.user.full_name}}" required></td>
+                    <td><input class="form-control" type="text" name="matric[]" value="{{com.student.matric_no}}" required></td>
+                    <td><button class="btn btn-danger delete-button" onclick="deleteRow(this)"><i
+                        class="fas fa-trash"></i></button></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td><input class="form-control" type="text" name="position[]" required></td>
+                    <td><input class="form-control" type="text" name="name[]" required></td>
+                    <td><input class="form-control" type="text" name="matric[]" required></td>
+                    <td><button class="btn btn-danger delete-button" onclick="deleteRow(this)"><i
+                                class="fas fa-trash"></i></button></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <button class="btn btn-outline-primary" type="button" onclick="addRow()"><i class="fas fa-add"></i>Add
+            Row</button>&nbsp;
+        <button class="btn btn-primary" type="submit" name="submit">Submit</button>
+
+    </form>
+    <script>
+        function addRow() {
+            // Clone the template row
+            var templateRow = document.querySelector("#dynamic-form tr:last-child");
+            var newRow = templateRow.cloneNode(true);
+
+            // Clear input values in the new row
+            var inputs = newRow.querySelectorAll("input");
+            inputs.forEach(function (input) {
+                input.value = "";
+            });
+
+            // Append the new row to the table
+            var tableBody = document.querySelector("#dynamic-form");
+            tableBody.appendChild(newRow);
+        }
+
+        function deleteRow(button) {
+            // Get the row containing the clicked button
+            var row = button.parentNode.parentNode;
+
+            // Remove the row from the table
+            row.parentNode.removeChild(row);
+        }
+    </script>
+</body>
+
+</html>
+
+
+{% endblock %}

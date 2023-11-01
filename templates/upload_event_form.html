@@ -1,0 +1,125 @@
+{% extends "sidebar.html" %} {% block content %} {% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/uploads.css' %}">
+<h3>Event Comittee List Upload</h3>
+<img src="{% static 'img/Excel.png' %}" alt="Excel Icon">
+
+<br><br>
+<a href="{% url 'event-com-form' %}" type="button" class="btn btn-outline-primary">
+    Add Event Committee
+</a>
+<br><br>
+<button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#upload_event"> Add for External
+    Event</button>
+<br><br>
+<div class="container-fluid table-responsive">
+    <h3> Event Committee List Uploaded </h3>
+    {% if forms %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Year</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Edit Form</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for form in forms %}
+            <tr>
+                <td>{{form.event.e_name}} <br> {{form.event.c_name}}</td>
+                <td>{{form.event.year}}</td>
+                <td>{{form.event.get_type_display}}</td>
+                {% if form.event.internal in 'True' %}
+                <td>Internal</td>
+                {% else %}
+                <td>External</td>
+                {% endif %}
+                {% if form.status != 1 %}
+                <td><a href="{% url 'edit-event-com-form' form.id %}">Edit Form</a></td>
+                {% else %}
+                <td></td>
+                {% endif %}
+
+
+                <td>
+                    {% if form.status == 1 %}
+                    <span class="badge rounded-pill bg-success">Approved</span>
+                    {% elif form.status == 0 %}
+                    <span class="badge rounded-pill bg-danger">Rejected</span>
+                    {% else %}
+                    <span class="badge rounded-pill bg-secondary">Pending</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <sub>No uploaded event committee file.</sub>
+    {% endif %}
+</div>
+<br>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="upload_event" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">External Event Commitment</h5>
+                    <button type="button" class="btn btn-close" data-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-outline">
+                        <input type="text" id="event_name" name="event_name" class="form-control">
+                        <label class="form-label" for="event_name" style="margin-left: 0px;">Event Name</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 87.2px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-outline">
+                        <input type="text" id="year" name="year" class="form-control">
+                        <label class="form-label" for="year" style="margin-left: 0px;">Year</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 87.2px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-outline"">
+                        <input type="text" id="position" name="position" class="form-control">
+                        <label class="form-label" for="event_year" style="margin-left: 0px;">Position</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 87.2px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>                   
+                    <br>
+                    <label class="form-label" for="event_file">Ceritification Document</label>
+                    <div class="input-group mb-3">
+                        <input type="file"  id="event_file" class="form-control" name="event_file" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                    </button>
+
+                    <button type="submit" class="btn btn-primary" name="event_submit">
+                        Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

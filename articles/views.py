@@ -8,39 +8,103 @@ import pandas as pd
 import openpyxl
 from django.contrib.auth.decorators import login_required
 from users.decorators import role_required
-from events.models import Events, Event_Participants
+from events.models import Events, Event_Participants, Event_Form
 from users.models import Organisation,Student,User,OrgComittee
 from .models import Article
 from datetime import datetime
 
 # Create your views here.
-def uploadEventView (request):
-    option_obj = Events.type.field.choices
+def eventComFormView (request):
     event_list = Events.objects.all()
+    context = {
+        "events": event_list,
+    }
+    if request.method == 'POST':
+        event = Events.objects.get(id=request.POST['event_id'])
+        if 'submit' in request.POST:         
+            if not Event_Form.objects.filter(event=event).exists():             
+                form = Event_Form()
+                student = Student.objects.get(user_id=request.user.id)                
+                form.event = event
+                form.submit_by = student
+                form.save()            
+                matrics = request.POST.getlist('matric[]')
+                positions = request.POST.getlist('position[]')           
+                for i in range (len(matrics)):
+                    student = Student.objects.get(matric_no=matrics[i].lower())
+                    if Event_Participants.objects.filter(event=event, student=student).exists():
+                        event_par = Event_Participants.objects.get(event=event, student=student)
+                    else:
+                        event_par = Event_Participants()
+                        event_par.event = event
+                        event_par.student = student
+                    event_par.event_form = form
+                    event_par.position = positions[i]
+                    print(event_par)
+                    event_par.save()                
+            else:
+                form = Event_Form.objects.get(event=event)
+                messages.error(request, "Event Comittee was submitted. Please edit the previous submission.")
+                
+
+        
+        return redirect("submit-event")
+    return render(request, "event_com_form.html", context)
+
+def submitEventView (request):
+  
+ 
     student = Student.objects.get(user=request.user.id)
-    events = Events.objects.filter(file_by=student)
+    forms = Event_Form.objects.filter(submit_by=student)
    
     context = {
         "page_name": "Upload Event Documents",
-        "option_obj": option_obj,
-        "event_list": event_list,
-        "events": events,
+        "forms": forms    
+    
     }
 
-    if request.POST:
-        if 'event_submit' in request.POST:
-            event = Events.objects.get(id=request.POST['event_id'])
-            if not event.file:
-                event.file = request.FILES['event_file']
-                event.file_by = Student.objects.get(user=request.user.id)
-                event.save()
-            else:
-                messages.error(request, "Event comittee list was uploaded.")
-                return redirect("upload-event")
-    
+
     return render (request, "upload_event.html", context)
 
-def uploadOrgView (request):
+def editEventComView (request, form_id):
+    form = Event_Form.objects.get(id=form_id)
+    event_name = form.event.e_name
+    coms = Event_Participants.objects.filter(event_form=form)
+    students = list()
+    for com in coms:
+        students.append(com.student)
+    coms_students = zip(coms,students)
+    print(coms_students)
+    context = {
+        "page_name": "Edit Event Documents",
+        "coms_students": coms_students,
+        "event_name": event_name,
+    
+    }
+
+    if request.method == 'POST':
+        matrics = request.POST.getlist('matric[]')
+        positions = request.POST.getlist('position[]')    
+        for com in coms:
+            if com.student.matric_no not in matrics:
+                com.delete()       
+        for i in range (len(matrics)):
+            student = Student.objects.get(matric_no=matrics[i].lower())
+            if Event_Participants.objects.filter(event=form.event, student=student).exists():
+                event_par = Event_Participants.objects.get(event=form.event, student=student)
+            else:
+                event_par = Event_Participants()
+                event_par.event = form.event
+                event_par.student = student
+                event_par.event_form = form
+            event_par.position = positions[i]
+            print(event_par)
+            form.save()
+            event_par.save()  
+        return redirect (request.get_full_path())  
+        
+    return render (request, "event_com_form.html", context)
+def submitOrgView (request):
     student = Student.objects.get(user=request.user.id)
     orgs = Organisation.objects.filter(file_by=student)
 
@@ -63,11 +127,11 @@ def uploadOrgView (request):
 
             else:
                 messages.error(request, "Organisation comittee list was uploaded.")
-                return redirect("upload-org")
+                return redirect("submit-org")
                 
     return render (request, "upload_org.html", context)
 
-def uploadArticleView (request):
+def submitArticleView (request):
     student = Student.objects.get(user=request.user.id)
     arts = Article.objects.filter(file_by=student)
 
@@ -93,7 +157,7 @@ def uploadArticleView (request):
                 article.save()
             else:
                 messages.error(request, "Article was uploaded.")
-                return redirect("upload-article")
+                return redirect("submit-article")
         
    
     return render(request, "upload_article.html", context)
