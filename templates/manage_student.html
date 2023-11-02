@@ -59,6 +59,12 @@
 <br>
 <form method="POST">
     {% csrf_token %}
+<button class="btn btn-primary" name="update-status">Update Student Status</button>
+
+</form>
+<br><br>
+<form method="POST">
+    {% csrf_token %}
     <h5>Student Status</h5>
     <table class="table table-striped">
         <thead class="bg-light">
@@ -192,4 +198,6 @@
         </div>
     </div>
 </form>
+
+
 {% endblock %}

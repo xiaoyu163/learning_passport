@@ -27,4 +27,5 @@ urlpatterns = [
      path('get-student-details/<int:student_id>/', views.get_student_details, name='get-student-details'),
      path('get-lecturer-details/<int:lecturer_id>/', views.get_lecturer_details, name='get-lecturer-details'),
      path('add-student', views.addStudentsView, name="add-student"),
+     path('semester-dates', views.semesterDatesView, name="semesters")
 ]

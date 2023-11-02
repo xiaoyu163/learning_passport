@@ -1,24 +1,34 @@
 {% extends "sidebar.html" %}
 {% block content %}
 {% load static %}
-
+<style>
+    .custom-small-form-floating .form-floating {
+      width: 200px; /* Set the desired width */
+      height: 30px; /* Set the desired height */
+    }
+  
+    .custom-small-form-floating .form-select {
+      height: 50px; /* Adjust the input field height */
+    }
+  </style>
 <head>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
 </head>
-<h1>Dashboard</h1>
+
 <br>
 
-<body>
+
+    <h1>Dashboard</h1>
     <div class="dashboard">
         <div class="left-side">
             <div class="container container-fluid">
                 <div class="left">
                     <form method="POST">
                         {% csrf_token %}
-
+                        <div class="custom-small-form-floating">
                         <div class="form-floating">
-                            <select class="form-select" id="academic_year" name="academic_year"
+                            <select class="form-select form-select-sm" id="academic_year" name="academic_year"
                                 aria-label="Default select example" onchange="submit()">
                                 {% for semester in years %}
                                 <option value="{{semester.academic_year}}" 
@@ -29,24 +39,30 @@
                             </select>
                             <label for="academic_year">Academic Year</label>
                         </div>
+                        </div>
                         <br>
+                        <div class="custom-small-form-floating">
                         <div class="form-floating">
-                            <select class="form-select" id="semester" name="semester"
+                            <select class="form-select form-select-sm" id="semester" name="semester"
                                 aria-label="Default select example" onchange="submit()">
                                 <option value="1" {% if selected_year.semester == 1 %} selected {% endif %}>1</option>
                                 <option value="2" {% if selected_year.semester == 2 %} selected {% endif %}>2</option>
                             </select>
                             <label for="semester">Semester</label>
                         </div>
+                    </div>
                         <br>
+                        <div class="custom-small-form-floating">
                         <div class="form-floating">
-                            <select class="form-select" id="study_level" name="study_level"
+                            <!-- Student Study Level -->
+                            <select class="form-select form-select-sm" id="study_level" name="study_level"
                                 aria-label="Default select example" onchange="submit()">
                                 <option value="1" {% if study_level == '1' %} selected {% endif %}>All</option>
                                 <option value="2" {% if study_level == '2' %} selected {% endif %}>Undergraduate</option>
                                 <option value="3" {% if study_level == '3' %} selected {% endif %}>Postgraduate</option>
                             </select>
                             <label for="study_level">Student Study Level</label>
+                        </div>
                         </div>
                         <br>
                     </form>
@@ -56,50 +72,59 @@
                 <div class="gap"></div>
                 <div class="right">
               
-                        <div class="card card border border-primary">
-                            <div class="card-body" style="text-align: right;">
-
-                                <h3 class="card-title" style="color: #2e4b7a"><i class="fa-solid fa-graduation-cap"></i>
-                                    &nbsp;
-                                    {{num_active}}</h3>
-                                <div class="card-text">
+                        <div class="card p-1 m-1 border border-primary">
+                            <div class="card-body p-1 m-1" style="text-align: right;">
+                                <div class="card-text p-1 m-1">
+                                    <h3 style="color: #2e4b7a">
+                                        <i  class="fa-solid fa-graduation-cap"></i>
+                                        {{num_active}}
+                                    </h3>
                                     <sub>Active Students </sub>
-                                    <p><strong>Year {{selected_year.academic_year}} Semester
-                                            {{selected_year.semester}}</strong>
+                                    <p>
+                                        <strong>
+                                            Year {{selected_year.academic_year}} Semester
+                                            {{selected_year.semester}}
+                                        </strong>
                                     </p>
                                 </div>
                             </div>
                         </div>
-                
-                        <div class="card card border border-primary">
-                            <div class="card-body" style="text-align: right;">
-
-                                <h3 class="card-title" style="color: #2e4b7a"><i class="fa-solid fa-calendar-check"></i>
-                                    &nbsp;
-                                    {{num_event}}</h3>
-                                <div class="card-text">
-                                    <sub>Internal Events </sub>
-                                    <p><strong>Year {{selected_year.academic_year}} Semester
-                                            {{selected_year.semester}}</strong>
+                        <div style="width: 5%;"></div>
+                        <div class="card p-1 m-1 border border-primary">
+                            <div class="card-body p-1 m-1" style="text-align: right;">
+                                <div class="card-text p-1 m-1">
+                                    <h3 style="color: #2e4b7a">
+                                        <i  class="fa-solid fa-calendar-check"></i>
+                                        {{num_event}}
+                                    </h3>
+                                    <sub>Active Students </sub>
+                                    <p>
+                                        <strong>
+                                            Year {{selected_year.academic_year}} Semester
+                                            {{selected_year.semester}}
+                                        </strong>
                                     </p>
                                 </div>
                             </div>
                         </div>
-                  
-                        <div class="card card border border-primary">
-                            <div class="card-body" style="text-align: right;">
-                                <h3 class="card-title" style="color: #2e4b7a"><i class="fa-solid fa-file-lines"></i>
-                                    &nbsp;
-                                    {{num_article}}</h3>
-                                <div class="card-text">
-                                    <sub>Articles Published </sub>
-                                    <p><strong>Year {{selected_year.academic_year}} Semester
-                                            {{selected_year.semester}}</strong>
+                        <div style="width: 5%;"></div>
+                        <div class="card p-1 m-1 border border-primary">
+                            <div class="card-body p-1 m-1" style="text-align: right;">
+                                <div class="card-text p-1 m-1">
+                                    <h3 style="color: #2e4b7a">
+                                        <i  class="fa-solid fa-file-lines"></i>
+                                        {{num_article}}
+                                    </h3>
+                                    <sub>Active Students </sub>
+                                    <p>
+                                        <strong>
+                                            Year {{selected_year.academic_year}} Semester
+                                            {{selected_year.semester}}
+                                        </strong>
                                     </p>
                                 </div>
                             </div>
                         </div>
-                 
                 </div>
             </div>
             <br>
@@ -131,10 +156,13 @@
            
             {% for event in upcoming_events %}
             <a href="{% url 'event-detail' event.id %}">
-            <div class="card border border-info">
-                <div class="card-body">
-                  <p><strong>{{event.e_name}}</strong>
-                    <br>{{event.start.date}}</p>
+            <div class="card p-1 m-1 border border-info">
+                <div class="card-header p-1 m-1">
+                    <strong>{{event.e_name}}</strong>
+                </div>
+                <div class="card-body p-1 m-1">
+                 
+                {{event.start.date}}
               </div>
             </div>
             </a>
@@ -147,11 +175,11 @@
                 <a href="{% url 'announcements' %}"><sub>View all</sub></a>
             </div>
             {% for ann in announcements %}
-            <div class="card border border-info">
-                <div class="card-header">
+            <div class="card p-1 m-1 border border-info">
+                <div class="card-header p-1 m-1">
                  <strong>{{ann.title}}</strong>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-1 m-1">
                     {{ann.content}}
                 </div>
             </div>
@@ -159,7 +187,6 @@
             {% endfor %}
         </div>
     </div>
-</body>
 
 
 

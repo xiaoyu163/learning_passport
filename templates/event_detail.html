@@ -28,11 +28,13 @@
             </div>
         </div>
         <br>
+        {% if event.desc %}
         <div class="card profile-card">
             <div class="card-body">
                 <p class="card-text">{{event.desc}}</p>
             </div>
         </div>
+        {% endif %}
         <br>
         <div>
             {% if request.user.role in 'SUPER ADMIN' %}

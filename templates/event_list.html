@@ -58,10 +58,10 @@
           if (event_attendance == true){
             $('#enable').prop('checked',true);
           }
-          var on_time = response.on_time          
-          if (on_time == true){
-            $('#on_time').prop('checked',true);
-          }
+          // var on_time = response.on_time          
+          // if (on_time == true){
+          //   $('#on_time').prop('checked',true);
+          // }
         },
         error: function(xhr, status, error) {
           console.log(error);  // Handle the error if necessary
@@ -167,7 +167,8 @@
           Venue: {{event.venue}}
         </div>  
         <div class="card-footer">   
-          <!-- Register Button-->     
+          <!-- Register Button--> 
+       
           {% if part.registered != 1 %}
             <button id="reg_button" type="button" class="reg_button btn btn-primary" name="reg_event" data-mdb-toggle="modal" data-mdb-target="#reg_event_modal" data-event-id="{{ event.id }}">
               Register
@@ -290,11 +291,11 @@
             <label class="form-check-label" for="enable">Enable Attendance</label>
           </div>
           <br>
-          <div class="form-check form-switch">
+          <!-- <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="on_time" name="on_time">
             <label class="form-check-label" for="on_time">Attendance on Event Time Only</label>
           </div>
-          <br>
+          <br> -->
           <input type="text" id="event_id" name="event_id" class="form-control" hidden>
         </div>
         <div class="modal-footer">
@@ -423,11 +424,11 @@
             <label class="form-check-label" for="enable">Enable Attendance</label>
           </div>
           <br>
-          <div class="form-check form-switch">
+          <!-- <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="on_time" name="on_time">
             <label class="form-check-label" for="on_time">Attendance on Event Time Only</label>
           </div>
-          <br>
+          <br> -->
           <div>
             Upload Event Poster: <br>
             <input type="file" id="poster" name="poster">

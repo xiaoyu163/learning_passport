@@ -4,7 +4,7 @@
 <head>
     {% load static %}
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{% static 'css/event_list.css' %}">
@@ -37,43 +37,43 @@
                         <i class="fas fa-times"></i>
                     </div>
                 </div>
+                {% if request.user.is_authenticated %}
                 <div class="sidebar-header">
-                    <div class="user-pic">
-                        <i class="fa fa-user" style="font-size:25px"></i>
-                    </div>
-                    <div class="user-info">
-                        <!-- <br> -->
-                        {% if request.user.is_authenticated %}
-                        <span class="user-name">
-                            <strong>{{ request.user.full_name }}</strong>
-                        </span>
-                        <span class="user-role">
-                            <strong>ROLE: {{ request.user.get_role_display }}</strong>
-                        </span>
-                        <a href="{% url 'logout' %}"><strong>Logout</strong></a>
-                        {% else %}
-                        <a href="{% url 'login' %}"><strong>Login</strong></a>
-                        {% endif %}
+                    <!-- <div class="user-pic"> -->
+
+                    <!-- </div> -->
+                    <div style="display: flex; vertical-align: middle; align-items: center;">
+                        <div>
+                            <i class="fa fa-user" style="font-size:25px"></i>
+                        </div>
+                        <div style="width:10%"></div>
+                        <div class="user-info">
+
+                            <span class="user-name">
+                                <strong>{{ request.user.full_name }}</strong>
+                            </span>
+                            <span class="user-role">
+                                <strong>ROLE: {{ request.user.get_role_display }}</strong>
+                            </span>
+                        </div>
                     </div>
                 </div>
+                {% endif %}
                 <div class="sidebar-menu">
                     <ul>
                         <li class="header-menu">
-                            <span>User</span>
+                            <span>Account</span>
                             <ul id="userAction">
 
                                 {% if request.user.is_authenticated %}
-
+                                <li class="sidebar-dropdown">
+                                    <a href="{% url 'logout' %}"><strong>Logout</strong></a>
+                                </li>
                                 <li class="sidebar-dropdown">
                                     <a href="{% url 'change-password' %}"><strong>Change Password</strong></a>
                                 </li>
-                                <li class="sidebar-dropdown">
-                                    <a href="{% url 'dashboard' %}">Dashboard</a>
-                                </li>
-                                <li class="sidebar-dropdown">
-                                    <a href="{% url 'announcements' %}">Announcements</a>
-                                </li>
-                               
+                                <hr>
+
                                 {% else %}
                                 <li class="sidebar-dropdown">
                                     <a href="{% url 'login' %}"><strong>Login</strong></a>
@@ -84,88 +84,124 @@
                             </ul>
                         </li>
                         {% if request.user.is_authenticated %}
-                            {% if request.user.role in 'SUPER ADMIN' %}
-                            <li class="header-menu">
-                                <span>Manage User</span>
-                            </li>
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'manage-student' %}">Manage Student</a>
-                            </li>
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'manage-lecturer' %}">Manage Lecturer</a>
-                            </li>              
-                            {% endif %}
+                        <li class="sidebar-item">
+                            <a href="{% url 'dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i>Dashboard</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="{% url 'announcements' %}"><i class="fa-solid fa-bullhorn"></i>Announcements</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="{% url 'generate-transcript' request.user.id %}"><i class="fa-solid fa-file"></i>
+                                <span>Generate Transcript</span>
+                            </a>
+                        </li>
+                        {% if request.user.role in 'SUPER ADMIN' %}
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa-solid fa-people-roof"></i>
+                                <span>Manage</span>
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'manage-student' %}">Manage Student
 
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'manage-lecturer' %}">Manage Lecturer</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'semesters' %}">Manage Semester Dates</a>
+                                    </li>
 
-                       
-                            <li class="header-menu">
+                                </ul>
+                            </div>
+                        </li>
+
+                        {% endif %}
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa fa-calendar"></i>
                                 <span>Events</span>
-                            </li>
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'events' %}">
+                                            {% if request.user.role in 'STUDENT' %}
+                                            <span>Upcoming Events</span>
+                                            {% elif request.user.role in 'SUPER ADMIN' %}
+                                            <span>Events</span>
+                                            {% endif %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'attendance' %}">
+                                            <span>Take Attendance</span>
+                                        </a>
+                                    </li>
 
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'events' %}">
-                                    {% if request.user.role in 'STUDENT' %}
-                                    <span>Upcoming Events</span>
-                                    {% elif request.user.role in 'SUPER ADMIN' %}
-                                    <span>Events</span>
-                                    {% endif %}
-                                </a>
-                            </li>
-                     
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'attendance' %}">
-                                    <span>Take Attendance</span>
-                                </a>
-                            </li>
-                       
+                                </ul>
+                            </div>
+                        </li>
 
-                            {% if 'STUDENT' in request.user.get_role_display %}
-                            <li class="header-menu">
+
+                        {% if 'STUDENT' in request.user.get_role_display %}
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa-solid fa-file-arrow-up"></i>
                                 <span>Upload Documents</span>
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'upload-event' %}">Curricular Event Comittee </a>
-                            </li>
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'upload-other' %}">Co-curricular Awards</a>
-                            </li>
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'upload-org' %}">Organisation Comittee</a>
-                            </li>
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'upload-article' %}">Article</a>
-                            </li>
-                        
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'upload-event' %}">Curricular Event Comittee </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'upload-other' %}">Co-curricular Awards</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'upload-org' %}">Organisation Comittee</a>
+                                    </li>
+                                    <li class="sidebar-dropdown">
+                                        <a href="{% url 'upload-article' %}">Article</a>
+                                    </li>
 
-                            {% elif 'ADMIN' in request.user.get_role_display %}
-                            <li class="header-menu">
+                                </ul>
+                            </div>
+                        </li>
+
+
+
+                        {% elif 'ADMIN' in request.user.get_role_display %}
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa-solid fa-file-arrow-up"></i>
                                 <span>Verify Documents</span>
-                                <li class="sidebar-dropdown">
-                                    <a href="{% url 'verify-event' %}">Curricular Event Comittee </a>
-                                </li>
-                                <li class="sidebar-dropdown">
-                                    <a href="{% url 'verify-other' %}">Co-curricular Awards</a>
-                                </li>
-                                <li class="sidebar-dropdown">
-                                    <a href="{% url 'verify-org' %}">Organisation Comittee</a>
-                                </li>
-                                <li class="sidebar-dropdown">
-                                    <a href="{% url 'verify-article' %}">Article</a>
-                                </li>                        
-                            </li>
-                            {% endif %}
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li class="sidebar-dropdown">
+                                        <a href="{% url 'verify-event' %}">Curricular Event Comittee </a>
+                                    </li>
+                                    <li class="sidebar-dropdown">
+                                        <a href="{% url 'verify-other' %}">Co-curricular Awards</a>
+                                    </li>
+                                    <li class="sidebar-dropdown">
+                                        <a href="{% url 'verify-org' %}">Organisation Comittee</a>
+                                    </li>
+                                    <li class="sidebar-dropdown">
+                                        <a href="{% url 'verify-article' %}">Article</a>
+                                    </li>
 
+                                </ul>
+                            </div>
+                        </li>
 
-                            <li class="header-menu">
-                                <span>Transcript</span>
-                            </li>
-        
+                        {% endif %}
 
-                            <li class="sidebar-dropdown">
-                                <a href="{% url 'generate-transcript' request.user.id %}">
-                                    <span>Generate Transcript</span>
-                                </a>
-                            </li>
-                   
+                        
                         {% endif %}
                     </ul>
                 </div>
@@ -202,6 +238,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+
+    $("#close-sidebar").click(function () {
+        $(".page-wrapper").removeClass("toggled");
+    });
+    $("#show-sidebar").click(function () {
+        $(".page-wrapper").addClass("toggled");
+    });
+
+</script>
+<script>
+    $(".sidebar-dropdown > a").click(function () {
+        $(".sidebar-submenu").slideUp(200);
+        if (
+            $(this)
+                .parent()
+                .hasClass("active")
+        ) {
+            $(".sidebar-dropdown").removeClass("active");
+            $(this)
+                .parent()
+                .removeClass("active");
+        } else {
+            $(".sidebar-dropdown").removeClass("active");
+            $(this)
+                .next(".sidebar-submenu")
+                .slideDown(200);
+            $(this)
+                .parent()
+                .addClass("active");
+        }
+    });
 
     $("#close-sidebar").click(function () {
         $(".page-wrapper").removeClass("toggled");

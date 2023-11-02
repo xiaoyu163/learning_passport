@@ -3,17 +3,33 @@
 }
 
 .right{
-    width: 70%;
+    width: 80%;
     display: flex;
 }
 
 
 .left{
-    width: 40%;
+    width: 15%;
 }
 
 .gap {
     width: 5%;
+}
+
+.data-card{
+    height: 50px;
+}
+.left-side {
+    flex: 2.0;
+    background-color: #fff; /* Light grey background for analytics */
+    padding: 20px;
+}
+
+.right-side {
+    flex: 1.0;
+    background-color: #fff; /* White background for events and announcements */
+    padding: 20px;
+    border-radius: 5px;
 }
 
 .dashboard {
@@ -21,29 +37,11 @@
     width: 100%;
 }
 
-.left-side {
-    flex: 2.3;
-    background-color: #fff; /* Light grey background for analytics */
-    padding: 20px;
-}
-
-.right-side {
-    flex: 0.7;
-    background-color: #fff; /* White background for events and announcements */
-    padding: 20px;
-    border-radius: 5px;
-}
 
 .event-con {
     border-radius: 10px;
 }
 
-.event-con p {
-    margin: 10px;
-}
-.event-con sub {
-    margin: 10px;
-}
 
 .profile-card {
     width: 40%;
@@ -53,11 +51,6 @@
   
 }
 
-
-
-.card-link{
-    color:grey;
-}
 
 .info-cards {
     width: 70%;

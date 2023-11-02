@@ -1,0 +1,99 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+<br>
+<h1>Semester Dates</h1>
+<br>
+<button class="btn btn-primary" type="button" data-mdb-toggle="modal" data-mdb-target="#semester" >Add Semester Date</button>
+<br><br>
+<h4>Current Semester: Semester {{curr_sem.semester}} Year {{curr_sem.academic_year}}</h4>
+<hr>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Academic Year</th>
+            <th>Semester</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sem in semesters %}
+        <tr>
+            <td>{{sem.academic_year}}</td>
+            <td>{{sem.semester}}</td>
+            <td>{{sem.start}}</td>
+            <td>{{sem.end}}</td>
+            <form method="POST">
+                {% csrf_token %}
+            <td>
+                <button class="btn btn-floating btn-danger" type="submit" name="delete" value="{{sem.id}}"
+                onclick="return confirm('Confirm to delete dates for Semester {{sem.semester}} Year {{sem.academic_year}}')">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        </form>
+        {% endfor %}
+    </tbody>
+</table>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="semester" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add New Semester Dates</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-outline">
+                        <input class="form-control" id="academic_year" name="academic_year" type="text">
+                        <label class="form-label" for="academic_year" style="margin-left: 0px;">Academic Year (20XX/XX)</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 40px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-floating">
+                        <select class="form-select" id="semester" name="semester">
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                        <label for="semester">Semester</label>
+                    </div>
+                    <br>
+                    <label for="start">Start Date</label>
+                    <div class="form-outline">
+                        <input type="date" name="start" id="start" class="form-control" required />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="end">End Date</label>
+                    <div class="form-outline">
+                        <input type="date" name="end" id="end" class="form-control" required />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+                    <button id="add-semester" type="submit" class="btn btn-primary" name="add-semester">Save
+                        changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

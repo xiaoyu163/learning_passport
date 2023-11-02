@@ -19,19 +19,19 @@ def eventListView (request):
     # print("Base dir: ", base_dir)
     current_date = datetime.now()
     if request.user.role in 'STUDENT':
-        events = Events.objects.filter(internal=1, start__gte=current_date).order_by("-id")
+        events = Events.objects.filter(internal=1, start__gte=current_date).order_by("-start")
     else:
-        events = Events.objects.filter(internal=1).order_by("-id")
+        events = Events.objects.filter(internal=1).order_by("-start")
     option_obj = Events.type.field.choices
     parts = list()
     if request.user.role in 'STUDENT':
-        student = Student.objects.get(user=request.user.id)
+        student = Student.objects.get(user_id=request.user.id)
         for event in events:
             part = Event_Participants.objects.filter(student=student, event=event).first()
             parts.append(part)
     else:
         parts = ''
-
+    print(parts)
     event_parts = zip(events,parts)
   
     
@@ -56,7 +56,6 @@ def eventListView (request):
             event.type = request.POST['event_type']
             event.desc = request.POST['event_desc']
             event.internal = request.POST['internal']
-            event.enable_attendance = 1 if 'on_time' in request.POST else 0
             attendance = 1 if 'enable' in request.POST else 0
             print(request.FILES)
             if 'poster' in request.FILES:
@@ -66,14 +65,19 @@ def eventListView (request):
 
         elif 'register' in request.POST:
             print(request.POST)
-            student = Student.objects.get(user=request.user.id)
+            student = Student.objects.get(user_id=request.user.id)
             event = Events.objects.get(id=request.POST['event_id'])
-            event_part = Event_Participants()
-            event_part.event = event
-            event_part.student = student
-            event_part.registered = 1
-            print(event_part)
+            if not Event_Participants.objects.filter(student=student, event=event).exists():
+                event_part = Event_Participants()
+                event_part.event = event
+                event_part.student = student
+                event_part.registered = 1
+            else:
+                event_part = Event_Participants.objects.get(student=student, event=event)
+                event_part.registered = 1
+            
             event_part.save()
+            print(event_part)
             return redirect("events")
         
         elif 'delete_event' in request.POST:            
@@ -100,11 +104,8 @@ def eventListView (request):
 def eventDetailView (request, id):
     event = Events.objects.get(id=id)
     if request.user.role in 'STUDENT':
-        student = Student.objects.get(user=request.user.id)
-        print(student)
+        student = Student.objects.get(user_id=request.user.id)
         parts = Event_Participants.objects.get(student=student, event=event) if Event_Participants.objects.filter(student=student, event=event).exists() else None
-        print(parts)
-        print(parts.attendance)
         current_time = datetime.now()
         if event.enable_attendance == 1:
             curr_event = 1
@@ -118,6 +119,7 @@ def eventDetailView (request, id):
                 curr_event = 0
     else:
         parts = ''
+        curr_event = 0
     context = {
         "event": event,
         "start_date": event.start.strftime("%d %b %Y") if event.start else None,

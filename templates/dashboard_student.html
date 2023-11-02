@@ -103,8 +103,10 @@
     </div>
   </div>
   <div class="right-side">
+    {% if registered_event %}
     <div style="display:flex;">
       <h5><strong>Registered Event</strong></h5>
+      
       &nbsp; &nbsp;
       <a href="{% url 'attendance' %}"><sub>View all</sub></a>
     </div>
@@ -122,6 +124,7 @@
     <br>
     {% endfor %}
 
+    {% endif %}
     <div style="display:flex;">
       <h5><strong>Announcement</strong></h5>
       &nbsp; &nbsp; &nbsp; &nbsp;

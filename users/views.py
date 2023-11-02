@@ -215,6 +215,7 @@ def manageStudent (request):
     }
 
     if request.method == "POST":
+        current_date = datetime.now().date()
         if 'manage-student' in request.POST:
             student = Student.objects.get(id=request.POST['manage-student'])
             student.user.full_name = request.POST['student_name'].upper()
@@ -230,6 +231,19 @@ def manageStudent (request):
             student = Student.objects.get(id=request.POST['delete-student'])
             student.delete()
             student.user.delete()
+
+        if 'update-status' in request.POST:            
+            users = User.objects.filter(role="STUDENT", is_active=1)
+            current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+            print(users.count())
+            print(current_year.academic_year)
+            for user in users:
+                student = Student.objects.get(user=user)
+                if student.grad_year <= current_year.start:
+                    user.is_active = 0
+                    user.save()
+            messages.success (request, f"Student status updated succesfully for Semester {current_year.semester} {current_year.academic_year}")
+        
         return redirect ("manage-student")
     return render (request, "manage_student.html", context)
 
@@ -355,8 +369,8 @@ def dashboardView(request):
         upcoming_events = Events.objects.filter(start__gte=current_year.start)
         selected = event_name
         events = Events.objects.filter(e_name=event_name)
-        upcoming_events = Events.objects.filter(start__gte=current_date).order_by("start")[:3]
-        announcements = Announcement.objects.order_by("-created_time")[:3]
+        upcoming_events = Events.objects.filter(start__gte=current_date).order_by("start")[:2]
+        announcements = Announcement.objects.order_by("-created_time")[:2]
         num_active = User.objects.filter(role='STUDENT', is_active=1).count()
         num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
         num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end).count()
@@ -415,15 +429,6 @@ def dashboardView(request):
                     
                     num_active = count_active
             
-            if 'update_active' in request.POST:
-                users = User.objects.filter(role="STUDENT", is_active=1)
-                print(users.count())
-                print(current_year.academic_year)
-                for user in users:
-                    student = Student.objects.get(user=user)
-                    if student.grad_year <= current_year.start:
-                        user.is_active = 0
-                        user.save()
                 return redirect ("dashboard")
             
         for event in events:
@@ -459,14 +464,14 @@ def dashboardView(request):
     
     elif request.user.role in 'STUDENT':
         student = Student.objects.get(user_id=request.user.id)
-        registered = Event_Participants.objects.filter(registered=1, student=student, event__start__gte=current_date).order_by("event__start")
+        registered = Event_Participants.objects.filter(registered=1, student=student, event__start__gte=current_date).order_by("event__start")[:2]
         registered_events = list()
         for par in registered:
                 registered_events.append(par.event)
         if student.program == 1:
-            announcements = Announcement.objects.exclude(display_to=3).order_by("-created_time")
+            announcements = Announcement.objects.exclude(display_to=3).order_by("-created_time")[:2]
         else:
-            announcements = Announcement.objects.exclude(display_to=2).order_by("-created_time")
+            announcements = Announcement.objects.exclude(display_to=2).order_by("-created_time")[:2]
         par_count = Event_Participants.objects.filter(student=student, attendance=1).count()
         com_count = Event_Participants.objects.filter(student=student, position__isnull=False, status=1).count()
         org_count = OrgComittee.objects.filter(student=student, status=1).count()
@@ -488,6 +493,33 @@ def dashboardView(request):
         }
         return render (request, "dashboard_lecturer.html", context)
 
+def semesterDatesView (request):
+    current_date = datetime.now().date()
+    current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+    semesters = Semester.objects.all()
+    context = {
+        "curr_sem": current_sem,
+        "semesters": semesters,
+    }
+    if request.method == 'POST':
+        if 'add-semester' in request.POST:
+            academic_year = request.POST['academic_year']
+            semester = request.POST['semester']
+            if not Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
+                sem = Semester()
+                sem.academic_year = academic_year
+                sem.semester = semester
+                sem.start = request.POST['start']
+                sem.end = request.POST['end']
+                sem.save()
+            else:
+                messages.error(request, f'Semester {semester} Year {academic_year} already exists.')
+        
+        if 'delete' in request.POST:
+            sem = Semester.objects.get(id=request.POST['delete'])
+            sem.delete()
+        return redirect ("semesters")
+    return render (request, "semester.html", context)
 def get_student_details(request, student_id):
     try:
         student = Student.objects.get(id=student_id)
