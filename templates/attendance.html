@@ -9,35 +9,36 @@
 <h1>Take Attendance</h1>
 <br />
 {% if request.user.role in 'STUDENT' %}
-{% for part, event in par_events %}
+{% for part in events %}
 <br />
 <div class="card">
-  <a href="{% url 'event-detail' event.id %}">
+  <a href="{% url 'event-detail' part.event.id %}">
     <div class="card-header">
-      <strong>{% if event.c_name %}{{event.c_name}} <br> {% endif %} {{event.e_name}}</strong>
+      <strong>{% if part.event.c_name %}{{part.event.c_name}} <br> {% endif %} {{part.event.e_name}}</strong>
     </div>
   </a>
 
   <div class="card-body">
-    Date: {{event.start.date}} <br />
-    Venue: {{event.venue}}
+    Date: {{part.event.start.date}} <br />
+    Venue: {{part.event.venue}}
   </div>
 
   <!-- Take attendance button if attendance is not submitted and event attendance is enabled -->
-  {% if part.attendance != 1 and event.attendance == 1 %}
+
+  {% if part.attendance != 1 and part.event.attendance == 1 %}
   <form method="POST">
     {% csrf_token %}
     <div class="card-footer">
-      <input id="event_id" name="event_id" value="{{event.id}}" hidden />
+      <input id="event_id" name="event_id" value="{{part.event.id}}" hidden />
       <button type="submit" class="btn btn-primary" name="attendance"
-        onclick='return confirm("Confirm to take attendance for {{event.e_name}}?")'>
+        onclick='return confirm("Confirm to take attendance for {{part.event.e_name}}?")'>
         Take Attendance
       </button>
     </div>
   </form>
   {% elif part.attendance == 1 %}
   <div class="card-footer">
-    <input id="event_id" name="event_id" value="{{event.id}}" hidden />
+    <input id="event_id" name="event_id" value="{{part.event.id}}" hidden />
     <button type="button" class="btn btn-primary" name="attendance" disabled>
       Attendance Submitted
     </button>
@@ -45,33 +46,40 @@
   {% endif %}
 </div>
 {% endfor %}
-{% for event in reg_events %}
+{% for part in reg_events %}
 <br />
+
 <div class="card">
-  <a href="{% url 'event-detail' event.id %}">
+  <a href="{% url 'event-detail' part.event.id %}">
     <div class="card-header">
-      <strong>{% if event.c_name %}{{event.c_name}}<br>{% endif %} {{event.e_name}}</strong>
+      <strong>{% if part.event.c_name %}{{part.event.c_name}}<br>{% endif %} {{part.event.e_name}}</strong>
     </div>
   </a>
 
   <div class="card-body">
-    Date: {{event.start.date}} <br />
-    Venue: {{event.venue}}
+    Date: {{part.event.start.date}} <br />
+    Venue: {{part.event.venue}}
+  </div>
+  <div class="card-footer">
+
+    {% if part.attendance == 1 %}
+      <button type="button" class="btn btn-primary" name="attendance" disabled>
+        Attendance Submitted
+      </button>
+    {% else %}
+      {% if part.event.attendance == 1 %}
+        <button type="button" class="btn btn-primary" name="attendance" disabled>
+          Take Attendance
+        </button>
+ 
+      {% else %}      
+        <button type="button" class="btn btn-primary" name="attendance" disabled>
+          Attendance Disabled
+        </button>
+      {% endif %}
+      {% endif %}
   </div>
 
-  {% if event.attendance == 1 %}
-  <div class="card-footer">
-    <button type="button" class="btn btn-primary" name="attendance" disabled>
-      Take Attendance
-    </button>
-  </div>
-  {% else %}
-  <div class="card-footer">
-    <button type="button" class="btn btn-primary" name="attendance" disabled>
-      Attendance Disabled
-    </button>
-  </div>
-  {% endif %}
 
 </div>
 {% endfor %}

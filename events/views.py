@@ -160,34 +160,36 @@ def eventDetailView (request, id):
 @login_required
 def takeAttendanceView (request):
     if request.user.role in 'STUDENT':
+        # To store event that attendance are currently available
         events = list()
         student = Student.objects.get(user=request.user.id)
         parts = Event_Participants.objects.filter(student=student, registered=1)
+        # To store registered event that are currently not available for attendance
         reg_events = list()
-        # Get the current time in Malaysia's timezone
         current_time = datetime.now()
         for part in parts:
             print(part)
             start_time = part.event.start.replace(tzinfo=None) if part.event.start else None
             end_time = part.event.end.replace(tzinfo=None) if part.event.end else None
             if part.event.enable_attendance==1:
-                events.append(part.event)
+                events.append(part)
             elif start_time and end_time :
                 if start_time <= current_time <= end_time and part.event.attendance==1:
-                    events.append(part.event)
+                    events.append(part)
                 else:
-                    reg_events.append(part.event)
+                    reg_events.append(part)
             else:
-                    reg_events.append(part.event)
+                    reg_events.append(part)
             
-        parts = parts.filter(event__in=events)
+        # parts = parts.filter(event__in=events)
         print("Participation")
         print(parts)
         print("Event")
         print(events)
-        par_events = zip(parts, events)
+        # par_events = zip(parts, events)
         context = {
-            "par_events": par_events,
+           
+            "events": events,
             "reg_events": reg_events,
             "page_name": "Registered Event"
         }

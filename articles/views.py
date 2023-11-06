@@ -406,14 +406,14 @@ def verEventView(request):
             com_df = pd.read_excel(file_path,  names=["position", "matric"])
             
             for com in com_df.iterrows():
-                print(com[1]['matric'].lower())
+                print(com[1]['matric'].upper())
                 if not Student.objects.filter(
-                    matric_no=com[1]['matric'].lower()).exists():
-                    messages.error(request, f"Matric number {com[1]['matric'].lower()} does not exist in the system. The committee list is not approved.")
+                    matric_no=com[1]['matric'].upper()).exists():
+                    messages.error(request, f"Matric number {com[1]['matric'].upper()} does not exist in the system. The committee list is not approved.")
                     return redirect("verify-event")
                 else:
                     student = Student.objects.get(
-                        matric_no=com[1]['matric'].lower())
+                        matric_no=com[1]['matric'].upper())
                     if Event_Participants.objects.filter(event=event, student=student).exists():
                         event_par = Event_Participants.objects.get(
                             event=event, student=student)
@@ -540,12 +540,12 @@ def verOrgView(request):
                     student = Student.objects.get(
                         matric_no=com[1]['matric'].upper())
                     if not Student.objects.filter(
-                        matric_no=com[1]['matric'].upeer()).exists():
-                        messages.error(request, f"Matric number {com[1]['matric'].lower()} does not exist in the system. The committee list is not approved.")
+                        matric_no=com[1]['matric'].upper()).exists():
+                        messages.error(request, f"Matric number {com[1]['matric'].upper()} does not exist in the system. The committee list is not approved.")
                         return redirect("verify-org")
                     else:
                         student = Student.objects.get(
-                            matric_no=com[1]['matric'].lower())
+                            matric_no=com[1]['matric'].upper())
                         if OrgComittee.objects.filter(org=org, student=student).exists():
                             org_com = OrgComittee.objects.get(org=org, student=student)
                         else:

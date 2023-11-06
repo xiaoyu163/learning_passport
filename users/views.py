@@ -310,10 +310,12 @@ def generateTranscriptView(request, user_id):
         # Event/Org Committee
         event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
         event_coms_ex = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=0).order_by('event__start')
-        org_coms_in = OrgComittee.objects.filter(student=student, org__internal=1).order_by('org__year')
-        org_coms_ex = OrgComittee.objects.filter(student=student, org__internal=0).order_by('org__year')
+        org_coms_in = OrgComittee.objects.filter(student=student, org__internal=1, status=1).order_by('org__year')
+        org_coms_ex = OrgComittee.objects.filter(student=student, org__internal=0, status=1).order_by('org__year')
         total_in_length = len(event_coms_in) + len(org_coms_in)
         total_ex_length = len(event_coms_ex) + len(org_coms_ex)
+
+        hod_name = User.objects.get(role="HEAD OF DEPARTMENT").full_name
 
         # Other Competition
         other = OtherComp.objects.filter(student=student, status=1)
@@ -331,6 +333,7 @@ def generateTranscriptView(request, user_id):
             "awarded_arts": awarded_arts,
             "other": other,
             "transcript": True,
+            "hod_name": hod_name,
         }
 
     else:
@@ -380,7 +383,8 @@ def dashboardView(request):
         if request.method == 'POST':
             print(request.POST)
             if 'event_name' in request.POST:
-                events = Events.objects.filter(e_name=request.POST['event_name'])
+                events = Events.objects.filter(e_name=request.POST['event_name']).order_by("year")
+                print("events: ", events)
                 event_name = request.POST['event_name']
                 selected = event_name
 
@@ -436,7 +440,7 @@ def dashboardView(request):
             number = Event_Participants.objects.filter(event=event, attendance=1).count()
             par_list.append(number) 
     
-    
+        print(par_list)
         par_df = pd.DataFrame({'Year':year_list, 'Participants': par_list})
         fig = px.line(par_df, x="Year", y="Participants", title=f'Number of Participants for {event_name}')
         fig.update_traces(mode="lines+markers")
