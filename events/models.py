@@ -8,7 +8,7 @@ class Events(models.Model):
         (1, 'Seminar/Talk'),
         (2, 'Conference'),
         (3, 'Proposal Defense'),
-        (4, 'Candidatual Defense'),
+        (4, 'Candidature Defense'),
         (5, 'Welcome Week/Month'),
         (6, 'Chinese Studies Night'),
         (7, 'Workshop'),

@@ -87,6 +87,11 @@
                         <li class="sidebar-item">
                             <a href="{% url 'dashboard' %}"><i class="fa-solid fa-tachometer-alt"></i>Dashboard</a>
                         </li>
+                        {% if not 'STUDENT' in request.user.role %}
+                        <li class="sidebar-item">
+                            <a href="{% url 'postgrad' %}"><i class="fa-solid fa-graduation-cap"></i>Postgraduates</a>
+                        </li>
+                        {% endif %}
                         <li class="sidebar-item">
                             <a href="{% url 'announcements' %}"><i class="fa-solid fa-bullhorn"></i>Announcements</a>
                         </li>
@@ -94,7 +99,7 @@
                             <a href="{% url 'generate-transcript' request.user.id %}"><i class="fa-solid fa-file"></i>
                                 <span>Generate Transcript</span>
                             </a>
-                        </li>
+                        </li>                       
                         <li class="sidebar-dropdown">
                             <a href="#">
                                 <i class="fa fa-calendar"></i>
@@ -104,7 +109,7 @@
                                 <ul>
                                     <li>
                                         <a href="{% url 'events' %}">
-                                            {% if request.user.role in 'STUDENT' %}
+                                            {% if not 'ADMIN' in request.user.role %}
                                             <span>Upcoming Events</span>
                                             {% elif request.user.role in 'SUPER ADMIN' %}
                                             <span>Events</span>
@@ -208,7 +213,7 @@
                                     <li>
                                         <a href="{% url 'upload-org' %}">Organisation Comittee</a>
                                     </li>
-                                    <li class="sidebar-dropdown">
+                                    <li>
                                         <a href="{% url 'upload-article' %}">Article</a>
                                     </li>
 

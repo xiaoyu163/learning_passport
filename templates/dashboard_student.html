@@ -40,6 +40,7 @@
       </div>
 
       <div class="gap"></div>
+      {% if student.program == 1 %}
       <div class="info-cards">
 
         <div class="card info-card card1">
@@ -100,6 +101,67 @@
         </div>
 
       </div>
+      {% else %}
+      <div class="info-cards">
+        <div class="card info-card card1">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-lightbulb" style="color: #6151fb"></i></h1>
+                <strong>
+                  <p class="info-title">Proposal<br>Defense </p>
+                </strong>
+                <h3>{{pd_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+        <div class="card info-card card2">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-balance-scale" style="color: #ed1d4d"></i></h1>
+                <strong>
+                  <p class="info-title">Candidature<br>Defense </p>
+                </strong>
+                <h3>{{cd_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+        
+        
+        <div class="card info-card card3">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-users" style="color: #1b8be3"></i></h1>
+                <strong>
+                  <p class="info-title">Conference </p>
+                </strong>
+                <h3>{{conf_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+
+        <div class="card info-card card4">
+          <div class="card-body">
+            <center>
+              <div class="card-text">
+                <h1><i class="fa-solid fa-file-lines" style="color: #ffa01f"></i></h1>
+                <strong>
+                  <p class="info-title">Articles<br>Published </p>
+                </strong>
+                <h3>{{art_count}}</h3>
+              </div>
+            </center>
+          </div>
+        </div>
+      </div>
+
+      {% endif %}
+      
     </div>
   </div>
   <div class="right-side">

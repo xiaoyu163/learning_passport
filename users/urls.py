@@ -30,4 +30,5 @@ urlpatterns = [
      path('pdf', views.generatePDF, name='pdf'),
      path('graduate-report', views.graduateReportView, name="graduate-report"),
      path('active-report', views.activeReportView, name="active-report"),
+     path('postgrad', views.postgradDetailsView, name="postgrad")
 ]

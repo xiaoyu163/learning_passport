@@ -1,0 +1,98 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+</head>
+
+<h1> Dashboard </h1>
+<br>
+
+<div class="container">
+    <div class="card profile-card">
+        <div class="card-header">
+            <h4 class="card-title">My Profile</h4>
+        </div>
+        <div class="card-body">
+            <sub>Name</sub>
+            <p><strong>{{lecturer.user.full_name}}</strong></p>
+            <sub>Email</sub>
+            <p><strong>{{lecturer.user.email}}</strong></p>
+            <sub>Contact</sub>
+            <p><strong>{{lecturer.user.contact}}</strong></p>
+            <sub>Address</sub>
+            <p><strong>{{lecturer.user.address}}</strong></p>
+        </div>
+        <div class="card-footer">
+            <center>
+                <a href="{% url 'edit-profile' lecturer.user.id %}">Edit Profile Details</a>
+            </center>
+        </div>
+    </div>
+
+    <div class="gap"></div>
+
+    <div class="info-cards">
+        <div class="card info-card card1">
+            <div class="card-body">
+              <center>
+                <div class="card-text">
+                  <h1><i class="fa-solid fa-graduation-cap" style="color: #6151fb"></i></h1>
+                  <strong>
+                    <p class="info-title">Bachelor of Arts<br>Chinese Studies</p>
+                  </strong>
+                  <h3>{{undergrad}}</h3>
+                </div>
+              </center>
+            </div>
+          </div>
+          <div class="card info-card card2">
+            <div class="card-body">
+              <center>
+                <div class="card-text">
+                  <h1><i class="fa-solid fa-book" style="color: #ed1d4d"></i></h1>
+                  <strong>
+                    <p class="info-title">Master of Chinese Studies<br>(Coursework)</p>
+                  </strong>
+                  <h3>{{master_cw}}</h3>
+                </div>
+              </center>
+            </div>
+          </div>
+          <div class="card info-card card3">
+            <div class="card-body">
+              <center>
+                <div class="card-text">
+                  <h1><i class="fa-solid fa-flask" style="color: #1b8be3"></i></h1>
+                  <strong>
+                    <p class="info-title">Master of Arts <br>(Research) </p>
+                  </strong>
+                  <h3>{{master_re}}</h3>
+                </div>
+              </center>
+            </div>
+          </div>
+          <div class="card info-card card4">
+            <div class="card-body">
+              <center>
+                <div class="card-text">
+                  <h1><i class="fa-solid fa-clipboard-check" style="color: #ffa01f"></i></h1>
+                  <strong>
+                    <p class="info-title">Doctor of Philosophy<br>(Ph.D) </p>
+                  </strong>
+                  <h3>{{phd}}</h3>
+                </div>
+              </center>
+            </div>
+          </div>
+    </div>
+
+    <div class="gap"></div>
+</div>
+
+<br>
+
+
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+    <script>
+        $(document).ready(function () {
+        $('.dates-button').click(function () {
+            console.log()
+            var studentId = $(this).data('student-id');
+
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+                url: '/get-student-details/' + studentId + '/',  // URL to your Django view for fetching event details
+                type: 'GET',
+
+                success: function (response) {
+                    student_id = response.id;
+                    $('#submit-dates').val(student_id);
+                    student_name = response.name;
+                    $('#student_name').val(student_name);
+                    if (response.rm_date){
+                        rm_date = new Date(response.rm_date)
+                        var formattedrm = rm_date.toISOString().substring(0, 16);
+                        $('#rm_date').val(formattedrm);
+                    }
+                    if (response.pd_date){
+                        pd_date = new Date(response.pd_date)
+                        var formattedpd = pd_date.toISOString().substring(0, 16);
+                        $('#pd_date').val(formattedpd);
+                    }
+                    if (response.cd_date){
+                        cd_date = new Date(response.cd_date)
+                        var formattedcd = cd_date.toISOString().substring(0, 16);
+                        $('#cd_date').val(formattedcd);
+                    }
+                    if (response.viva_date){
+                        viva_date = new Date(response.viva_date)
+                        var formattedviva = viva_date.toISOString().substring(0, 16);
+                        $('#viva_date').val(formattedviva);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);  // Handle the error if necessary
+                }
+            });
+        });
+    });
+    </script>
+</head>
+<h1>Postgraduate Students Details</h1>
+<br>
+<form method="POST">
+    {% csrf_token %}
+    <div class="form-floating">
+        <select class="form-select" id="program" name="program" onchange="submit()" style="width:50%">
+            <option value="all" {% if selected_program == 'all' %}selected{% endif %}>All</option>
+            <option value="2" {% if selected_program == '2' %}selected{% endif %}>Master of Chinese Studies (Coursework)</option>
+            <option value="3" {% if selected_program == '3' %}selected{% endif %}>Master of Arts (Research)</option>
+            <option value="4" {% if selected_program == '4' %}selected{% endif %}>Doctor of Philosophy (Ph.D)</option>
+        </select>
+        <label for="program">Program</label>
+    </div>
+</form>
+
+<div class="students_table">
+    <table class="table table-responsive">
+        <tr>
+            <thead>
+                <th>Student Name</th>
+                <th>Matric Number</th>
+                <th>Program</th>
+                {% if not 'LECTURER' in request.user.role %}
+                <th>Supervisor</th>
+                {% endif %}
+                <th>RM Date</th>
+                <th>PD Date</th>
+                <th>CD Date</th>
+                <th>Viva Date</th>
+                <th>Assign Dates</th>
+            </thead>
+        </tr>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{student.user.full_name}}</td>
+                <td>{{student.matric_no}}</td>
+                <td>{{student.get_program_display}}</td>
+                {% if not 'LECTURER' in request.user.role %}
+                <td>{{student.lecturer.user.full_name}}</td>
+                {% endif %}
+                {% if student.rm_date %}
+                <td class="text-nowrap">{{student.rm_date.date}} <br> {{student.rm_date.time}}</td>
+                {% else %}
+                <td>-</td>
+                {% endif %}
+                {% if student.pd_date %}
+                <td class="text-nowrap">{{student.pd_date.date}} <br> {{student.pd_date.time}}</td>
+                {% else %}
+                <td>-</td>
+                {% endif %}
+                {% if student.cd_date %}
+                <td class="text-nowrap">{{student.cd_date.date}} <br> {{student.cd_date.time}}</td>
+                {% else %}
+                <td>-</td>
+                {% endif %}
+                {% if student.viva_date %}
+                <td class="text-nowrap">{{student.viva_date.date}} <br> {{student.viva_date.time}}</td>
+                {% else %}
+                <td>-</td>
+                {% endif %}
+                <td>
+                    <button class="dates-button btn btn-floating" 
+                            data-mdb-toggle="modal" 
+                            data-mdb-target="#dates_modal"
+                            data-student-id="{{ student.id }}">
+                        <i class="fa-solid fa-edit"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="dates_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Assign Dates</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-outline">
+                        <input class="form-control active" id="student_name" name="student_name" type="text" disabled>
+                        <label class="form-label" for="student_name" style="margin-left: 0px;">Name</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 40px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="rm_date">Research Methodology Date</label>
+                    <div class="form-outline">
+                        <input type="datetime-local" name="rm_date" id="rm_date" class="form-control" />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="pd_date">Proposal Defense Date</label>
+                    <div class="form-outline">
+                        <input type="datetime-local" name="pd_date" id="pd_date" class="form-control" />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="cd_date">Candidatual Defense Date</label>
+                    <div class="form-outline">
+                        <input type="datetime-local" name="cd_date" id="cd_date" class="form-control" />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="viva_date">Viva Date</label>
+                    <div class="form-outline">
+                        <input type="datetime-local" name="viva_date" id="viva_date" class="form-control" />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+                    <button id="submit-dates" type="submit" class="btn btn-primary" name="submit-dates">Save
+                        changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

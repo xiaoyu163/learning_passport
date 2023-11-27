@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 urlpatterns = [
-    path('uplaod/event', views.submitEventView, name="upload-event"),
+    path('upload/event', views.submitEventView, name="upload-event"),
     # path('submit/event', views.submitEventView, name="submit-event"),
     # path('submit/event/form', views.eventComFormView, name="event-com-form"),
     # path('submit/event/form/<int:form_id>', views.editEventComView, name="edit-event-com-form"),

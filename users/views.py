@@ -23,6 +23,8 @@ import os
 # from weasyprint import HTML
 from django.http import HttpResponse
 from django.http import JsonResponse
+from datetime import datetime
+
 
 import openpyxl
 from openpyxl.styles import Alignment
@@ -589,12 +591,17 @@ def dashboardView(request):
             year_list.append(event.year)
             number = Event_Participants.objects.filter(event=event, attendance=1).count()
             par_list.append(number) 
+
+       
+        
+
+       
     
-        par_df = pd.DataFrame({'Year':year_list, 'Participants': par_list})
-        fig = px.line(par_df, x="Year", y="Participants", title=f'Number of Participants for {event_name}')
-        fig.update_traces(mode="lines+markers")
-        fig.update_xaxes(tickvals=year_list)
-        fig.update_yaxes(dtick=1)
+        # par_df = pd.DataFrame({'Year':year_list, 'Participants': par_list})
+        # fig = px.line(par_df, x="Year", y="Participants", title=f'Number of Participants for {event_name}')
+        # fig.update_traces(mode="lines+markers")
+        # fig.update_xaxes(tickvals=year_list)
+        # fig.update_yaxes(dtick=1)
         graph_json = fig.to_json()
 
 
@@ -629,6 +636,9 @@ def dashboardView(request):
         com_count = Event_Participants.objects.filter(student=student, position__isnull=False, status=1).count()
         org_count = OrgComittee.objects.filter(student=student, status=1).count()
         art_count = Article.objects.filter(student=student, status=1).count()
+        pd_count = Event_Participants.objects.filter(student=student, event__type=3, attendance=1).count()
+        cd_count = Event_Participants.objects.filter(student=student, event__type=4, attendance=1).count()
+        conf_count = Event_Participants.objects.filter(student=student, event__type=2, attendance=1).count()
         context = { 
             "student": student,
             "announcements": announcements,
@@ -637,14 +647,66 @@ def dashboardView(request):
             "com_count": com_count,
             "org_count": org_count,
             "art_count": art_count,
+            "pd_count": pd_count,
+            "cd_count": cd_count,
+            "conf_count": conf_count,
         }
         return render(request, "dashboard_student.html", context)
     
     else:
+        lecturer = Lecturer.objects.get(user=request.user)
+        print(lecturer)
+        students = Student.objects.filter(lecturer=lecturer)
+        undergrad_students = students.filter(program=1)
+        master_cw = students.filter(program=2)
+        master_re = students.filter(program=3)
+        phd_students = students.filter(program=4)
+        print("students: ",students)
         context = {
-
+            "lecturer": lecturer,
+            "students": students,
+            "active_student": len(students),
+            "undergrad": len(undergrad_students),
+            "master_cw": len(master_cw),
+            "master_re": len(master_re),
+            "phd": len(phd_students),
         }
         return render (request, "dashboard_lecturer.html", context)
+    
+def postgradDetailsView (request):
+    selected_program = ""
+    if "HEAD OF DEPARTMENT" in request.user.role or "ADMIN" in request.user.role:
+        print("HOD OR ADMIN")
+        students = Student.objects.filter(program__in=[2,3,4], user__is_active=1)
+    elif "LECTURER" in request.user.role:
+        print("LECTURER")
+        lecturer = Lecturer.objects.get(user=request.user)
+        students = Student.objects.exclude(program='1', user__is_active=0).filter(lecturer=lecturer)
+
+    if request.method == 'POST':
+        if 'program' in request.POST:
+            selected_program = request.POST['program']
+            if not 'all' in request.POST['program']:
+                students = students.filter(program=request.POST['program'])
+        if 'submit-dates' in request.POST:
+            print(request.POST)
+            rm_date  = datetime.strptime(request.POST['rm_date'], "%Y-%m-%dT%H:%M") if request.POST['rm_date'] != "" else None
+            pd_date  = datetime.strptime(request.POST['pd_date'], "%Y-%m-%dT%H:%M") if request.POST['pd_date'] != "" else None
+            cd_date  = datetime.strptime(request.POST['cd_date'], "%Y-%m-%dT%H:%M") if request.POST['cd_date'] != "" else None
+            viva_date  = datetime.strptime(request.POST['viva_date'], "%Y-%m-%dT%H:%M") if request.POST['viva_date'] != "" else None
+            student = Student.objects.get(id=request.POST['submit-dates'])
+            student.rm_date = rm_date 
+            student.pd_date = pd_date
+            student.cd_date = cd_date
+            student.viva_date = viva_date
+            student.save()
+            return redirect ("postgrad")
+    context = {
+        "students": students,
+        "program_opt": Student.program.field.choices,
+        "selected_program": selected_program,
+    }
+    return render (request, "postgrad_details.html", context)
 
 def semesterDatesView (request):
     current_date = datetime.now().date()
@@ -735,7 +797,11 @@ def get_student_details(request, student_id):
             'enrol': student.enrol_year,
             'grad': student.grad_year,
             'active': student.user.is_active,
-            'student_lect': student.lecturer_id
+            'student_lect': student.lecturer_id,
+            'rm_date': student.rm_date,
+            'pd_date': student.pd_date,
+            'cd_date': student.cd_date,
+            'viva_date': student.viva_date,
             # Include other event details in the response as needed
         }
         return JsonResponse(response_data)
