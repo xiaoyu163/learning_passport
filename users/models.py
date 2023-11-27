@@ -61,8 +61,8 @@ class User(AbstractUser):
 class Semester (models.Model):
     academic_year = models.CharField(max_length=7)
     semester = models.SmallIntegerField()
-    start = models.DateField()
-    end = models.DateField()
+    start = models.DateField(null=True)
+    end = models.DateField(null=True)
     
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -88,6 +88,12 @@ class Student(models.Model):
     )
     program = models.SmallIntegerField(choices=Program)
     lecturer = models.ForeignKey(Lecturer, on_delete=models.PROTECT)
+    enrol_sem = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True, related_name="enrol_sem")
+    grad_sem = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True, related_name="grad_sem")
+    rm_date = models.DateTimeField(null=True)
+    pd_date = models.DateTimeField(null=True)
+    cd_date = models.DateTimeField(null=True)
+    viva_date = models.DateTimeField(null=True)
 
 class Organisation(models.Model):
     name = models.CharField(max_length=100)

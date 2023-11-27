@@ -1,0 +1,165 @@
+{% load static %}
+
+<style>
+    .transcript{
+        font-family: 'Times New Roman', Times, serif;
+    }   
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        margin-right: 50px;
+    }
+
+
+    .image {
+        /* Adjust as needed */
+        margin-right: 20px;
+        height: 100%;
+        /* Set the height to match the text container */
+
+    }
+
+    .names {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gradient-container {
+        background: linear-gradient(to right, #887455, #dfc190);
+        /* Define your gradient colors */
+        padding: 10px;
+        /* Add padding to the container */
+    }
+
+    /* Style the text within the container */
+    .gradient-text {
+        color: white;
+        /* Make text transparent */
+        font-size: 14px;
+        font-weight: bold;
+        display: inline;
+        /* Make the text inline */
+    }
+
+    /* Define the style for the watermark container */
+    #watermark {
+        position: fixed; /* or absolute, depending on your preference */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Allows interaction with elements below the watermark */
+    }
+
+    /* Style the watermark text */
+    #watermark::after {
+        content: "Non-Printable Version";
+        font-size: 50px;
+        font-weight: bold;
+        color: #888; /* Adjust the color as needed */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform:  rotate(-45deg);
+        opacity: 0.5;
+    }
+
+    @page {
+        size: A4;
+        margin: 5mm;
+        /* Add headers and footers using content property */
+        
+    }
+</style>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/generate_transcript.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div id="content" style="margin:0; padding:0;">
+        <div class="logo-container">
+            <div class="image">
+                <img src="{% static 'img/um_chinese_logo.png' %}" alt="UM logo.">
+            </div>
+            <div class="names">
+                <h5><strong>
+                        <div>Undergraduates Activities Record</div>
+                        <div>Department of Chinese Studies, Universiti Malaya </div>
+                        <div>马大中文系（本科生）活动记录</div>
+                </h5></strong>
+            </div>
+        </div>
+        <br><br>
+    <table>
+        <tr>
+            <td>English Name</td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>{{student.user.full_name}}</td>
+        </tr>
+        <tr>
+            <td>No. Matric</td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>{{student.matric_no}}</td>
+        </tr>
+        <tr>
+            <td>Academic Years</td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>{{student.enrol_year.year}} - {{student.grad_year.year}}</td>
+        </tr>
+    </table>
+    <br>
+    {% if event_pars_in or event_pars_ex %}
+    <div class="gradient-container">
+        <span class="gradient-text">Attendend Events</span>
+    </div>
+    <div class="table-container">
+        {% include 'event_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if event_coms_in or org_coms_in or event_coms_ex or org_coms_ex %}
+    <div class="gradient-container">
+        <span class="gradient-text">Activities / Organisations Committee </span>
+    </div>
+    <div class="table-container">
+    {% include 'committee_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if arts %}
+    <div class="gradient-container">
+        <span class="gradient-text">Published Articles / Literature Works </span>
+    </div>
+    <div class="table-container">
+    {% include 'article_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if awarded_arts %}
+    <div class="gradient-container">
+        <span class="gradient-text">Awarded Articles / Work </span>
+    </div>
+    <div class="table-container">
+    {% include 'awarded_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if other %}
+    <div class="gradient-container">
+        <span class="gradient-text">Other Competition </span>
+    </div>
+    <div class="table-container">
+    {% include 'other_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+        
+    </div>
+</body>
+

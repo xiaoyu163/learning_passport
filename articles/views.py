@@ -16,11 +16,13 @@ from .models import Article
 from datetime import datetime
 from django.http import JsonResponse
 
-# Create your views here.
+from utils.emails import noMatricEmail
 
+# Create your views here.
+base_dir = str(settings.BASE_DIR).replace("\\", "/")
 
 def submitEventView(request):
-    base_dir = str(settings.BASE_DIR).replace("\\", "/")
+   
     option_obj = Events.type.field.choices
     events_in = Events.objects.filter(internal=1).exclude(status=1).exclude(file__isnull=False)
     events_ex = Events.objects.filter(internal=0).exclude(status=1)
@@ -142,7 +144,6 @@ def submitEventView(request):
 
 
 def submitOrgView(request):
-    base_dir = str(settings.BASE_DIR).replace("\\", "/")
     student = Student.objects.get(user=request.user.id)
     orgs_in = Organisation.objects.filter(file_by=student).exclude(internal=0)
     orgs_ex = OrgComittee.objects.filter(student=student).exclude(org__internal=1)
@@ -237,53 +238,63 @@ def submitOrgView(request):
 def submitArticleView(request):
     student = Student.objects.get(user=request.user.id)
     arts = Article.objects.filter(student=student)
-    base_dir = str(settings.BASE_DIR).replace("\\", "/")
     context = {
         "page_name": "Upload Articles",
         "arts": arts
     }
     if request.method == 'POST':
         print(request.POST)
-        if 'art_submit' in request.POST or 'art_edit' in request.POST:
+        if 'art_submit' in request.POST or 'art_edit' in request.POST or 'art_awd_submit' in request.POST or 'art_awd_edit' in request.POST:
             student = Student.objects.get(user_id=request.user.id)
-            print("In submit or edit")
 
-            if 'art_submit' in request.POST:
-                print("In submit")
+            if 'art_submit' in request.POST or 'art_awd_submit' in request.POST:
                 if Article.objects.filter(title=request.POST['art_title']).exists():
                     messages.error(request, "Article was uploaded.")
                     return redirect("upload-article")
                 else:            
                     article = Article()
-                    if request.POST['published'] == '0':
-                        article.filename = request.FILES['proof']
-                        article.file = request.FILES['proof']
+                    if 'art_submit' in request.POST:
+                        if request.POST['published'] == '0':
+                            article.filename = request.FILES['proof']
+                            article.file = request.FILES['proof']
+                        else:
+                            article.filename = request.FILES['art']
+                            article.file = request.FILES['art']
                     else:
-                        article.filename = request.FILES['art']
-                        article.file = request.FILES['art']
-            elif 'art_edit' in request.POST:
-                print("In edit")
-                article = Article.objects.get(id=request.POST['art_edit'])
+                        article.file = request.FILES['cert']
+                        article.filename = request.FILES['cert']
+                
+            elif 'art_edit' in request.POST or 'art_awd_edit' in request.POST:
+                id = request.POST['art_edit'] if 'art_edit' in request.POST else request.POST['art_awd_edit']
+                article = Article.objects.get(id=id)
                 ori_file_url = base_dir + article.file.url
-                if request.POST['published'] == '0' and 'proof_edit' in request.FILES:
-                    os.remove(ori_file_url)
-                    article.filename = request.FILES['proof_edit']
-                    article.file = request.FILES['proof_edit']
-                elif request.POST['published'] == '1' and 'article_edit' in request.FILES:
-                    os.remove(ori_file_url)
-                    article.filename = request.FILES['article_edit']
-                    article.file = request.FILES['article_edit']
+
+                if 'published' in request.POST:
+                    if request.POST['published'] == '0' and 'proof_edit' in request.FILES:
+                        article.filename = request.FILES['proof_edit']
+                        article.file = request.FILES['proof_edit']
+                        os.remove(ori_file_url)
+                    elif request.POST['published'] == '1' and 'article_edit' in request.FILES:
+                        article.filename = request.FILES['article_edit']
+                        article.file = request.FILES['article_edit']
+                        os.remove(ori_file_url)
+                else:
+                    if 'cert_edit' in request.FILES:
+                        article.filename = request.FILES['cert_edit']
+                        article.file = request.FILES['cert_edit']
+                        os.remove(ori_file_url)  
 
             article.title = request.POST['art_title']
             article.date = request.POST['art_year']
             article.type = request.POST['art_type']
             article.platform = request.POST['art_platform']
-            article.comp = request.POST['art_comp']
-            article.award = request.POST['art_awd']
+            article.comp = request.POST['art_comp'] if 'art_comp' in request.POST else None
+            article.award = request.POST['art_awd'] if 'art_awd' in request.POST else None
+            article.apa = request.POST['apa']
             article.student = student
-            article.published = request.POST['published']            
+            article.published = request.POST['published'] if 'published' in request.POST else None         
             article.save()              
-            
+            print(article)
             
         elif 'art_delete' in request.POST:
             print("In delete")
@@ -299,7 +310,6 @@ def submitArticleView(request):
     return render(request, "upload_article.html", context)
 
 def submitOtherComp (request):
-    base_dir = str(settings.BASE_DIR).replace("\\", "/")
     student = Student.objects.get(user_id=request.user.id)
     comps = OtherComp.objects.filter(student=student)
     context = {
@@ -396,7 +406,7 @@ def verEventView(request):
 
         elif 'approve_in' in request.POST:
             print(request.POST)
-          
+            student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
             event = Events.objects.get(id=request.POST['approve_in'])
             event.status = 1
             
@@ -409,8 +419,7 @@ def verEventView(request):
                 print(com[1]['matric'].upper())
                 if not Student.objects.filter(
                     matric_no=com[1]['matric'].upper()).exists():
-                    messages.error(request, f"Matric number {com[1]['matric'].upper()} does not exist in the system. The committee list is not approved.")
-                    return redirect("verify-event")
+                    student_df.loc[len(student_df.index)] = [com[1]['matric'].upper(), com[1]['position']]
                 else:
                     student = Student.objects.get(
                         matric_no=com[1]['matric'].upper())
@@ -425,9 +434,14 @@ def verEventView(request):
                     event_par.position = match_position[0].strip()
                     event_par.status = 1
                     event_par.save()
-            event.file = None
-            event.filename= None
-            os.remove(file_path)
+            # event.file = None
+            # event.filename= None
+            # os.remove(file_path)
+            
+            if len(student_df) > 0:
+                noMatricEmail(request, [request.user], [request.user], student_df, event.e_name)
+                print(student_df)
+                messages.error(request, "Invalid matric numbers exists in Excel file. Please check email for details.")
             event.save()
 
         elif 'approve_ex' in request.POST:
@@ -435,9 +449,9 @@ def verEventView(request):
             event_par.status = 1
             file_url = event_par.file.url
             file_path = base_dir + file_url  
-            event_par.file = None  
-            event_par.filename = None
-            os.remove(file_path)
+            # event_par.file = None  
+            # event_par.filename = None
+            # os.remove(file_path)
             event_par.save()
                        
 
@@ -478,7 +492,6 @@ def verEventView(request):
 @login_required
 @role_required(['SUPER ADMIN', 'ADMIN'])
 def verOrgView(request):
-    base_dir = str(settings.BASE_DIR).replace("\\", "/")
     pending_orgs = Organisation.objects.exclude(file__exact='').exclude(
         status__in=[0, 1]).exclude(file__exact=None)
     approved_orgs = Organisation.objects.filter(status=1)
@@ -526,7 +539,6 @@ def verOrgView(request):
             org_com.status = 0
             org_com.save()
         elif 'approve_in' in request.POST or 'approve_ex' in request.POST:
-            base_dir = str(settings.BASE_DIR).replace("\\", "/")
             if 'approve_in' in request.POST:
                 org = Organisation.objects.get(id=request.POST['approve_in'])
                 org.status = 1
@@ -535,14 +547,11 @@ def verOrgView(request):
                 file_path = base_dir + file_url 
                 com_df = pd.read_excel(
                     file_path,  names=["position", "matric"])
-                
+                student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
                 for com in com_df.iterrows():
-                    student = Student.objects.get(
-                        matric_no=com[1]['matric'].upper())
                     if not Student.objects.filter(
                         matric_no=com[1]['matric'].upper()).exists():
-                        messages.error(request, f"Matric number {com[1]['matric'].upper()} does not exist in the system. The committee list is not approved.")
-                        return redirect("verify-org")
+                        student_df.loc[len(student_df.index)] = [com[1]['matric'],com[1]['position']]
                     else:
                         student = Student.objects.get(
                             matric_no=com[1]['matric'].upper())
@@ -557,16 +566,22 @@ def verOrgView(request):
                         org_com.status = 1
                         org_com.save()
                 
-                org.file = None
+                if len(student_df)>0:
+                    noMatricEmail(request, [request.user], [request.user], student_df, org.name)
+                    messages.error(request, f"Invalid matric number exists in the file. Please check email for details.")
+
+                
+                # org.file = None
                 org.save()
             else:
                 org_com = OrgComittee.objects.get(id=request.POST['approve_ex'])
                 org_com.status = 1
-                file_url = org_com.file.url
-                org_com.file = None 
+                # file_url = org_com.file.url
+                # org_com.file = None 
+                # org_com.filename = None
                 org_com.save()
                 file_path = base_dir + file_url 
-            os.remove(file_path) 
+            # os.remove(file_path) 
 
         elif 'delete_in' in request.POST:
             org = Organisation.objects.get(id=request.POST['delete_in'])
@@ -591,7 +606,6 @@ def verOrgView(request):
 @login_required
 @role_required(['SUPER ADMIN', 'ADMIN'])
 def verArtView(request):
-    base_dir = str(settings.BASE_DIR).replace("\\", "/")
     pending_arts = Article.objects.exclude(file__exact='').exclude(
         status__in=[0, 1]).exclude(file__exact=None)
     approved_arts = Article.objects.filter(status=1)
@@ -626,11 +640,11 @@ def verArtView(request):
         elif "art_approve" in request.POST:
             art = Article.objects.get(id=request.POST['art_approve'])
             art.status = 1
-            base_dir = str(settings.BASE_DIR).replace("\\", "/")
-            file_url = art.file.url
-            file_path = base_dir + file_url
-            os.remove(file_path)
-            art.file = None
+            # file_url = art.file.url
+            # file_path = base_dir + file_url
+            # os.remove(file_path)
+            # art.file = None
+            # art.filename = None
             art.save()
         elif "art_delete" in request.POST:
             art = Article.objects.get(id=request.POST['art_delete'])
@@ -643,7 +657,6 @@ def verArtView(request):
 @login_required
 @role_required(['SUPER ADMIN', 'ADMIN'])
 def verOtherView (request):
-    base_dir = str(settings.BASE_DIR).replace("\\", "/")
     pending_comps = OtherComp.objects.exclude(file__exact='').exclude(
         status__in=[0, 1]).exclude(file__exact=None)
     approved_comps = OtherComp.objects.filter(status=1)
@@ -670,7 +683,6 @@ def verOtherView (request):
 
     }
     if request.method == 'POST':
-        base_dir = str(settings.BASE_DIR).replace("\\", "/")
         if 'reject' in request.POST:
             comp = OtherComp.objects.get(id=request.POST['reject'])
             comp.status = 0
@@ -678,9 +690,10 @@ def verOtherView (request):
         elif 'approve' in request.POST:
             comp = OtherComp.objects.get(id=request.POST['approve'])
             comp.status = 1
-            file_url = comp.file.url
-            file_path = base_dir + file_url
-            comp.file = None
+            # file_url = comp.file.url
+            # file_path = base_dir + file_url
+            # comp.filename = None
+            # comp.file = None
             comp.save()
             os.remove(file_path)
 
@@ -696,6 +709,129 @@ def verOtherView (request):
 
     return render (request, "verify_other.html", context)
 
+def deleteEventDocView(request):
+   
+    events = Events.objects.filter(file__isnull=False).exclude(file__exact="")
+    print(events)
+    context = {
+        "events": events,
+        "event": 1,
+    }
+    if request.method =='POST':
+        print(request.POST)
+        for elem in request.POST:
+            if elem.isnumeric():
+                elem = int(elem)
+                event = Events.objects.get(id=elem)
+                file_path = base_dir + event.file.url
+                event.file = None
+                event.filename = None
+                event.file_by = None
+                os.remove(file_path)
+                event.save()
+        return redirect ("delete-event-doc")
+    return render (request, "delete-document.html", context)
+
+def deleteExEventDocView(request):
+   
+    ex_events = Event_Participants.objects.filter(file__isnull=False).exclude(file__exact="")
+    context = {
+        "ex_events": ex_events,
+        "ex_event": 1,
+    }
+    if request.method =='POST':
+        print(request.POST)
+        for elem in request.POST:
+            if elem.isnumeric():
+                elem = int(elem)
+                ex_event = Event_Participants.objects.get(id=elem)
+                file_path = base_dir + ex_event.file.url
+                ex_event.file = None
+                ex_event.filename = None
+                os.remove(file_path)
+                ex_event.save()
+        return redirect ("delete-ex-event-doc")
+    return render (request, "delete-document.html", context)
+
+def deleteOrgDocView(request):
+   
+    orgs = Organisation.objects.filter(file__isnull=False).exclude(file__exact="")
+    context = {
+        "orgs": orgs,
+        "org": 1,
+    }
+    if request.method =='POST':
+        for elem in request.POST:
+            if elem.isnumeric():
+                elem = int(elem)
+                org = Organisation.objects.get(id=elem)
+                file_path = base_dir + org.file.url
+                org.file = None
+                org.filename = None
+                org.file_by = None
+                os.remove(file_path)
+                org.save()
+        return redirect ("delete-org-doc")
+    return render (request, "delete-document.html", context)
+
+def deleteExOrgDocView(request):
+   
+    org_coms = OrgComittee.objects.filter(file__isnull=False).exclude(file__exact="")
+    context = {
+        "org_coms": org_coms,
+        "org_ex": 1,
+    }
+    if request.method =='POST':
+        for elem in request.POST:
+            if elem.isnumeric():
+                elem = int(elem)
+                org = OrgComittee.objects.get(id=elem)
+                file_path = base_dir + org.file.url
+                org.file = None
+                org.filename = None
+                os.remove(file_path)
+                org.save()
+        return redirect ("delete-ex-org-doc")
+    return render (request, "delete-document.html", context)
+
+def deleteOtherDocView(request):
+   
+    others = OtherComp.objects.filter(file__isnull=False).exclude(file__exact="")
+    context = {
+        "others": others,
+        "other": 1,
+    }
+    if request.method =='POST':
+        for elem in request.POST:
+            if elem.isnumeric():
+                elem = int(elem)
+                other = OtherComp.objects.get(id=elem)
+                file_path = base_dir + other.file.url
+                other.file = None
+                other.filename = None
+                os.remove(file_path)
+                other.save()
+        return redirect ("delete-other-doc")
+    return render (request, "delete-document.html", context)
+
+def deleteArtDocView(request):
+    arts = Article.objects.filter(file__isnull=False).exclude(file__exact="")
+    context = {
+        "arts": arts,
+        "article": 1,
+    }
+    if request.method =='POST':
+        for elem in request.POST:
+            if elem.isnumeric():
+                elem = int(elem)
+                art = Article.objects.get(id=elem)
+                file_path = base_dir + art.file.url
+                art.file = None
+                art.filename = None
+                os.remove(file_path)
+                art.save()
+        return redirect ("delete-art-doc")
+    return render (request, "delete-document.html", context)
 def statusView(request):
     student = Student.objects.get(user=request.user.id)
     events = Events.objects.filter(file_by=student).exclude(file__exact='')
@@ -728,6 +864,7 @@ def get_art_details(request, art_id):
             'file': art.file.url if art.file else None,
             'published': art.published,
             'filename': art.filename,
+            'apa': art.apa,
             # Include other event details in the response as needed
         }
         return JsonResponse(response_data)

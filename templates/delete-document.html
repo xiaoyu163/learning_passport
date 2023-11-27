@@ -1,0 +1,343 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+<script>
+    function checkAll(o) {
+        var boxes = document.getElementsByTagName("input");
+        for (var x = 0; x < boxes.length; x++) {
+            var obj = boxes[x];
+            if (obj.type == "checkbox") {
+                if (obj.name != "check")
+                    obj.checked = o.checked;
+            }
+        }
+    }
+</script>
+{% if event %}
+    <h3>Delete Event Committee Documents</h3>
+    <br>
+    {% if events %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="check-all" class="form-check-input" type="checkbox" id="cc"
+                                    onclick="javascript:checkAll(this)" />
+                                <label for="check-all">Event Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for event in events %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input" type="checkbox" name="{{ event.id }}"> {{event.e_name}}
+                        </div>
+                    </td>
+                    <td>{{event.year}}</td>
+                    <td>{{event.file_by.user.full_name}}</td>
+                    <td>
+                        <a href="{{ event.file.url }}">{{event.filename}}</a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+    {% else %}
+    <sub>No event committee list to be deleted.</sub>
+    {% endif %}
+{% endif %}
+<!-- External Event -->
+{% if ex_event %}
+    <h3>Delete External Event Commitment Files</h3>
+    <br>
+    {% if ex_events %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="check-all" class="form-check-input" type="checkbox" id="cc"
+                                    onclick="javascript:checkAll(this)" />
+                                <label for="check-all">Event Name</label>
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for event in ex_events %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input" type="checkbox" name="{{ event.id }}"> {{event.event.e_name}}
+                        </div>
+                    </td>
+                    <td>{{event.event.year}}</td>
+                    <td>{{event.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ event.file.url }}">{{event.filename}}</a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+    {% else %}
+    <sub>No external event committee list to be deleted.</sub>
+    {% endif %}
+{% endif %}
+<!-- Organisation -->
+{% if org %}
+    <h3>Delete Organisation Committee Documents</h3>
+    <br>
+    {% if orgs %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="check-all" class="form-check-input" type="checkbox" id="cc"
+                                    onclick="javascript:checkAll(this)" />
+                                <label for="check-all">Organisation Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for org in orgs %}
+                <tr>
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input" type="checkbox" name="{{ org.id }}"> {{org.name}}
+                        </div>
+                    </td>
+                    <td>{{org.year}}</td>
+                    <td>{{org.file_by.user.full_name}}</td>
+                    <td>
+                        <a href="{{ org.file.url }}">{{org.filename}}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+    {% else %}
+    <sub>No organisation committee list to be deleted.</sub>
+    {% endif %}
+{% endif %}
+
+<!-- External Organisation -->
+{% if org_ex %}
+    <h3>Delete Organisation Committee Documents</h3>
+    <br>
+    {% if org_coms %}
+        <form method="POST">
+            {% csrf_token %}
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="check-all" class="form-check-input" type="checkbox" id="cc"
+                                    onclick="javascript:checkAll(this)" />
+                                <label for="check-all">Organisation Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for org in org_coms %}
+                <tr>
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input" type="checkbox" name="{{ org.id }}"> {{org.org.name}}
+                        </div>
+                    </td>
+                    <td>{{org.org.year}}</td>
+                    <td>{{org.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ org.file.url }}">{{org.filename}}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+    {% else %}
+    <sub>No external organisation committee list to be deleted.</sub>
+    {% endif %}
+{% endif %}
+
+<!-- Other Competition -->
+{% if other %}
+    <h3>Delete Other Competition Documents</h3>
+    <br>
+    {% if others %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="check-all" class="form-check-input" type="checkbox" id="cc"
+                                    onclick="javascript:checkAll(this)" />
+                                <label for="check-all">Competition Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for event in others %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input" type="checkbox" name="{{ event.id }}"> {{event.name}}
+                        </div>
+                    </td>
+                    <td>{{event.year}}</td>
+                    <td>{{event.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ event.file.url }}">{{event.filename}}</a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+    {% else %}
+    <sub>No competition certificates to be deleted.</sub>
+    {% endif %}
+{% endif %}
+
+<!-- Article -->
+{% if article %}
+    <h3>Delete Articles Uploaded</h3>
+    <br>
+    {% if arts %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="check-all" class="form-check-input" type="checkbox" id="cc"
+                                    onclick="javascript:checkAll(this)" />
+                                <label for="check-all">Article Title</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for art in arts %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input" type="checkbox" name="{{ art.id }}"> {{art.title}}
+                        </div>
+                    </td>
+                    <td>{{art.year}}</td>
+                    <td>{{art.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ art.file.url }}">{{art.filename}}</a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete">
+                    Delete Selected Articles
+                </button>
+            </center>
+        </form>
+    {% else %}
+    <sub>No articles to be deleted.</sub>
+    {% endif %}
+{% endif %}
+{% endblock %}

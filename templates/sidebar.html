@@ -95,31 +95,6 @@
                                 <span>Generate Transcript</span>
                             </a>
                         </li>
-                        {% if request.user.role in 'SUPER ADMIN' %}
-                        <li class="sidebar-dropdown">
-                            <a href="#">
-                                <i class="fa-solid fa-people-roof"></i>
-                                <span>Manage</span>
-                            </a>
-                            <div class="sidebar-submenu">
-                                <ul>
-                                    <li>
-                                        <a href="{% url 'manage-student' %}">Manage Student
-
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'manage-lecturer' %}">Manage Lecturer</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'semesters' %}">Manage Semester Dates</a>
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </li>
-
-                        {% endif %}
                         <li class="sidebar-dropdown">
                             <a href="#">
                                 <i class="fa fa-calendar"></i>
@@ -145,6 +120,75 @@
                                 </ul>
                             </div>
                         </li>
+                        {% if request.user.role in 'SUPER ADMIN' %}
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa-solid fa-people-roof"></i>
+                                <span>Manage</span>
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'manage-student' %}"> Manage Student </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'manage-lecturer' %}"> Manage Lecturer </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'semesters' %}"> Manage Semester Dates </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa-solid fa-file-lines"></i>
+                                <span>Report</span>
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'graduate-report' %}"> Graduated Students </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'active-report' %}"> Active Students </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa-solid fa-file-circle-xmark"></i>
+                                <span>Delete Documents</span>
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'delete-event-doc' %}"> Event Documets </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'delete-ex-event-doc' %}"> External Event Document </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'delete-org-doc' %}"> Internal Org Document </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'delete-ex-org-doc' %}"> External Org Document </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'delete-other-doc' %}"> Other Comp Document </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'delete-art-doc' %}"> Articles </a>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                        </li>
+
+                        {% endif %}
+                        
 
 
                         {% if 'STUDENT' in request.user.get_role_display %}
@@ -177,7 +221,7 @@
                         {% elif 'ADMIN' in request.user.get_role_display %}
                         <li class="sidebar-dropdown">
                             <a href="#">
-                                <i class="fa-solid fa-file-arrow-up"></i>
+                                <i class="fa-solid fa-file-circle-check"></i>
                                 <span>Verify Documents</span>
                             </a>
                             <div class="sidebar-submenu">

@@ -192,7 +192,7 @@
         {% else %}
         <td>External</td>
         {% endif %}
-        {% if org.status != 1 %}
+        {% if org.status != 1 and org.file %}
         <td><a href="{{ org.file.url }}">Download File</a></td>
         {% else %}
         <td>-</td>

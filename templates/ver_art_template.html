@@ -8,6 +8,8 @@
             <th>Year</th>
             <th>Type</th>
             <th>Platform</th>
+            <th>Award</th>
+            <th>Competition</th>
             <th>Status</th>
             <th>Author</th>
             {% if tab_data.pending or tab_data.rejected %}
@@ -21,13 +23,22 @@
         {% for art in tab_data.arts %}
         <tr>
             <td>{{art.title}} <br></td>
-            <td>{{art.year}}</td>
+            <td>{{art.date.year}}</td>
             <td>{{art.type}}</td>
             <td>{{art.platform}}</td>
+            {% if art.award %}
+            <td>{{art.award}}</td>
+            <td>{{art.comp}}</td>
+            {% else %}
+            <td>-</td>
+            <td>-</td>
+            {% endif %}
             {% if art.published == 1 %}
             <td>Published</td>
+            {% elif art.published == 0 %}
+            <td>Accepted</td>
             {% else %}
-            <td>Yet To Be Published</td>
+            <td>Awarded</td>
             {% endif %}
             <td>{{art.student.user.full_name}}</td>
             {% if tab_data.pending or tab_data.rejected %}

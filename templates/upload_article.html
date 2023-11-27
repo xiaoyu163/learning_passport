@@ -38,6 +38,8 @@
             $('#art_platform_edit').val(art_platform);
             art_file = response.file;
             $('#art_file_edit').val(art_file);
+            art_apa = response.apa;
+            $('#art_apa').val(art_apa);
             var art_published = response.published
             if (art_published == true) {
               $('#art_published').prop('checked', true);
@@ -46,13 +48,69 @@
               $('#art_not_published').prop('checked', true);
             };
             var file_url = response.file;
-            $('#art_file').attr('href', file_url)
-           
-            filename = response.filename;
-            $('#art_file').text(filename);
-            toggleInputFields2()
+
+            if (file_url) {
+              $('#art_file').attr('href', file_url)
+
+              filename = response.filename;
+              $('#art_file').text(filename);
+            }
+            else {
+              $('#existing_file').hide();
+            }
+              toggleInputFields2()
           },
-          
+
+          error: function (xhr, status, error) {
+            console.log(error);  // Handle the error if necessary
+          }
+        });
+      });
+
+      $('.edit-awd-button').click(function () {
+        var artId = $(this).data('art-id');
+        console.log(artId)
+
+        // Make an AJAX request to retrieve the event details
+        $.ajax({
+          url: '/get-art-details/' + artId + '/',  // URL to your Django view for fetching event details
+          type: 'GET',
+
+          success: function (response) {
+            art_id = response.id;
+            $('#art_id_awd').val(art_id);
+            $('#art_awd_edit').val(art_id);
+
+            console.log(art_id)
+            art_year = response.date;
+            $('#awd_year_edit').val(art_year);
+            art_type = response.type;
+            $('#awd_type_edit').val(art_type);
+            art_title = response.title;
+            $('#awd_title_edit').val(art_title);
+            art_awd = response.award;
+            $('#awd_edit').val(art_awd);
+            art_comp = response.comp;
+            $('#awd_comp_edit').val(art_comp);
+            art_platform = response.platform;
+            $('#awd_platform_edit').val(art_platform);
+            art_file = response.file;
+            $('#awd_file_edit').val(art_file);
+            art_apa = response.apa;
+            $('#awd_apa').val(art_apa);
+            var file_url = response.file;
+            if (file_url){
+              $('#awd_file').attr('href', file_url)
+              console.log(file_url)
+              filename = response.filename;
+              $('#awd_file').text(filename);
+            }
+            else {
+              $('#existing_file_awd').hide();
+            }
+
+          },
+
           error: function (xhr, status, error) {
             console.log(error);  // Handle the error if necessary
           }
@@ -63,7 +121,11 @@
 </head>
 <button type="button" class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#upload_article">
   <i class="fas fa-upload"></i>
-  Upload
+  Published/Accepted Article
+</button>
+<button type="button" class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#awarded_article">
+  <i class="fas fa-upload"></i>
+  Awarded Article
 </button>
 <br><br>
 <div class="container-fluid table-responsive">
@@ -76,6 +138,8 @@
         <th>Year</th>
         <th>Type</th>
         <th>Platform</th>
+        <th>Award</th>
+        <th>Competition</th>
         <th>File</th>
         <th>Status</th>
         <th></th>
@@ -85,10 +149,17 @@
       {% for art in arts %}
       <tr>
         <td>{{art.title}} <br></td>
-        <td>{{art.year}}</td>
+        <td>{{art.date.year}}</td>
         <td>{{art.type}}</td>
         <td>{{art.platform}}</td>
-        {% if art.status != 1 %}
+        {% if art.award %}
+        <td>{{art.award}}</td>
+        <td>{{art.comp}}</td>
+        {% else %}
+        <td>-</td>
+        <td>-</td>
+        {% endif %}
+        {% if art.status != 1 and art.file %}
         <td><a href="{{ art.file.url }}">Download File</a></td>
         {% else %}
         <td>-</td>
@@ -104,48 +175,39 @@
         </td>
         <form method="POST">
           {% csrf_token %}
-        {% if not art.status == 1 %}
-        <td>        
-          <div class="button-container">
-          <button 
-            id="edit-button" 
-            type="button" 
-            class="edit-button btn btn-floating" 
-            data-mdb-toggle="modal" 
-            data-mdb-target="#edit_article" 
-            data-art-id="{{ art.id }}"
-            onclick="toggleInputFields2()">
-            <i class="fas fa-edit"></i>
-          </button>
-          &nbsp;
-        
-          <button 
-          type="submit" 
-          class="btn btn-floating" 
-          name="art_delete"
-          value="{{art.id}}"
-          onclick="return confirm('Confirm to delete {{art.title}}?')"
-          >
-          <i class="fas fa-trash"></i></button>
-          </div>
-        </td>
-        {% else %}
-        <td>
-          <div class="button-container">
-          <button class="btn btn-floating" disabled>
-            <i class="fas fa-edit"></i></button>
-          &nbsp;
-          <button 
-          type="submit" 
-          class="btn btn-floating" 
-          name="art_delete"
-          value="{{art.id}}" disabled
-          >
-          <i class="fas fa-trash"></i></button>
-          </div>
-        </td>
-        {% endif %}
-      </form>
+          {% if not art.status == 1 %}
+          <td>
+            <div class="button-container">
+              {% if not art.award %}
+              <button id="edit-button" type="button" class="edit-button btn btn-floating" data-mdb-toggle="modal"
+                data-mdb-target="#edit_article" data-art-id="{{ art.id }}" onclick="toggleInputFields2()">
+                <i class="fas fa-edit"></i>
+              </button>
+              {% else %}
+              <button id="edit-button" type="button" class="edit-awd-button btn btn-floating" data-mdb-toggle="modal"
+                data-mdb-target="#edit_awd_article" data-art-id="{{ art.id }}">
+                <i class="fas fa-edit"></i>
+              </button>
+              {% endif %}
+              &nbsp;
+
+              <button type="submit" class="btn btn-floating" name="art_delete" value="{{art.id}}"
+                onclick="return confirm('Confirm to delete {{art.title}}?')">
+                <i class="fas fa-trash"></i></button>
+            </div>
+          </td>
+          {% else %}
+          <td>
+            <div class="button-container">
+              <button class="btn btn-floating" disabled>
+                <i class="fas fa-edit"></i></button>
+              &nbsp;
+              <button type="submit" class="btn btn-floating" name="art_delete" value="{{art.id}}" disabled>
+                <i class="fas fa-trash"></i></button>
+            </div>
+          </td>
+          {% endif %}
+        </form>
       </tr>
 
       {% endfor %}
@@ -170,7 +232,7 @@
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="published" id="not_published" value="0"
               onchange="toggleInputFields()" checked />
-            <label class="form-check-label" for="inlineRadio1">Yet To Be Published</label>
+            <label class="form-check-label" for="inlineRadio1">Accepted</label>
           </div>
 
           <div class="form-check form-check-inline">
@@ -219,28 +281,14 @@
             </div>
           </div>
           <br>
-          <div class="form-outline">
-            <input type="text" id="art_comp" name="art_comp" class="form-control">
-            <label class="form-label" for="art_comp" style="margin-left: 0px;">Competition (If applicable)</label>
-            <div class="form-notch">
-              <div class="form-notch-leading" style="width: 9px;"></div>
-              <div class="form-notch-middle" style="width: 87.2px;"></div>
-              <div class="form-notch-trailing"></div>
-            </div>
+          <div class="form-floating mb-3">
+            <textarea class="form-control content" id="apa" name="apa" rows="4" style="height: auto;"></textarea>
+            <label for="event_desc">APA Citation</label>
           </div>
-          <br>
-          <div class="form-outline">
-            <input type="text" id="art_awd" name="art_awd" class="form-control">
-            <label class="form-label" for="art_awd" style="margin-left: 0px;">Award (If applicable)</label>
-            <div class="form-notch">
-              <div class="form-notch-leading" style="width: 9px;"></div>
-              <div class="form-notch-middle" style="width: 87.2px;"></div>
-              <div class="form-notch-trailing"></div>
-            </div>
-          </div>
+
           <br>
           <div id="not_published_container">
-            <label class="form-label" for="proof">Proof of Publication:</label>
+            <label class="form-label" for="proof">Proof of Acceptance:</label>
             <input type="file" class="form-control" name="proof" id="proof" />
           </div>
           <div id="published_container">
@@ -278,14 +326,16 @@
         </div>
         <div class="modal-body">
           <div class="form-check form-check-inline">
-            
-              <input class="form-check-input" type="radio" name="published" id="art_not_published" value="0" onchange="toggleInputFields2()">
-            <label class="form-check-label" for="inlineRadio1">Yet To Be Published</label>
+
+            <input class="form-check-input" type="radio" name="published" id="art_not_published" value="0"
+              onchange="toggleInputFields2()">
+            <label class="form-check-label" for="inlineRadio1">Accepted</label>
           </div>
 
           <div class="form-check form-check-inline">
-            
-              <input class="form-check-input" type="radio" name="published" id="art_published" value="1" onchange="toggleInputFields2()">
+
+            <input class="form-check-input" type="radio" name="published" id="art_published" value="1"
+              onchange="toggleInputFields2()">
             <label class="form-check-label" for="inlineRadio2">Published</label>
           </div>
           <br><br>
@@ -320,8 +370,7 @@
           </div>
           <br>
           <div class="form-outline">
-            <input class="form-control active" id="art_platform_edit" name="art_platform" type="text"
-              >
+            <input class="form-control active" id="art_platform_edit" name="art_platform" type="text">
             <label class="form-label" for="art_platform" style="margin-left: 0px;">Platform</label>
             <div class="form-notch">
               <div class="form-notch-leading" style="width: 9px;"></div>
@@ -330,33 +379,18 @@
             </div>
           </div>
           <br>
-          <div class="form-outline">
-            <input class="form-control active" id="art_comp_edit" name="art_comp" type="text">
-            <label class="form-label" for="art_comp" style="margin-left: 0px;">Competition</label>
-            <div class="form-notch">
-              <div class="form-notch-leading" style="width: 9px;"></div>
-              <div class="form-notch-middle" style="width: 60px;"></div>
-              <div class="form-notch-trailing"></div>
-            </div>
+          <div class="form-floating mb-3">
+            <textarea class="form-control content" id="art_apa" name="apa" rows="4" style="height: auto;"></textarea>
+            <label for="art_apa">APA Citation</label>
           </div>
           <br>
-          <div class="form-outline">
-            <input class="form-control active" id="art_awd_edit" name="art_awd" type="text" >
-            <label class="form-label" for="art_awd" style="margin-left: 0px;">Award</label>
-            <div class="form-notch">
-              <div class="form-notch-leading" style="width: 9px;"></div>
-              <div class="form-notch-middle" style="width: 60px;"></div>
-              <div class="form-notch-trailing"></div>
-            </div>
-          </div>
-          <br>
-          <div>
+          <div id="existing_file">
             <label for="file" class="form-label">Existing File</label>
             <a href="#" class="form-control" type="text" id="art_file"></a>
           </div>
           <br>
           <div id="not_published_container2">
-            <label class="form-label" for="proof">(To update) Proof of Publication:</label>
+            <label class="form-label" for="proof">(To update) Proof of Acceptance:</label>
             <input type="file" class="form-control" name="proof_edit" id="proof_edit" />
           </div>
           <div id="published_container2">
@@ -370,6 +404,200 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
           <button id="edit_submit" type="submit" class="btn btn-primary" name="art_edit">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Add Awarded Article -->
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="awarded_article" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Upload Awarded Articles</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="form-outline">
+            <input type="text" id="art_title" name="art_title" class="form-control" required>
+            <label class="form-label" for="art_title" style="margin-left: 0px;">Title</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="date" id="art_year" name="art_year" class="form-control active" required>
+            <label class="form-label" for="art_year" style="margin-left: 0px;">Date</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 30px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="text" id="art_type" name="art_type" class="form-control" required>
+            <label class="form-label" for="art_type" style="margin-left: 0px;">Type</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-floating mb-3">
+            <textarea class="form-control content" id="apa" name="apa" rows="4" style="height: auto;"></textarea>
+            <label for="event_desc">APA Citation</label>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control" id="art_platform_edit" name="art_platform" type="text">
+            <label class="form-label" for="art_platform" style="margin-left: 0px;">Platform</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="text" id="art_comp" name="art_comp" class="form-control" required>
+            <label class="form-label" for="art_comp" style="margin-left: 0px;">Competition</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input type="text" id="art_awd" name="art_awd" class="form-control" required>
+            <label class="form-label" for="art_awd" style="margin-left: 0px;">Award</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 87.2px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div>
+            <label class="form-label" for="proof">Certification:</label>
+            <input type="file" class="form-control" name="cert" id="cert" required />
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+            Close
+          </button>
+
+          <button type="submit" class="btn btn-primary" name="art_awd_submit">
+            Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Edit Award Modal -->
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="modal fade" id="edit_awd_article" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Awarded Submission</h5>
+          <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-outline">
+            <input class="form-control active" id="awd_title_edit" name="art_title" type="text">
+            <label class="form-label" for="art_title" style="margin-left: 0px;">Title</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="awd_year_edit" name="art_year" type="date">
+            <label class="form-label" for="art_year" style="margin-left: 0px;">Year</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="awd_type_edit" name="art_type" type="text">
+            <label class="form-label" for="art_type" style="margin-left: 0px;">Type</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="awd_platform_edit" name="art_platform" type="text">
+            <label class="form-label" for="art_platform" style="margin-left: 0px;">Platform</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-floating mb-3">
+            <textarea class="form-control content" id="awd_apa" name="apa" rows="4" style="height: auto;"></textarea>
+            <label for="art_apa">APA Citation</label>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="awd_comp_edit" name="art_comp" type="text">
+            <label class="form-label" for="art_comp" style="margin-left: 0px;">Competition</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div class="form-outline">
+            <input class="form-control active" id="awd_edit" name="art_awd" type="text">
+            <label class="form-label" for="art_awd" style="margin-left: 0px;">Award</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <br>
+          <div id="existing_file_awd">
+            <label for="file" class="form-label">Existing File</label>
+            <a href="#" class="form-control" type="text" id="awd_file"></a>
+          </div>
+          <br>
+          <div id="not_published_container2">
+            <label class="form-label" for="proof">(To update) Certification:</label>
+            <input type="file" class="form-control" name="cert_edit" id="cert_edit" />
+          </div>
+       
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+          <button id="art_awd_edit" type="submit" class="btn btn-primary" name="art_awd_edit">Save changes</button>
         </div>
       </div>
     </div>
@@ -420,12 +648,12 @@
       console.log("published")
       published_con.style.display = "block";
       not_published_con.style.display = "none";
-  
+
     } else if (notPublishedCheckbox.checked) {
       console.log("not published")
       published_con.style.display = "none";
       not_published_con.style.display = "block";
- 
+
     }
   }
   toggleInputFields2();

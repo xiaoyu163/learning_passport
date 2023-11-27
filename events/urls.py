@@ -9,4 +9,5 @@ urlpatterns = [
     path('get-event-details/<int:event_id>/', views.get_event_details, name='get_event_details'),
     path('announcements', views.announcementListView, name="announcements"),
     path('get-ann-details/<int:ann_id>/', views.get_ann_details, name='get_ann_details'),
+    path('try', views.dynamicInput, name="Dynamic")
 ]

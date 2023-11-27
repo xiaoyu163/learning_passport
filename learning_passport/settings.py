@@ -149,21 +149,15 @@ ADMIN_STYLE = {
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'u2005405@siswa.um.edu.my'
-EMAIL_HOST_PASSWORD = 'u201697a3a6'
+# EMAIL_HOST_USER = 'u2005405@siswa.um.edu.my'
+# EMAIL_HOST_PASSWORD = 'u201697a3a6'
 # EMAIL_HOST_USER = 'learning_passport@outlook.com'
 # EMAIL_HOST_USER = 'leexyu2001@hotmail.com'
 # EMAIL_HOST_PASSWORD = '1632001'
 # EMAIL_HOST_PASSWORD = 'FASS_chinesestudies'
+MAIL_USE_TLS = True
+EMAIL_HOST_USER = 'fortrash1603@gmail.com'
+EMAIL_HOST_PASSWORD = 'dccx mgtq fgsj xzkh' #app password
 EMAIL_PORT = 587
-
-WKHTMLTOPDF_CMD = 'Downloads'  # Replace with the path to wkhtmltopdf executable
-PDFKIT_OPTIONS = {
-    'page-size': 'A4',
-    'margin-top': '0mm',
-    'margin-right': '0mm',
-    'margin-bottom': '0mm',
-    'margin-left': '0mm',
-}
 
 

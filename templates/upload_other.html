@@ -62,7 +62,7 @@
       <td>{{comp.year}}</td>
       <td>{{comp.name}}</td>
       <td>{{comp.award}}</td>
-      {% if comp.status != 1 %}
+      {% if comp.status != 1 and comp.file %}
       <td><a href="{{ comp.file.url }}">Download File</a></td>
       {% else %}
       <td>-</td>

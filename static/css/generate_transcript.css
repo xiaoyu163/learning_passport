@@ -41,3 +41,29 @@
     /* Make the text inline */
 }
 
+/* Define the style for the watermark container */
+#watermark {
+    position: fixed; /* or absolute, depending on your preference */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allows interaction with elements below the watermark */
+}
+
+/* Style the watermark text */
+#watermark::after {
+    content: "Non-Printable Version";
+    font-size: 50px;
+    font-weight: bold;
+    color: #888; /* Adjust the color as needed */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform:  rotate(-45deg);
+    opacity: 0.5;
+}
+
+.content {
+    z-index: 1;
+}

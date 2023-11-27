@@ -13,5 +13,6 @@ class Article (models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     file = models.FileField(upload_to='article/', null=True)
     filename = models.CharField(max_length=100, null=True)
-    published = models.BooleanField()
+    published = models.BooleanField(null=True)
+    apa = models.CharField(max_length=100, null=True)
 

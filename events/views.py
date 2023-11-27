@@ -13,6 +13,12 @@ import os
 #     return render (request, "try.html")
 
 # Create your views here.
+
+def dynamicInput (request):
+    context = {
+        "event_name": "Event 1"
+    }
+    return render (request, "event_com_form.html", context)
 @login_required
 def eventListView (request):
     # base_dir = settings.BASE_DIR
