@@ -107,11 +107,11 @@
           <div class="card-body">
             <center>
               <div class="card-text">
-                <h1><i class="fa-solid fa-lightbulb" style="color: #6151fb"></i></h1>
+                <h1><i class="fa-solid fa-comments" style="color: #6151fb"></i></h1>
                 <strong>
-                  <p class="info-title">Proposal<br>Defense </p>
+                  <p class="info-title">Seminar</p>
                 </strong>
-                <h3>{{pd_count}}</h3>
+                <h3>{{seminar_count}}</h3>
               </div>
             </center>
           </div>
@@ -122,7 +122,7 @@
               <div class="card-text">
                 <h1><i class="fa-solid fa-balance-scale" style="color: #ed1d4d"></i></h1>
                 <strong>
-                  <p class="info-title">Candidature<br>Defense </p>
+                  <p class="info-title">CD/PD </p>
                 </strong>
                 <h3>{{cd_count}}</h3>
               </div>
@@ -166,11 +166,9 @@
   </div>
   <div class="right-side">
     {% if registered_event %}
-    <div style="display:flex;">
-      <h5><strong>Registered Event</strong></h5>
-      
-      &nbsp; &nbsp;
-      <a href="{% url 'attendance' %}"><sub>View all</sub></a>
+    <div>
+      <h5 class="fw-bold mb-1">Registered Events</h5>
+      <a class="mb-0" href="{% url 'attendance' %}">View all</a>
     </div>
 
     {% for event in registered_events %}
@@ -187,10 +185,9 @@
     {% endfor %}
 
     {% endif %}
-    <div style="display:flex;">
-      <h5><strong>Announcement</strong></h5>
-      &nbsp; &nbsp; &nbsp; &nbsp;
-      <a href="{% url 'announcements' %}"><sub>View all</sub></a>
+    <div>
+      <h5 class="fw-bold mb-1">Announcements</h5>
+      <a class="mb-0" href="{% url 'announcements' %}">View all</a>
     </div>
     {% for ann in announcements %}
     <div class="card border border-info">

@@ -14,6 +14,7 @@ import os
 
 # Create your views here.
 
+
 def dynamicInput (request):
     context = {
         "event_name": "Event 1"

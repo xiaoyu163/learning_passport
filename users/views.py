@@ -613,7 +613,7 @@ def dashboardView(request):
         print(df_students)
 
         fig = px.line(df_students, x='enrol_sem', y='count', color='program', line_group='program',
-              labels={'count': 'Number of Students', 'year_sem': 'Year and Semester'},
+              labels={'count': 'Number of Students', 'enrol_sem': 'Year and Semester'},
               title='Number of Students Enrolled in Each Semester by Study Level',
               )
         
@@ -622,7 +622,7 @@ def dashboardView(request):
         # fig.update_traces(mode="lines+markers")
         # fig.update_xaxes(tickvals=year_list)
         # fig.update_yaxes(dtick=1)
-        fig.update_xaxes(rangeslider_visible=True, showticklabels=False)
+        fig.update_xaxes(rangeslider_visible=True)
         graph_json = fig.to_json()
 
 
@@ -660,6 +660,7 @@ def dashboardView(request):
         pd_count = Event_Participants.objects.filter(student=student, event__type=3, attendance=1).count()
         cd_count = Event_Participants.objects.filter(student=student, event__type=4, attendance=1).count()
         conf_count = Event_Participants.objects.filter(student=student, event__type=2, attendance=1).count()
+        seminar_count = Event_Participants.objects.filter(student=student, event__type=1, attendance=1).count()
         context = { 
             "student": student,
             "announcements": announcements,
@@ -671,6 +672,7 @@ def dashboardView(request):
             "pd_count": pd_count,
             "cd_count": cd_count,
             "conf_count": conf_count,
+            "seminar_count": seminar_count,
         }
         return render(request, "dashboard_student.html", context)
     

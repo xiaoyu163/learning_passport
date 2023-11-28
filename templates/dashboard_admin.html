@@ -17,10 +17,11 @@
 </head>
 
 <br>
-    <h1>Dashboard</h1>
-    <div class="dashboard">
+<h1>Dashboard</h1>
+<div class="container contaner-fluid">
+    <!-- <div class="dashboard"> -->
         <div class="left-side">
-            <div class="container container-fluid">
+            <div class="container">
                 <div class="left">
                     <form method="POST">
                         {% csrf_token %}
@@ -147,12 +148,10 @@
             </div>
         </div>
         <div class="right-side">
-            <div style="display:flex;">
-                <h5><strong>Upcoming Event</strong></h5> 
-                &nbsp; &nbsp;
-                <a href="{% url 'events' %}"><sub>View all</sub></a>
+            <div>
+                <h5 class="fw-bold mb-1">Upcoming Events</h5>
+                <a class="mb-0" href="{% url 'events' %}">View all</a>
             </div>
-           
             {% for event in upcoming_events %}
             <a href="{% url 'event-detail' event.id %}">
             <div class="card p-1 m-1 border border-info">
@@ -160,19 +159,17 @@
                     <strong>{{event.e_name}}</strong>
                 </div>
                 <div class="card-body p-1 m-1">
-                 
-                {{event.start.date}}
-              </div>
+                    {{event.start.date}}
+                </div>
             </div>
             </a>
             <br>
             {% endfor %}
-            
-            <div style="display:flex;">
-                <h5><strong>Announcement</strong></h5> 
-                &nbsp; &nbsp; &nbsp; &nbsp;
-                <a href="{% url 'announcements' %}"><sub>View all</sub></a>
+            <div>
+                <h5 class="fw-bold mb-1">Announcements</h5>
+                <a class="mb-0" href="{% url 'announcements' %}">View all</a>
             </div>
+            
             {% for ann in announcements %}
             <div class="card p-1 m-1 border border-info">
                 <div class="card-header p-1 m-1">
@@ -185,8 +182,8 @@
             <br>
             {% endfor %}
         </div>
-    </div>
-
+    <!-- </div> -->
+</div>
 
 
 <script>
