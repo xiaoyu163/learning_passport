@@ -661,6 +661,7 @@ def dashboardView(request):
         cd_count = Event_Participants.objects.filter(student=student, event__type=4, attendance=1).count()
         conf_count = Event_Participants.objects.filter(student=student, event__type=2, attendance=1).count()
         seminar_count = Event_Participants.objects.filter(student=student, event__type=1, attendance=1).count()
+        pd_cd_count = pd_count + cd_count
         context = { 
             "student": student,
             "announcements": announcements,
@@ -673,6 +674,7 @@ def dashboardView(request):
             "cd_count": cd_count,
             "conf_count": conf_count,
             "seminar_count": seminar_count,
+            "pd_cd_count": pd_cd_count,
         }
         return render(request, "dashboard_student.html", context)
     

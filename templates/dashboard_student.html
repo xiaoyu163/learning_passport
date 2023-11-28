@@ -6,8 +6,13 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
 </head>
-<h1>Dashboard</h1>
-<br>
+<div style="display: flex; align-items: center;">
+  <div style="height: 10%; width: 30%;">
+    <img class="img-fluid" src="{% static 'img/um_chinese_logo.png' %}" alt="UM Chinese Studies logo.">
+  </div>
+  <h1 style="margin-left: 10px;">Dashboard</h1>
+</div>
+
 <div class="container">
   <div class="left-side">
     <div class="container">
@@ -122,9 +127,9 @@
               <div class="card-text">
                 <h1><i class="fa-solid fa-balance-scale" style="color: #ed1d4d"></i></h1>
                 <strong>
-                  <p class="info-title">CD/PD </p>
+                  <p class="info-title">PD/CD </p>
                 </strong>
-                <h3>{{cd_count}}</h3>
+                <h3>{{pd_cd_count}}</h3>
               </div>
             </center>
           </div>
