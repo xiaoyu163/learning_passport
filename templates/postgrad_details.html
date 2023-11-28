@@ -39,6 +39,22 @@
                         var formattedviva = viva_date.toISOString().substring(0, 16);
                         $('#viva_date').val(formattedviva);
                     }
+                    var rm = response.rm          
+                    if (rm == true){
+                        $('#rm').prop('checked',true);
+                    }
+                    var pd = response.pd          
+                    if (pd == true){
+                        $('#pd').prop('checked',true);
+                    }
+                    var cd = response.cd          
+                    if (cd == true){
+                        $('#cd').prop('checked',true);
+                    }
+                    var viva = response.viva          
+                    if (viva == true){
+                        $('#viva').prop('checked',true);
+                    }
                 },
                 error: function (xhr, status, error) {
                     console.log(error);  // Handle the error if necessary
@@ -90,24 +106,64 @@
                 <td>{{student.lecturer.user.full_name}}</td>
                 {% endif %}
                 {% if student.rm_date %}
-                <td class="text-nowrap">{{student.rm_date.date}} <br> {{student.rm_date.time}}</td>
+                <td class="text-nowrap">
+                    <div class="ms-3">
+                        <p class="fw-bold mb-1">{{student.rm_date.date}}</p>
+                        <p class="text-muted mb-0">{{student.rm_date.time}}</p>
+                        {% if student.rm_status %}
+                        <span class="badge badge-primary rounded-pill d-inline">Passed</span>
+                        {% else %}
+                        <span class="badge badge-warning rounded-pill d-inline">Pending</span>
+                        {% endif %}
+                    </div>
+                </td>
                 {% else %}
-                <td>-</td>
+                <td><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
                 {% endif %}
                 {% if student.pd_date %}
-                <td class="text-nowrap">{{student.pd_date.date}} <br> {{student.pd_date.time}}</td>
+                <td class="text-nowrap">
+                    <div class="ms-3">
+                        <p class="fw-bold mb-1">{{student.pd_date.date}}</p>
+                        <p class="text-muted mb-0">{{student.pd_date.time}}</p>
+                        {% if student.pd_status %}
+                        <span class="badge badge-primary rounded-pill d-inline">Passed</span>
+                        {% else %}
+                        <span class="badge badge-warning rounded-pill d-inline">Pending</span>
+                        {% endif %}
+                    </div>
+                </td>
                 {% else %}
-                <td>-</td>
+                <td style="vertical-align: middle;"><span class="badge badge-danger rounded-pill d-inline" >Not Scheduled</span></td>
                 {% endif %}
                 {% if student.cd_date %}
-                <td class="text-nowrap">{{student.cd_date.date}} <br> {{student.cd_date.time}}</td>
+                <td class="text-nowrap">
+                    <div class="ms-3">
+                        <p class="fw-bold mb-1">{{student.cd_date.date}}</p>
+                        <p class="text-muted mb-0">{{student.cd_date.time}}</p>
+                        {% if student.cd_status %}
+                        <span class="badge badge-primary rounded-pill d-inline">Passed</span>
+                        {% else %}
+                        <span class="badge badge-warning rounded-pill d-inline">Pending</span>
+                        {% endif %}
+                    </div>
+                </td>
                 {% else %}
-                <td>-</td>
+                <td><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
                 {% endif %}
                 {% if student.viva_date %}
-                <td class="text-nowrap">{{student.viva_date.date}} <br> {{student.viva_date.time}}</td>
+                <td class="text-nowrap">
+                    <div class="ms-3">
+                        <p class="fw-bold mb-1">{{student.viva_date.date}}</p>
+                        <p class="text-muted mb-0">{{student.viva_date.time}}</p>
+                        {% if student.viva_status %}
+                        <span class="badge badge-primary rounded-pill d-inline">Passed</span>
+                        {% else %}
+                        <span class="badge badge-warning rounded-pill d-inline">Pending</span>
+                        {% endif %}
+                    </div>
+                </td>
                 {% else %}
-                <td>-</td>
+                <td><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
                 {% endif %}
                 <td>
                     <button class="dates-button btn btn-floating" 
@@ -152,6 +208,11 @@
                             <div class="form-notch-trailing"></div>
                         </div>
                     </div>
+                    <!-- Default switch -->
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="rm" name="rm"/>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Pass</label>
+                    </div>
                     <br>
                     <label for="pd_date">Proposal Defense Date</label>
                     <div class="form-outline">
@@ -160,6 +221,10 @@
                             <div class="form-notch-leading"></div>
                             <div class="form-notch-trailing"></div>
                         </div>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="pd" name="pd"/>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Pass</label>
                     </div>
                     <br>
                     <label for="cd_date">Candidatual Defense Date</label>
@@ -170,6 +235,10 @@
                             <div class="form-notch-trailing"></div>
                         </div>
                     </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="cd" name="cd"/>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Pass</label>
+                    </div>
                     <br>
                     <label for="viva_date">Viva Date</label>
                     <div class="form-outline">
@@ -178,6 +247,10 @@
                             <div class="form-notch-leading"></div>
                             <div class="form-notch-trailing"></div>
                         </div>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="viva" name="viva"/>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Pass</label>
                     </div>
                     
                 </div>

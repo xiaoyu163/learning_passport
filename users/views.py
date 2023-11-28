@@ -512,7 +512,7 @@ def dashboardView(request):
         year_list = list()
         par_list = list()
 
-        years = Semester.objects.values('academic_year').distinct()
+        years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
 
         
         current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
@@ -524,20 +524,21 @@ def dashboardView(request):
         events = Events.objects.filter(e_name=event_name)
         upcoming_events = Events.objects.filter(start__gte=current_date).order_by("start")[:2]
         announcements = Announcement.objects.order_by("-created_time")[:2]
-        num_active = User.objects.filter(role='STUDENT', is_active=1).count()
+        num_active = Student.objects.filter(user__is_active=1).count()
         num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
         num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end).count()
         study_level = 1
         
         if request.method == 'POST':
             print(request.POST)
-            if 'event_name' in request.POST:
-                events = Events.objects.filter(e_name=request.POST['event_name']).order_by("year")
-                event_name = request.POST['event_name']
-                selected = event_name
+            # if 'event_name' in request.POST:
+            #     events = Events.objects.filter(e_name=request.POST['event_name']).order_by("year")
+            #     event_name = request.POST['event_name']
+            #     selected = event_name
+
+            
 
             if 'academic_year' in request.POST or 'semester' in request.POST or 'study_level' in request.POST:
-                count_active = 0
                 study_level = request.POST['study_level']
                 if Semester.objects.filter(academic_year=request.POST['academic_year'], semester=request.POST['semester']).exists():
                     selected_year = Semester.objects.get(academic_year=request.POST['academic_year'], semester=request.POST['semester'])
@@ -547,61 +548,81 @@ def dashboardView(request):
 
                 print(selected_year)
 
-                if study_level == '1':
+                if study_level == 'All':
                     num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
                     num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end).count()
-                elif study_level == '2':
+                elif study_level == '1':
                     num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
                     num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end,student__program=1).count()
-                else:
+                elif study_level == '2':
                     num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
-                    num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end).exclude(student__program=1).count()
+                    num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end,student__program=2).count()
+                elif study_level == '3':
+                    num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
+                    num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end,student__program=3).count()
+                elif study_level == '4':
+                    num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
+                    num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end,student__program=4).count()
+                
 
                 if selected_year == current_year:
-                    active = User.objects.filter(role='STUDENT', is_active=1)
-                    
-                    if request.POST['study_level'] == '1':
+                    active = Student.objects.filter(user__is_active=1)
+                    if study_level == 'All':
                         num_active = active.count()
-                    elif request.POST['study_level'] == '2':
-                        student = Student.objects.filter(user__in=active)
-                        num_active = student.filter(program=1).count()
-                    else:
-                        student = Student.objects.filter(user__in=active)
-                        num_active = student.exclude(program=1).count()
+                    elif study_level== '1':
+                        num_active = active.filter(program=1).count()
+                    elif study_level == '2':
+                        num_active = active.filter(program=2).count()
+                    elif study_level == '3':
+                        num_active = active.filter(program=3).count()
+                    elif study_level == '4':
+                        num_active = active.filter(program=4).count()
                 else:
-                    users = User.objects.filter(role="STUDENT")
+                    students = Student.objects.filter(grad_sem__end__gte=selected_year.start, enrol_sem__start__lte=selected_year.start)
                     
-                    for user in users:
-                        student = Student.objects.get(user=user)
-                        if student.grad_year > selected_year.start and student.enrol_year < selected_year.end:
-                            if study_level == '1':
-                                count_active += 1
-                            elif study_level == '2':
-                                count_active += 1 if student.program == 1 else 0
-                            else:
-                                count_active += 1 if not student.program == 1 else 0                    
-                    
-                    num_active = count_active
-                print(study_level)
-                print(num_active)
+                    if study_level == 'All':
+                        num_active = students.count()
+                    elif study_level == '1':
+                        num_active = students.filter(program=1).count()
+                    elif study_level == '2':
+                        num_active = students.filter(program=2).count()
+                    elif study_level == '3':
+                        num_active = students.filter(program=3).count()  
+                    elif study_level == '4':
+                        num_active = students.filter(program=4).count()                  
+           
             
-               
-            
-        for event in events:
-            year_list.append(event.year)
-            number = Event_Participants.objects.filter(event=event, attendance=1).count()
-            par_list.append(number) 
+        # for event in events:
+        #     year_list.append(event.year)
+        #     number = Event_Participants.objects.filter(event=event, attendance=1).count()
+        #     par_list.append(number) 
 
        
+        df_students = pd.DataFrame(columns=["enrol_sem", "program", "count"])
+        semesters = Semester.objects.all()
+        for semester in semesters:
+            enrol_sem = str(semester.academic_year) + " Sem " + str(semester.semester)
+            student_count = Student.objects.filter(enrol_sem=semester).count()
+            undergrad_count = Student.objects.filter(enrol_sem=semester, program=1).count()
+            postgrad_count = Student.objects.filter(enrol_sem=semester, program__in=[2,3,4]).count()
+            df_students.loc[len(df_students.index)] = [enrol_sem, "All", student_count]
+            df_students.loc[len(df_students.index)] = [enrol_sem, "Undergraduate", undergrad_count]
+            df_students.loc[len(df_students.index)] = [enrol_sem, "Postgraduate", postgrad_count] 
+
+        df_students = df_students.sort_values(by=['enrol_sem'])  
+        print(df_students)
+
+        fig = px.line(df_students, x='enrol_sem', y='count', color='program', line_group='program',
+              labels={'count': 'Number of Students', 'year_sem': 'Year and Semester'},
+              title='Number of Students Enrolled in Each Semester by Study Level',
+              )
         
-
-       
-    
         # par_df = pd.DataFrame({'Year':year_list, 'Participants': par_list})
         # fig = px.line(par_df, x="Year", y="Participants", title=f'Number of Participants for {event_name}')
         # fig.update_traces(mode="lines+markers")
         # fig.update_xaxes(tickvals=year_list)
         # fig.update_yaxes(dtick=1)
+        fig.update_xaxes(rangeslider_visible=True, showticklabels=False)
         graph_json = fig.to_json()
 
 
@@ -699,6 +720,22 @@ def postgradDetailsView (request):
             student.pd_date = pd_date
             student.cd_date = cd_date
             student.viva_date = viva_date
+            if 'rm' in request.POST:
+                student.rm_status = 1
+            else:
+                student.rm_status = 0
+            if 'pd' in request.POST:
+                student.pd_status = 1
+            else:
+                student.pd_status = 0
+            if 'cd' in request.POST:
+                student.cd_status = 1
+            else:
+                student.cd_status = 0
+            if 'viva' in request.POST:
+                student.viva_status = 1
+            else:
+                student.viva_status = 0
             student.save()
             return redirect ("postgrad")
     context = {
@@ -802,6 +839,10 @@ def get_student_details(request, student_id):
             'pd_date': student.pd_date,
             'cd_date': student.cd_date,
             'viva_date': student.viva_date,
+            'rm': student.rm_status,
+            'pd': student.pd_status,
+            'cd': student.cd_status,
+            'viva': student.viva_status,
             # Include other event details in the response as needed
         }
         return JsonResponse(response_data)

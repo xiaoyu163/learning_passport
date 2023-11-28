@@ -55,9 +55,6 @@ class User(AbstractUser):
     address = models.CharField(max_length=100, null=True)
     date_inactive = models.DateField(null=True)
 
-
-
-
 class Semester (models.Model):
     academic_year = models.CharField(max_length=7)
     semester = models.SmallIntegerField()
@@ -94,6 +91,10 @@ class Student(models.Model):
     pd_date = models.DateTimeField(null=True)
     cd_date = models.DateTimeField(null=True)
     viva_date = models.DateTimeField(null=True)
+    rm_status = models.BooleanField(default=False)
+    pd_status = models.BooleanField(default=False)
+    cd_status = models.BooleanField(default=False)
+    viva_status = models.BooleanField(default=False)
 
 class Organisation(models.Model):
     name = models.CharField(max_length=100)

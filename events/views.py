@@ -37,7 +37,7 @@ def eventListView (request):
             parts.append(part)
     else:
         parts = ''
-    print(parts)
+    print(events)
     event_parts = zip(events,parts)
   
     

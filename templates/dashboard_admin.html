@@ -55,9 +55,11 @@
                                 <!-- Student Study Level -->
                                 <select class="form-select form-select-sm" id="study_level" name="study_level"
                                     aria-label="Default select example" onchange="submit()">
-                                    <option value="1" {% if study_level == '1' %} selected {% endif %}>All</option>
-                                    <option value="2" {% if study_level == '2' %} selected {% endif %}>Undergraduate</option>
-                                    <option value="3" {% if study_level == '3' %} selected {% endif %}>Postgraduate</option>
+                                    <option value="All" {% if study_level == 'All' %} selected {% endif %}>All</option>
+                                    <option value="1" {% if study_level == '1' %} selected {% endif %}>Bachelor of Arts Chinese Studies</option>
+                                    <option value="2" {% if study_level == '2' %} selected {% endif %}>Master of Chinese Studies (Coursework)</option>
+                                    <option value="3" {% if study_level == '3' %} selected {% endif %}>Master of Arts (Research)</option>
+                                    <option value="4" {% if study_level == '4' %} selected {% endif %}>Doctor of Philosophy (Ph.D)</option>
                                 </select>
                                 <label for="study_level">Student Study Level</label>
                             </div>
@@ -126,7 +128,7 @@
             </div>
             <br>
             <div>
-                <form method="POST">
+                <!-- <form method="POST">
                     {% csrf_token %}
 
                     <div class="form-floating">
@@ -140,7 +142,7 @@
                         </select>
                         <label for="event_select">Select Event Name</label>
                     </div>
-                </form>
+                </form> -->
                 <div id="plotly-graph"></div>
             </div>
         </div>
