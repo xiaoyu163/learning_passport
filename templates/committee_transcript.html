@@ -17,13 +17,13 @@
                         <td style="padding: 2px 10px;" rowspan="{{ total_in_length }}">Internal</td>
                         <td style="padding: 2px 10px;">{{ par.event.e_name }}</td>
                         <td style="padding: 2px 10px;">{{ par.position }}</td>
-                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.year }}</td>
+                        <td style="padding: 2px 10px; vertical-align: bottom;" class="text-nowrap">{{ par.event.year }}</td>
                     </tr>
                 {% else %}
                     <tr style="orphans: 4; widows: 4;">
                         <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.e_name }}</td>
                         <td style="padding: 2px 10px;" class="text-nowrap">{{ par.position }}</td>
-                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.event.year }}</td>
+                        <td style="padding: 2px 10px; vertical-align: bottom;" class="text-nowrap">{{ par.event.year }}</td>
                     </tr>
                 {% endif %}
             {% endfor %}
@@ -33,13 +33,13 @@
                         <td style="padding: 2px 10px;" rowspan="{{ total_in_length }}">Internal</td>
                         <td style="padding: 2px 10px;">{{ par.org.name }}</td>
                         <td style="padding: 2px 10px;">{{ par.position }}</td>
-                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.org.year }}</td>
+                        <td style="padding: 2px 10px; vertical-align: bottom;" class="text-nowrap">{{ par.org.year }}</td>
                     </tr>
                 {% else %}
                     <tr style="orphans: 4; widows: 4;">
                         <td style="padding: 2px 10px;">{{ par.org.name }}</td>
                         <td style="padding: 2px 10px;">{{ par.position }}</td>
-                        <td style="padding: 2px 10px;" class="text-nowrap">{{ par.org.year }}</td>
+                        <td style="padding: 2px 10px; vertical-align: bottom;" class="text-nowrap">{{ par.org.year }}</td>
                     </tr>
                 {% endif %}
             {% endfor %}

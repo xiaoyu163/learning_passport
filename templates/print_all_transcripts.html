@@ -1,0 +1,33 @@
+{% extends "sidebar.html" %}
+
+{% block content %}
+{% load static %}
+<h1>Print All Transcripts</h1>
+<br>
+<form method="POST">
+    {% csrf_token %}
+    <div class="form-floating" style="width:50%">
+        <select class="form-select" id="year" name="academic_year">
+            {% for year in academic_years %}
+            <option value="{{year.academic_year}}" {% if year.academic_year == current.academic_year %} selected {% endif %}>{{year.academic_year}}</option>
+            {% endfor %}
+        </select>
+        <label for="year">Academic Year</label>
+    </div>
+    <br>
+    <div class="form-floating" style="width:50%">
+        <select class="form-select" name="semester">
+            <option value="1" {% if current.semester == 1 %} selected {% endif %}>Semester 1</option>
+            <option value="2" {% if current.semester == 2 %} selected {% endif %}>Semester 2</option>
+        </select>
+        <label for="year">Semester</label>
+    </div>
+    <br>
+    <div class="input-group">
+        <button type="submit" class="btn btn-outline-primary" name="print_all">
+            <i class="fa-solid fa-file-zipper"></i> &nbsp;
+            Download All</button>
+    </div>
+</form>
+
+{% endblock %}

@@ -8,18 +8,15 @@
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'css/generate_transcript.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .gradient-container {
+            background: linear-gradient(to right, #63969b, #a8fafd);
+        }
+    </style>
 
 </head>
 {% if request.user.role in 'SUPER ADMIN' %}
-<form method="POST">
-    {% csrf_token %}
-    <h5>Print for all students that graduate on Semester {{current.semester}} {{current.academic_year}}</h5>
-    <div class="input-group">
-        <button type="submit" class="btn btn-outline-primary" name="print_all"><i class="fas fa-print"></i></button>
-    </div>
-</form>
-<br>
-<hr>
+
 <h5> Show Student's Transcript </h5>
 <form method="POST">
     {% csrf_token %}
@@ -46,8 +43,8 @@
     <div id="watermark"></div>
     {% endif %}
     <div class="logo-container">
-        <div class="image">
-            <img src="{% static 'img/um_chinese_logo.png' %}" alt="UM Chinese Studies Department logo.">
+        <div class="image" style="height:10%; width: 30%;">
+            <img class="img-fluid" src="{% static 'img/um_chinese_logo.png' %}" alt="UM Chinese Studies Department logo.">
         </div>
         <div class="names">
             <h5><strong>
@@ -81,7 +78,7 @@
         <span class="gradient-text">Attendend Events</span>
     </div>
     <div class="table-container">
-        {% include 'event_transcript.html' %}
+        {% include 'event_transcript_postgrad.html' %}
     </div>
     <br>
     {% endif %}
@@ -139,10 +136,10 @@
 </div>
 <div>
     <center>
-        <button id="btn-print-this" class="btn btn-success" name="print">
+        <a href="{% url 'generate-pdf' student.id  %}" class="btn btn-success" name="print">
             <i class="fas fa-print"></i> &nbsp;
             Print Transcript
-        </button>
+        </a>
     </center>
 </div>
 {% endif %}
@@ -170,7 +167,7 @@
     });
 </script> -->
 
-<script>
+<!-- <script>
     document.getElementById("btn-print-this").addEventListener("click", function () {
         const element = document.getElementById('content');
         const opt = {
@@ -219,7 +216,7 @@
             pdf.save();
         });
     });
-</script>
+</script> -->
 
 
 

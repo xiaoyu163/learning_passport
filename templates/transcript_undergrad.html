@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+{% extends "sidebar.html" %}
+
+{% block content %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/generate_transcript.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .gradient-container {
+            background: linear-gradient(to right, #887455, #dfc190);
+        }
+    </style>
+</head>
+{% if request.user.role in 'SUPER ADMIN' %}
+<h5> Show Student's Transcript </h5>
+<form method="POST">
+    {% csrf_token %}
+    <div class="input-group">
+        <div class="form-outline" style="width: 30%;">
+            <input type="text" id="matric" name="matric" class="form-control">
+            <label class="form-label" for="art_title" style="margin-left: 0px;">Student Matric Number</label>
+            <div class="form-notch">
+                <div class="form-notch-leading" style="width: 9px;"></div>
+                <div class="form-notch-middle" style="width: 87.2px;"></div>
+                <div class="form-notch-trailing"></div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary" name="search"><i class="fas fa-search"></i></button>
+    </div>
+</form>
+<br>
+{% endif %}
+{% if transcript %}
+
+<div id="content" style="margin:0; padding:0;">
+    {% if request.user.role in 'STUDENT' %}
+
+    <div id="watermark"></div>
+    {% endif %}
+    <div class="logo-container">
+        <div class="image" style="height:10%; width: 30%;">
+            <img class="img-fluid" src="{% static 'img/um_chinese_logo.png' %}" alt="UM Chinese Studies Department logo.">
+        </div>
+        <div class="names">
+            <h5><strong>
+                    <div>Undergraduates Activities Record</div>
+                    <div>Department of Chinese Studies, Universiti Malaya </div>
+                    <div>马大中文系（本科生）活动记录</div>
+            </h5></strong>
+        </div>
+    </div>
+    <br><br>
+    <table>
+        <tr>
+            <td>English Name</td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>{{student.user.full_name}}</td>
+        </tr>
+        <tr>
+            <td>No. Matric</td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>{{student.matric_no}}</td>
+        </tr>
+        <tr>
+            <td>Academic Years</td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>{{student.enrol_year.year}} - {{student.grad_year.year}}</td>
+        </tr>
+    </table>
+    <br>
+    {% if event_pars_in or event_pars_ex %}
+    <div class="gradient-container">
+        <span class="gradient-text">Attendend Events</span>
+    </div>
+    <div class="table-container">
+        {% include 'event_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if event_coms_in or org_coms_in or event_coms_ex or org_coms_ex %}
+    <div class="gradient-container">
+        <span class="gradient-text">Activities / Organisations Committee </span>
+    </div>
+    <div class="table-container">
+    {% include 'committee_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if arts %}
+    <div class="gradient-container">
+        <span class="gradient-text">Published Articles / Literature Works </span>
+    </div>
+    <div class="table-container">
+    {% include 'article_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if awarded_arts %}
+    <div class="gradient-container">
+        <span class="gradient-text">Awarded Articles / Work </span>
+    </div>
+    <div class="table-container">
+    {% include 'awarded_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if other %}
+    <div class="gradient-container">
+        <span class="gradient-text">Other Competition </span>
+    </div>
+    <div class="table-container">
+    {% include 'other_transcript.html' %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if request.user.role in 'SUPER ADMIN' %}
+    <div>
+        Verified by Head of Department
+        <br>
+        <img src="{% static 'img/hod_sign.png' %}" alt="Signature">
+        <br>
+        {{hod_name}}
+        <br><br>
+    </div>
+
+</div>
+<div>
+    <center>
+        <a href="{% url 'generate-pdf' student.id  %}" class="btn btn-success">
+            <i class="fas fa-print"></i> &nbsp;
+            Print Transcript
+        </a>
+    </center>
+</div>
+{% endif %}
+
+{% endif %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+    integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- <script>
+    document.getElementById("btn-print-this").addEventListener("click", function () {
+        const element = document.getElementById('content');
+        const opt = {
+            margin: 5,
+            filename: 'transcript.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, y: 0, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // New Promise-based usage:
+        html2pdf().from(element).set(opt).save();
+
+      
+
+    });
+</script> -->
+
+<script>
+    document.getElementById("btn-print-this").addEventListener("click", function () {
+        const element = document.getElementById('content');
+        const opt = {
+            margin: 5,
+            filename: 'transcript.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, y: 0, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // New Promise-based usage:
+        const pdf = html2pdf();
+        
+        pdf.from(element).set(opt).outputPdf().then((pdf) => {
+            const doc = pdf.internal.pdf;
+
+            // Set the page height to A4 (297mm)
+            const pageHeight = 297;
+            const margin = 15; // Top and bottom margin in mm
+            const space = 1; // Space between lines in mm
+            let currentLength = margin; // Initialize current length with the top margin
+
+            doc.pageNumber = 1; // Initialize page number
+
+            // Iterate through each table row
+            const tableRows = element.querySelectorAll('tr');
+            tableRows.forEach((row, index) => {
+                const rowHeight = space; // Height of the current table row
+                currentLength += rowHeight;
+
+                if (currentLength > pageHeight) {
+                    doc.addPage(); // Add a new page
+                    currentLength = margin + rowHeight; // Reset current length on a new page
+                    doc.pageNumber++; // Increment page number
+                }
+
+                // Print the table row content
+                doc.fromHTML(row, 15, currentLength, {
+                    width: 180
+                });
+
+                // Adjust the current length for the height of the printed row
+                currentLength += row.offsetHeight;
+            });
+
+            pdf.save();
+        });
+    });
+</script>
+
+
+
+
+</body>
+{% endblock %}

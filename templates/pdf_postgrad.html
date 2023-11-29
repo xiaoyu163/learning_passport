@@ -1,0 +1,187 @@
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/generate_transcript.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.css" rel="stylesheet" />
+    <!-- MDB -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        * {
+            font-family: 'Times New Roman', Times, serif;
+            
+        }
+
+        .table-container {
+            font-size: 11px;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-right: 50px;
+        }
+
+
+        .image {
+            /* Adjust as needed */
+            margin-right: 20px;
+            height: 15%;
+            width: 30%;
+            /* Set the height to match the text container */
+
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .profile td {
+            border: 0;
+            font-size: 12px;
+            padding: 0 10px;
+        }
+
+        .names {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gradient-container {
+
+            background: linear-gradient(to right, #63969b, #a8fafd);
+            font-size: 14px;
+            padding: 5px;
+            width: 100%;
+            /* Add padding to the container */
+        }
+
+        /* Style the text within the container */
+        .gradient-text {
+            color: white;
+            /* Make text transparent */
+            font-size: 14px;
+            font-weight: bold;
+            display: inline;
+            /* Make the text inline */
+        }
+
+        h5 {
+            font-size: 18px;
+        }
+
+    </style>
+</head>
+
+{% if transcript %}
+
+<div id="content" style="margin:0; padding:0;">
+    <div class="logo-container">
+        <div class="image">
+            <img class="img-fluid" src="{% static 'img/um_chinese_logo.png' %}"
+                alt="UM Chinese Studies Department logo.">
+        </div>
+        <div class="names">
+            <h5><strong>
+                    <div>Undergraduates Activities Record</div>
+                    <div>Department of Chinese Studies, Universiti Malaya </div>
+                    <div>马大中文系（本科生）活动记录</div>
+            </h5></strong>
+        </div>
+    </div>
+    <table class="profile">
+
+        <tr>
+            <td style="width: fit-content;">English Name</td>
+            <td style="width: fit-content;">{{student.user.full_name}}</td>
+        </tr>
+        <tr>
+            <td style="width: fit-content;">No. Matric</td>
+            <td style="width: fit-content;">{{student.matric_no}}</td>
+        </tr>
+        <tr>
+            <td style="width: fit-content;">Academic Years</td>
+            <td style="width: fit-content;">{{student.enrol_year.year}} - {{student.grad_year.year}}</td>
+        </tr>
+        <tr>
+            <td style="width: fit-content;">Program</td>
+            <td style="width: fit-content;">{{student.get_program_display}}</td>
+        </tr>
+    </table>
+</div>
+<br>
+{% if event_pars_in or event_pars_ex %}
+<div class="gradient-container">
+    <span class="gradient-text">Attendend Events</span>
+</div>
+<div class="table-container">
+    {% include 'event_transcript_postgrad.html' %}
+</div>
+<br>
+{% endif %}
+
+{% if event_coms_in or org_coms_in or event_coms_ex or org_coms_ex %}
+<div class="gradient-container">
+    <span class="gradient-text">Activities / Organisations Committee </span>
+</div>
+<div class="table-container">
+    {% include 'committee_transcript.html' %}
+</div>
+<br>
+{% endif %}
+
+{% if arts %}
+<div class="gradient-container">
+    <span class="gradient-text">Published Articles / Literature Works </span>
+</div>
+<div class="table-container">
+    {% include 'article_transcript.html' %}
+</div>
+<br>
+{% endif %}
+
+{% if awarded_arts %}
+<div class="gradient-container">
+    <span class="gradient-text">Awarded Articles / Work </span>
+</div>
+<div class="table-container">
+    {% include 'awarded_transcript.html' %}
+</div>
+<br>
+{% endif %}
+
+{% if other %}
+<div class="gradient-container">
+    <span class="gradient-text">Other Competition </span>
+</div>
+<div class="table-container">
+    {% include 'other_transcript.html' %}
+</div>
+<br>
+{% endif %}
+
+<div>
+    Verified by Head of Department
+    <br>
+    <img src="{% static 'img/hod_sign.png' %}" alt="Signature">
+    <br>
+    {{hod_name}}
+    <br><br>
+</div>
+
+
+{% endif %}
+
+
+
+
+</body>

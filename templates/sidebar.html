@@ -95,11 +95,37 @@
                         <li class="sidebar-item">
                             <a href="{% url 'announcements' %}"><i class="fa-solid fa-bullhorn"></i>Announcements</a>
                         </li>
+                        {% if 'STUDENT' in request.user.role %}
                         <li class="sidebar-item">
                             <a href="{% url 'generate-transcript' request.user.id %}"><i class="fa-solid fa-file"></i>
                                 <span>Generate Transcript</span>
                             </a>
-                        </li>                       
+                        </li>        
+                        {% endif %}
+                        {% if request.user.role in "SUPER ADMIN LECTURER HEAD OF DEPARTMENT" %}
+                        <li class="sidebar-dropdown">
+                            <a href="#">
+                                <i class="fa-solid fa-file-pdf"></i></i>
+                                <span>Generate Transcript</span>
+                            </a>
+                            <div class="sidebar-submenu">
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'generate-transcript' request.user.id %}">
+                                            <span>Search Student Transcript</span>
+                                        </a>
+                                    </li>
+                                    {% if not 'LECTURER' in request.user.role %}
+                                    <li>
+                                        <a href="{% url 'print-all-transcripts' %}">
+                                            <span>All Student Transcript</span>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </li>      
+                        {% endif %}        
                         <li class="sidebar-dropdown">
                             <a href="#">
                                 <i class="fa fa-calendar"></i>

@@ -14,7 +14,8 @@
 .image {
     /* Adjust as needed */
     margin-right: 20px;
-    height: 100%;
+    height: 5%;
+    width: 10%;
     /* Set the height to match the text container */
 
 }
@@ -25,9 +26,10 @@
 }
 
 .gradient-container {
-    background: linear-gradient(to right, #887455, #dfc190);
+    
     /* Define your gradient colors */
     padding: 10px;
+    width: 100%;
     /* Add padding to the container */
 }
 
@@ -66,4 +68,5 @@
 
 .content {
     z-index: 1;
+    width: 100%;
 }

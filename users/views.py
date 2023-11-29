@@ -24,13 +24,13 @@ import os
 from django.http import HttpResponse
 from django.http import JsonResponse
 from datetime import datetime
-
+from django.http import FileResponse
 
 import openpyxl
 from openpyxl.styles import Alignment
 
 import pandas as pd
-
+import zipfile
 import re
 from datetime import date
 from io import BytesIO
@@ -42,10 +42,21 @@ from docxtpl import DocxTemplate
 from docx import Document
 from htmldocx import HtmlToDocx
 from bs4 import BeautifulSoup
+import pdfkit
 
+import asyncio
+# from pyppeteer import launch
+from weasyprint import HTML
+from flask import Flask, send_file
 import os
+import subprocess
+from subprocess import run
+import pypandoc
+import tempfile
+from tempfile import NamedTemporaryFile
+from django.template.loader import render_to_string
 
-
+base_dir = str(settings.BASE_DIR).replace("\\", "/")
 
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = 'password_reset.html'
@@ -58,86 +69,98 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     success_url = reverse_lazy('login')
 
 # Create your views here.
-
-def generatePDF (request):
-    user_id = 21
+def contentPDF(request, student_id):
+    student = Student.objects.get(id=student_id) 
     current_date = datetime.now().date()
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+    # Event Participation
+    event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
+    event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__type')
+    arts = Article.objects.filter(student=student, status=1, published__isnull=False)
+    awarded_arts = Article.objects.filter(published__isnull=True)
+    
+    # Event/Org Committee
+    event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
+    event_coms_ex = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=0).order_by('event__start')
+    org_coms_in = OrgComittee.objects.filter(student=student, org__internal=1, status=1).order_by('org__year')
+    org_coms_ex = OrgComittee.objects.filter(student=student, org__internal=0, status=1).order_by('org__year')
+    total_in_length = len(event_coms_in) + len(org_coms_in)
+    total_ex_length = len(event_coms_ex) + len(org_coms_ex)
 
-    if Student.objects.filter(user_id=user_id).exists():
-        student = Student.objects.get(user_id=user_id) 
+    hod_name = User.objects.get(role="HEAD OF DEPARTMENT").full_name
 
-        # Event Participation
-        event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
-        event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__type')
-        arts = Article.objects.filter(student=student, status=1)
-        awarded_arts = arts.filter(award__isnull=False).exclude(award__exact="").exclude(award__exact=None)
-        
-        # Event/Org Committee
-        event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
-        event_coms_ex = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=0).order_by('event__start')
-        org_coms_in = OrgComittee.objects.filter(student=student, org__internal=1, status=1).order_by('org__year')
-        org_coms_ex = OrgComittee.objects.filter(student=student, org__internal=0, status=1).order_by('org__year')
-        total_in_length = len(event_coms_in) + len(org_coms_in)
-        total_ex_length = len(event_coms_ex) + len(org_coms_ex)
-
-        hod_name = User.objects.get(role="HEAD OF DEPARTMENT").full_name
-
-        # Other Competition
-        other = OtherComp.objects.filter(student=student, status=1)
-        context = {
-            "student": student,
-            "event_pars_in": event_pars_in,
-            "event_pars_ex": event_pars_ex,
-            "event_coms_in": event_coms_in,
-            "event_coms_ex": event_coms_ex,
-            "org_coms_in": org_coms_in,
-            "org_coms_ex": org_coms_ex,
-            "total_in_length": total_in_length,
-            "total_ex_length": total_ex_length,
-            "arts": arts,
-            "awarded_arts": awarded_arts,
-            "other": other,
-            "transcript": True,
-            "hod_name": hod_name,
-            "current": current_year
-        }
-
+    # Other Competition
+    other = OtherComp.objects.filter(student=student, status=1)
+    context = {
+        "student": student,
+        "event_pars_in": event_pars_in,
+        "event_pars_ex": event_pars_ex,
+        "event_coms_in": event_coms_in,
+        "event_coms_ex": event_coms_ex,
+        "event_in_post": event_pars_in.filter(event__type__in=[1,2,3,4]),
+        "event_ex_post": event_pars_ex.filter(event__type__in=[1,2]),
+        "event_in_others": event_pars_in.exclude(event__type__in=[1,2,3,4]),
+        "event_ex_others": event_pars_ex.exclude(event__type__in=[1,2]),
+        "org_coms_in": org_coms_in,
+        "org_coms_ex": org_coms_ex,
+        "total_in_length": total_in_length,
+        "total_ex_length": total_ex_length,
+        "arts": arts,
+        "awarded_arts": awarded_arts,
+        "other": other,
+        "transcript": True,
+        "hod_name": hod_name,
+        "current": current_year
+    }
+    if student.program == 1:
+        dynamic_html_content = render_to_string('pdf_undergrad.html', context)  
     else:
-        context = {
-            "transcript": False,
-            "current": current_year
-        }
+        dynamic_html_content = render_to_string('pdf_postgrad.html', context)
+    htmldoc = HTML(string=dynamic_html_content, base_url=request.build_absolute_uri())
+    # pdf_path = f'{student.matric_no}_transcript.pdf'
+    pdf_bytes = htmldoc.write_pdf()
 
-    template = get_template('transcript.html')  # Replace 'your_template.html' with your HTML template file
-    html = template.render(context)
-
-    
-
-    # htmldocx
-    # document = Document()
-    # new_parser = HtmlToDocx()
-    # new_parser.add_html_to_document(html, document)
-    # document.save('pdf')
+    # Specify the filename for the downloadable file
+    pdf_filename = f'{student.matric_no}_transcript.pdf'
 
     
-    # pisa xhtml12pdf
-    # result = BytesIO()
-    # Create a PDF document from the HTML content
-    # pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
 
-    # if not pdf.err:
-    #     response = HttpResponse(result.getvalue(), content_type='application/pdf')
-    #     response['Content-Disposition'] = 'attachment; filename="your_pdf_filename.pdf"'
-    #     return response
 
-    # doc = DocxTemplate("my_word_template.docx")
-    # context = { 'company_name' : "World company" }
-    # doc.render(context)
-    # doc.save("generated_doc.docx")
+    return pdf_bytes, pdf_filename
+    # return redirect ("generate-transcript", student.user.id)
 
-    return redirect ("dashboard")
+def generatePDF (request, student_id):
+    pdf_bytes, pdf_filename = contentPDF(request, student_id)
+    # Send the PDF as a downloadable file
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
 
+    return response
+
+def download_all_transcripts(request, semester_id):
+    print('Download all')
+    # Assuming you have a list of student IDs
+    semester = Semester.objects.get(id=semester_id)
+    students = Student.objects.filter(grad_sem=semester)
+
+    # Create a BytesIO object to store the zipped content
+    zip_buffer = BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, 'a') as zip_file:
+        for student in students:
+            # Generate a single student transcript PDF
+            pdf_bytes, pdf_filename = contentPDF(request,student.id)
+
+            # Add the PDF content to the zip file
+            zip_file.writestr(pdf_filename, pdf_bytes)
+
+    # Close the zip file
+    zip_buffer.seek(0)
+
+    # Create a Django HttpResponse with the zip file content
+    response = HttpResponse(zip_buffer, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=all_transcripts.zip'
+    return response
 
 def loginView(request):
 
@@ -432,10 +455,27 @@ def resetPasswordView(request):
             return redirect ("login")
     return render (request, "change_password.html",context)
 
+def printAllView (request):
+    academic_years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
+    context = {
+        "academic_years": academic_years
+    }
+    if 'print_all' in request.POST:
+        semester = Semester.objects.filter(academic_year=request.POST['academic_year'], semester=request.POST['semester'])
+        if semester:
+            semester_id = semester.first().id
+            print(semester_id)
+            return redirect("download-all-transcripts", semester_id)
+        else:
+            messages.error(request, "Selected semester is not available. Please try other semesters.")
+        
+        return redirect ("print-all-transcripts")
+    return render (request, "print_all_transcripts.html", context)
 @login_required
 def generateTranscriptView(request, user_id):
     current_date = datetime.now().date()
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+    student = ""
 
     if Student.objects.filter(user_id=user_id).exists():
         student = Student.objects.get(user_id=user_id) 
@@ -464,6 +504,10 @@ def generateTranscriptView(request, user_id):
             "event_pars_ex": event_pars_ex,
             "event_coms_in": event_coms_in,
             "event_coms_ex": event_coms_ex,
+            "event_in_post": event_pars_in.filter(event__type__in=[1,2,3,4]),
+            "event_ex_post": event_pars_ex.filter(event__type__in=[1,2]),
+            "event_in_others": event_pars_in.exclude(event__type__in=[1,2,3,4]),
+            "event_ex_others": event_pars_ex.exclude(event__type__in=[1,2]),
             "org_coms_in": org_coms_in,
             "org_coms_ex": org_coms_ex,
             "total_in_length": total_in_length,
@@ -473,35 +517,35 @@ def generateTranscriptView(request, user_id):
             "other": other,
             "transcript": True,
             "hod_name": hod_name,
-            "current": current_year
+            "current": current_year,
         }
 
     else:
         context = {
             "transcript": False,
-            "current": current_year
+            "current": current_year,
         }
     if request.method == 'POST':
-        if 'print_all' in request.POST:
-            students = Student.objects.filter(enrol_year__lte=current_year.start, grad_year__gte=current_year.end)
-            for student in students:
-                print("Enrol: ", student.enrol_year)
-                print("Grad: ", student.grad_year)
-                print()
-            return redirect ("generate-transcript", user_id=user_id)
         
         if 'search' in request.POST:
             if Student.objects.filter(matric_no=request.POST['matric'].upper()).exists():
                 student = Student.objects.get(matric_no=request.POST['matric'].upper())
                 user_id = student.user_id
+                return redirect ("generate-transcript", user_id=user_id)
             
             else:
                 messages.error(request, "Student does not exists. Please enter a valid matric number.")
                 return redirect ("generate-transcript", user_id=request.user.id)
 
-            return redirect ("generate-transcript", user_id=user_id)
+            
+        
+    if not student:
+        return render (request,"transcript_undergrad.html", context)
+    elif student.program == 1:
+        return render (request,"transcript_undergrad.html", context)
+    else:
+        return render (request,"transcript_postgrad.html", context)
 
-    return render (request,"generate_transcript.html", context)
 
    
 @login_required

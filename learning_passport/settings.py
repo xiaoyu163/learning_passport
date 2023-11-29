@@ -159,5 +159,3 @@ MAIL_USE_TLS = True
 EMAIL_HOST_USER = 'fortrash1603@gmail.com'
 EMAIL_HOST_PASSWORD = 'dccx mgtq fgsj xzkh' #app password
 EMAIL_PORT = 587
-
-
