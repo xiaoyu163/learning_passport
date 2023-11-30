@@ -349,23 +349,23 @@ def manageStudent (request):
         start = semester.start
         end = semester.end
         students = Student.objects.filter(enrol_year__range=(start,end))
-        for student in students:
-            student.enrol_sem = semester
-            if student.program == '1':
-                grad_year = int(semester.academic_year.split('/')[0]) + 3
-                grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-                grad_sem = semester.semester
+        # for student in students:
+        #     student.enrol_sem = semester
+        #     if student.program == '1':
+        #         grad_year = int(semester.academic_year.split('/')[0]) + 3
+        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+        #         grad_sem = semester.semester
                 
-            elif student.program == '2' or student.program == '3':
-                grad_year = int(semester.academic_year.split('/')[0]) + 1
-                grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-                grad_sem = 2 if semester.semester == 1 else 1
-            else:
-                grad_year = int(semester.academic_year.split('/')[0]) + 2
-                grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-                grad_sem = 2 if semester.semester == 1 else 1
+        #     elif student.program == '2' or student.program == '3':
+        #         grad_year = int(semester.academic_year.split('/')[0]) + 1
+        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+        #         grad_sem = 2 if semester.semester == 1 else 1
+        #     else:
+        #         grad_year = int(semester.academic_year.split('/')[0]) + 2
+        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+        #         grad_sem = 2 if semester.semester == 1 else 1
 
-            student.grad_sem = Semester.objects.filter(academic_year=grad_year, semester=grad_sem)
+        #     student.grad_sem = Semester.objects.filter(academic_year=grad_year, semester=grad_sem)
     lecturers = Lecturer.objects.all()
     students = Student.objects.all()
     context = {
