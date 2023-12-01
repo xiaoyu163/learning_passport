@@ -47,22 +47,10 @@
     
 </script>
 </head>
-<div class="container-fluid header">
-    <br>
-    <h1><strong><center> 
-        <i class="fa fa-bullhorn icon" aria-hidden="true"></i> 
-        &nbsp;
-        Announcement
-    </center></strong></h1>
-    <br>
-
-</div>
-<br>
-
 <!-- Add Annnouncement Button for SUPER ADMIN -->
 {% if request.user.role in 'SUPER ADMIN' %}
     <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#ann_modal"> 
-      <i class="fas fa-plus"></i> &nbsp;
+      <i class="fa-solid fa-plus fa-lg"></i>&nbsp;&nbsp;
       Add Announcement 
     </button>
     <br><br>

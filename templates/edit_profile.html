@@ -9,21 +9,22 @@
             </h3>
         </div>
         <div class="form-outline">
+            <input type="text" class="form-control active" id="name" name="name" value="{{request.user.full_name}}" required>
+            <label class="form-label" for="name" style="margin-left: 0px;">Full Name</label>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 60px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+        </div>
+        <br>
+        {% if request.user.role in 'STUDENT' %}
+        <div class="form-outline">
             <input type="text" class="form-control active" id="matric" name="matric" value="{{student.matric_no}}" required> 
             <label class="form-label" for="matric" style="margin-left: 0px;">Matric Number</label>
             <div class="form-notch">
               <div class="form-notch-leading" style="width: 9px;"></div>
               <div class="form-notch-middle" style="width: 87.2px;"></div>
-              <div class="form-notch-trailing"></div>
-            </div>
-        </div>
-        <br>
-        <div class="form-outline">
-            <input type="text" class="form-control active" id="name" name="name" value="{{name}}" required>
-            <label class="form-label" for="name" style="margin-left: 0px;">Full Name</label>
-            <div class="form-notch">
-              <div class="form-notch-leading" style="width: 9px;"></div>
-              <div class="form-notch-middle" style="width: 60px;"></div>
               <div class="form-notch-trailing"></div>
             </div>
         </div>
@@ -80,8 +81,9 @@
             <label for="enrol_sem">Graduation Semester</label>
         </div>
         <br>
+        {% endif %}
         <div class="form-outline">
-            <input type="text" class="form-control active" id="contact" name="contact" value="{{student.user.contact}}" required>
+            <input type="text" class="form-control active" id="contact" name="contact" value="{{request.user.contact}}" required>
             <label class="form-label" for="contact" style="margin-left: 0px;">Contact Number</label>
             <div class="form-notch">
               <div class="form-notch-leading" style="width: 9px;"></div>
@@ -91,7 +93,7 @@
         </div>
         <br>
         <div class="form-outline">
-            <input type="text" class="form-control active" id="address" name="address" value="{{student.user.address}}" required>
+            <input type="text" class="form-control active" id="address" name="address" value="{{request.user.address}}" required>
             <label class="form-label" for="address" style="margin-left: 0px;">Address</label>
             <div class="form-notch">
               <div class="form-notch-leading" style="width: 9px;"></div>
@@ -100,6 +102,7 @@
             </div>
         </div>
         <br>
+        {% if request.user.role in 'STUDENT' %}
         <div class="form-floating">
             <select class="form-select" id="lecturer" name="lecturer" required>
                 {% for lecturer in lecturers %}
@@ -108,6 +111,16 @@
             </select>
             <label>Advisor</label>
         </div>
+        {% elif request.user.role in 'LECTURER or HEAD OF DEPARTMENT' %}
+        <div class="form-floating">
+            <select class="form-select" id="position" name="position" required>
+                {% for val,position in positions %}
+                <option value="{{val}}" {% if lecturer and lecturer.position == val %} selected {% endif %}>{{position}}</option>
+                {% endfor %}
+            </select>
+            <label>Position</label>
+        </div>
+        {% endif %}
         <div class="row custom_margin_top">
             <button type='submit' class='btn btn-outline-primary' style='width:95%; margin:10px auto;'>Submit</button>
         </div>

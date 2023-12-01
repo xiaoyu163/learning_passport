@@ -2,13 +2,6 @@
 {% block content %}
 {% load static %}
 <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
-{% if graduate %}
-<h3>Graduated Student Report</h3>
-{% endif %}
-
-{% if active %}
-<h3>Active Student Report</h3>
-{% endif %}
 
 <br>
 <form method="POST">
@@ -45,11 +38,18 @@
         {% endif %}
         <div id="gap" style="width:2%"></div>
         {% if selected_sem %}
-        <button class="btn btn-floating" type="button" name="print" onclick="exportReportToExcel('xlsx');">
-            <i class="fa-solid fa-print"></i>
-        </button>
+            {% if students %}
+                <button id="print-btn" class="btn btn-outline-primary" type="button" name="print" onclick="exportReportToExcel('xlsx');">
+                    <i class="fa-solid fa-file-excel fa-lg"></i> &nbsp;&nbsp; Download Excel
+                </button>
+            {% endif %}
         {% endif %}
+      
     </div>
+    {% if selected_sem and not students %}
+    <br>
+    <p>No record for this semester.</p>
+    {% endif %}
     <br>
 </form>
 

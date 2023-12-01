@@ -38,7 +38,7 @@ class User(AbstractUser):
     first_name = None
     last_name = None
     username = None
-    full_name = models.CharField(max_length=50)
+    full_name = models.CharField(max_length=50, null=True)
     name_chi = models.CharField(max_length=50, null=True)
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(auto_now=True)

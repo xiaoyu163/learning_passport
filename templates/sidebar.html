@@ -285,6 +285,7 @@
             <!-- sidebar-menu  -->
         </nav>
         <!-- sidebar-wrapper  -->
+        
         <main class="page-content">
             <br>
 
@@ -307,6 +308,17 @@
                 {% endfor %}
                 {% endif %}
             </div>
+            {% if page_name or icon %}
+            <div class="container-fluid header">
+                <br>
+                <h1><strong><center> 
+                    <i class="{{icon}}"></i>
+                    &nbsp;
+                    {{page_name}}
+                </center></strong></h1>
+                <br><br>
+            </div>
+            {% endif %}
             <div class="container-fluid" style="overflow-x: auto;">
                 {% block content %}{% endblock %}
             </div>

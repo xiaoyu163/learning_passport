@@ -37,23 +37,56 @@
         });
     });
 
-</script>
+    function search() {
+      // Declare variables
+      var input, filter, table, tr, matric,name, i, txtValue;
+      input = document.getElementById("search_text");
+      filter = input.value.toUpperCase()
+      table = document.getElementById("lecturer_table");
+      tr = table.getElementsByTagName("tr");
+    
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        // matric = tr[i].getElementsByTagName("td")[1];
+        name = tr[i].getElementsByTagName("td")[0];
+        // console.log(name)
+        
+        if (name) {
+        //   matricValue = matric.textContent || matric.innerText;
+          nameValue = name.textContent || name.innerText;
+        //   console.log(matricValue)
+          console.log(nameValue)
+          if (nameValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
 
-<h1>Manage Lecturers</h1>
+</script>
+<center>
+    <input id="search_text" type="text" class="form-control" style="width:50%" placeholder="Search for lecturer's name..." onkeyup="search()">
+    </center>
+
 <br>
 <form method="POST">
     {% csrf_token %}
-    <h5>Lecturer Status</h5>
-    <table class="table table-striped">
+    
+    <table id="lecturer_table" class="table table-striped">
         <thead class="bg-light">
             <tr>
                 <th>Name</th>
-                <th>Number of Student Assigned</th>
+                <th>Bac. Chinese Studies</th>
+                <th>Master (Courserwork)</th>
+                <th>Master (Research)</th>
+                <th>Ph.D</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
         </thead>
-        {% for lecturer,count in lecturers_students %}
+        {% for lecturer,bac_count, cw_count, re_count, phd_count in lecturers_students %}
         <tr>
             <td>
                 <div class="ms-3">
@@ -62,7 +95,16 @@
                 </div>
             </td>
             <td>
-                {{count}}
+                {{bac_count}}
+            </td>
+            <td>
+                {{cw_count}}
+            </td>
+            <td>
+                {{re_count}}
+            </td>
+            <td>
+                {{phd_count}}
             </td>
             {% if lecturer.user.is_active %}
             <td><span class="badge rounded-pill badge-success">Active</span></td>

@@ -1,0 +1,171 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/detail.css' %}">
+</head>
+
+<br>
+
+<style>
+    .container {
+        display: flex;
+        vertical-align: middle;
+        align-items: center;
+
+    }
+    .left-side {
+        flex: 1;
+        background-color: #fff; /* Light grey background for analytics */
+        align-items: center;
+        vertical-align: middle;
+        
+    }
+
+    .right-side {
+        flex: 2;
+        background-color: #fff; /* White background for events and announcements */
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    /* .img-container {
+        text-align: center;
+    } */
+
+    .center-container img {
+        max-width: 100%; /* Ensure the image does not exceed the viewport width */
+        max-height: 100%; /* Ensure the image does not exceed the viewport height */
+    }
+
+    .card-title {
+        font-weight: bold;
+    }
+
+    .body-text {
+        font-weight: bold;
+        color: #5c5690;
+    }
+</style>
+<div class="container">
+
+    <div class="left-side">
+       
+            {% if event.poster %}
+                
+                <div class="img-container">
+                    <img src="{{event.poster.url}}" alt="Event Poster">
+                </div>
+            {% endif %}
+    
+    </div>
+    <div class="right-side">
+        <h3>{{event.e_name}}</h3>
+        <h3>{{event.c_name}}</h3>
+        {% if start_date not in end_date %}
+        <h5>Start</h5>
+        <p class="body-text">
+            <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
+        </p>
+
+        <p class="body-text">
+            <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}}
+        </p>
+
+
+        <h5>End</h5>
+        <p class="body-text">
+            <i class="fa-solid fa-calendar"></i> &nbsp; {{end_date}} ({{end_day}})
+        </p>
+        <p class="body-text">
+            <i class="fa-solid fa-clock"></i> &nbsp; {{end_time}}
+        </p>
+        {% else %}
+        <h5>Date</h5>
+        <p class="body-text">
+            <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
+        </p>
+
+        <h5>Time</h5>
+        <p class="body-text">
+            <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}} - {{end_time}}
+        </p>
+        {% endif %}
+
+
+    </div>
+        
+        
+</div>
+<div class="card border border-info">
+    <div class="card-body">
+        
+        <h5>Venue</h5>
+        <p class="body-text">
+            <i class="fa-solid fa-location-dot"></i> &nbsp; {{event.venue}}
+        </p>
+
+        {% if event.speaker %}
+        <h5>Speaker</h5>
+        <p class="body-text">
+            <i class="fa-solid fa-microphone"></i> &nbsp; {{event.speaker}}
+        </p>
+        {% endif %}
+        </p>
+    </div>
+</div>
+</div>
+
+<!-- Edit Poster Modal -->
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="poster_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Event Poster</h5>
+                    <button type="button" class="btn btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        Upload New Event Poster: <br>
+                        <input type="file" id="poster" name="poster">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input name="event_id" hidden />
+                    <button type="submit" class="btn btn-success" name="poster">Yes</button>
+                    <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Modal for Register Event -->
+<form method="POST">
+    {% csrf_token %}
+    <div class="modal fade" id="reg_event_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="register-title">Register Event</h4>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Confirm to register in this event?</p>
+                </div>
+                <div class="modal-footer">
+                    <input id="reg_event_id" name="event_id" hidden />
+                    <button type="submit" class="btn btn-success" name="register">Yes</button>
+                    <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+        <div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .right-container {
+        flex: 1.5;
+       
+    }
+
+    .sign-in-container {
+        border-radius: 10px;
+        max-width: 450px;
+        padding: 50px;
+        margin-right: 50px;
+    }
+
+    .container {
+        display:flex;
+        align-items: center;
+    }
+
+    .picture-container {
+        flex: 1.5;
+        align-items: center;
+        width: 30%;
+        height:10%;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+    }
+
+    
+</style>
+<script>
+    function checkRole(select) {
+
+        var lecturerContainer = document.getElementById("lecturerContainer");
+        var studentContainer = document.getElementById("studentContainer");
+        var position = document.getElementById("lecturer_position");
+        var program = document.getElementById("program");
+        var contact = document.getElementById("contact");
+        var address = document.getElementById("address");
+
+        if (select.value === "LECTURER") {
+            studentContainer.style.display = "none";    
+            lecturerContainer.style.display = "block";
+            position.required = true;
+            program.required = false;
+
+        } else {
+            studentContainer.style.display = "block";    
+            lecturerContainer.style.display = "none";    
+            position.required = false;
+            program.required = true;
+
+        }
+    }
+
+</script>
+
+<div class ="container container-fluid">
+    <div class="picture-container">
+        <img src="{% static 'img/um_chinese_logo.png' %}" class="img-fluid" alt="UM logo.">
+    </div>
+    <div class="right-container">
+        <div class="sign-in-container border container-fluid">
+            <form method="POST">
+                {% csrf_token %}
+                <input value="{{email}}" name="email" hidden>
+                <input value="{{password}}" name="password" hidden>
+                <h3><center>Register</h3></center>
+                <br>
+                <div class="form-outline">
+                    <input type="text" class="form-control" id="name" name="name" required>
+                    <label class="form-label" for="name" style="margin-left: 0px;">Full Name</label>
+                    <div class="form-notch">
+                    <div class="form-notch-leading" style="width: 9px;"></div>
+                    <div class="form-notch-middle" style="width: 60px;"></div>
+                    <div class="form-notch-trailing"></div>
+                    </div>
+                </div>                
+                <br>
+                <div class="form-outline">
+                    <input type="text" class="form-control" id="contact" name="contact" required>
+                    <label class="form-label" for="contact" style="margin-left: 0px;">Contact</label>
+                    <div class="form-notch">
+                    <div class="form-notch-leading" style="width: 9px;"></div>
+                    <div class="form-notch-middle" style="width: 60px;"></div>
+                    <div class="form-notch-trailing"></div>
+                    </div>
+                </div>                
+                <br>
+                <div class="form-outline">
+                    <input type="text" class="form-control" id="address" name="address" required>
+                    <label class="form-label" for="address" style="margin-left: 0px;">Address</label>
+                    <div class="form-notch">
+                    <div class="form-notch-leading" style="width: 9px;"></div>
+                    <div class="form-notch-middle" style="width: 60px;"></div>
+                    <div class="form-notch-trailing"></div>
+                    </div>
+                </div> 
+                <br>
+                <select class="form-select" id="role" name="role" onchange="checkRole(this)" required>
+                    <option value="STUDENT">Student</option>
+                    <option value="LECTURER">Lecturer</option>
+                </select>
+                
+                <div id="lecturerContainer" style="display:none;">
+                    <br>
+                    <select id="lecturer_position" class="form-select" name="lecturer_position">
+                        {% for val,type in option_position %}
+                        <option value="{{val}}">{{type}} </option>
+                        {% endfor %}
+                    </select>         
+                </div>
+                
+                <div id="studentContainer">
+                    <br>
+                    <select id="program" class="form-select" id="program" name="program">
+                        {% for val,type in option_program %}
+                        <option value="{{val}}">{{type}} </option>
+                        {% endfor %}
+                    </select>   
+                    <br>
+                    <div class="form-floating">
+                    <select id="advisor" class="form-select" name="advisor" >
+                        {% for lecturer in lecturers %}
+                        <option value="{{lecturer.id}}" {% if lecturer.user.role in "HEAD OF DEPARTMENT" %} selected {% endif %}>{{lecturer.user.full_name}}</option>
+                        {% endfor %}
+                    </select>  
+                    <label for="advisor">Academic Advisor/Supervisor</label>
+                </div>          
+                </div>
+                <br>
+                <div class="row custom_margin_top">
+                    <button type='submit' name="register-details" class='btn btn-dark' style='width:95%; margin:10px auto;'>Register</button>
+                </div>
+                <hr>
+                <div>
+                    <a href="{% url 'login' %}">Back to Login</a>
+                    
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

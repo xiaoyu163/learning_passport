@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout
+from users.decorators import role_required
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from learning_passport import settings
@@ -68,6 +69,481 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
                       "please make sure you've entered the address you registered with, and check your spam folder."
     success_url = reverse_lazy('login')
 
+def loginView(request):
+
+    redirected_login_failed_link = 'login'
+
+    redirected_success_link_dict = {
+        'SUPER ADMIN' : 'dashboard',
+        'ADMIN' : 'dashboard',
+        'HEAD OF DEPARTMENT' : 'dashboard',
+        'LECTURER' : 'dashboard',
+        'STUDENT' : 'dashboard',
+    }
+    if request.method == 'POST':
+
+        email = request.POST['email'].strip()
+        password = request.POST['password'].strip()
+
+        try:  
+            user = User.objects.get(email=email)
+
+        except ObjectDoesNotExist:
+            messages.error(request, 'Account does not exist.')
+            return redirect(redirected_login_failed_link)
+
+        if not user.check_password(password):
+            messages.error(request, "Incorrect username or password.")
+            return redirect(redirected_login_failed_link)
+        else:  # if password correct
+            login(request, user)
+            messages.success(request, f"Welcome {user.full_name}.")
+            if 'next' in request.GET:
+                if request.GET['next'] != '/':
+                    return redirect(request.GET['next'])
+
+            return redirect(redirected_success_link_dict[user.role])
+  
+ # redirect if logged in 
+    if request.user.is_authenticated:
+        redirected_link = redirected_success_link_dict[request.user.role]
+        return redirect(redirected_link)
+ 
+    return render(request, "login.html")
+
+@login_required
+def logoutView(request):
+    logout(request)
+    messages.success(request,"You have been logged out.")
+    return redirect('login')
+
+def registerView(request):
+    option_position = Lecturer.position.field.choices
+    option_program = Student.program.field.choices
+    lecturers = Lecturer.objects.filter(user__is_active=1)
+    context = {
+        "option_position": option_position,
+        "option_program": option_program,
+        "lecturers": lecturers,
+    }
+
+    if request.method == 'POST':
+        if 'register' in request.POST:
+            email = request.POST['email']
+            password = request.POST['password']
+            # If email exists in system
+            if User.objects.filter(email=email):
+                messages.info(request, "Account already exist. Please proceed to login.")
+                return redirect('login')
+            
+            # Check password
+            else:
+                if request.POST['password'] != request.POST['confirm_password']:
+                    messages.error(request, "Password and Confirm Password do not matched.")
+                    return redirect ("register")
+                else:
+                    context.update({
+                        "email": email,
+                        "password": password
+                    })
+                    return render (request, "register2.html", context)
+        
+        if 'register-details' in request.POST:
+            current_date = datetime.now().date()
+            current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+            
+            user = User()         
+            user.email = request.POST['email']
+            user.password = make_password(request.POST['password'])
+            user.role = request.POST['role']
+            user.full_name = request.POST['name'].upper()
+            user.contact = request.POST['contact']
+            user.address = request.POST['address']
+            user.save()                        
+            
+            if user.role not in 'STUDENT':
+                lecturer = Lecturer()
+                lecturer.user = user
+                lecturer.position = request.POST['lecturer_position']
+                lecturer.save()
+                messages.success(request,"Your account is registered successfully. Please proceed to login.")
+                return redirect('login')
+            
+            else:
+                student = Student()
+                student.user = user
+                student.matric_no = user.email.split('@')[0].upper()
+                student.program = request.POST['program']
+                student.enrol_sem = current_sem if current_sem else None
+                if current_sem:
+                    if student.program == '1':
+                        grad_year = int(current_sem.academic_year.split('/')[0]) + 3
+                        grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+                        grad_sem = current_sem.semester
+                        
+                    elif student.program == '2' or student.program == '3':
+                        grad_year = int(current_sem.academic_year.split('/')[0]) + 1
+                        grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+                        grad_sem = 2 if current_sem.semester == 1 else 1
+                    else:
+                        grad_year = int(current_sem.academic_year.split('/')[0]) + 2
+                        grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+                        grad_sem = 2 if current_sem.semester == 1 else 1
+                    if Semester.objects.filter(academic_year=grad_year, semester=grad_sem).exists():
+                        grad_semester = Semester.objects.get(academic_year=grad_year, semester=grad_sem)
+                    else:
+                        grad_semester = Semester()
+                        grad_semester.academic_year = grad_year
+                        grad_semester.semester = grad_sem
+                        grad_semester.save()
+                    student.grad_sem = grad_semester
+                student.lecturer_id = request.POST['advisor'] 
+                # student.lecturer = Lecturer.objects.get(user__role='HEAD OF DEPARTMENT')
+                student.save()
+                messages.success(request,"Your account is registered successfully. Please proceed to login.")
+                return redirect('login')
+    
+    
+    return render(request, "register.html")
+
+@login_required
+def editProfile(request, id):
+    
+    student = Student.objects.get(user_id=id) if Student.objects.filter(user_id=id).exists() else None
+    lecturer = Lecturer.objects.get(user_id=id) if Lecturer.objects.filter(user_id=id).exists() else None
+    lecturers = Lecturer.objects.filter(user__is_active=1)
+    positions = Lecturer.position.field.choices
+    context = {
+        "lecturers": lecturers,
+        "student": student,
+        "lecturer": lecturer,
+        "positions": positions,
+    }
+    
+
+    if request.method == 'POST':
+        if 'STUDENT' in request.user.role:
+            student = Student.objects.get(user_id=id)
+            student.user = user
+            student.matric_no = request.POST['matric'].upper()
+            student.program = request.POST['program']
+            # student.enrol_year = datetime.strptime(request.POST['enrol'], '%Y-%m').date()
+            # student.grad_year = datetime.strptime(request.POST['grad'], '%Y-%m').date()
+            enrol_sem = Semester.objects.filter(academic_year=request.POST['enrol_year'], semester=request.POST['enrol_sem']).first()
+            grad_sem = Semester.objects.filter(academic_year=request.POST['grad_year'], semester=request.POST['grad_sem']).first()
+            if not enrol_sem:
+                enrol_sem = Semester()
+                enrol_sem.academic_year = request.POST['enrol_year']
+                enrol_sem.semester = request.POST['enrol_sem']
+                enrol_sem.save()
+            if not grad_sem:
+                grad_sem = Semester()
+                grad_sem.academic_year = request.POST['grad_year']
+                grad_sem.semester = request.POST['grad_sem']
+                grad_sem.save()
+            student.lecturer_id = request.POST['lecturer']
+            student.enrol_sem = enrol_sem
+            student.grad_sem = grad_sem
+            student.save()
+        elif request.user.role in 'LECTURER OR HEAD OF DEPARTMENT':
+            lecturer = Lecturer.objects.get(user_id=id)
+            lecturer.position = request.POST['position']
+            lecturer.save()
+        user = request.user
+        user.full_name = request.POST['name'].upper()
+        user.contact = request.POST['contact']
+        user.address = request.POST['address']
+        user.save()
+
+   
+        messages.success(request, "Your profile is updated.")
+        return redirect('dashboard')
+        
+    return render(request, "edit_profile.html", context)
+
+@login_required
+def resetPasswordView(request):
+    if request.method == 'POST':
+        old_pw = request.POST['old_pw']        
+        new_pw = request.POST['new_pw']
+        confirm_pw = request.POST['confirm_pw']
+        if not request.user.check_password(old_pw):
+            messages.error(request, "Incorrect existing password!")
+            return redirect("change-password")
+        
+        elif not new_pw == confirm_pw:
+            messages.error(request, "Password and confirm password must be matched.")
+            return redirect("change-password")
+        
+        else:
+            user = User.objects.get(id=request.user.id)
+            user.password = make_password(new_pw)
+            user.save()
+            logout(request)
+            messages.success(request, "Password changed successfully. Please login again.")
+            return redirect ("login")
+    return render (request, "change_password.html")
+
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
+def manageStudent (request):
+    students = Student.objects.all()
+    semesters = Semester.objects.all()
+    for semester in semesters:
+        start = semester.start
+        end = semester.end
+        students = Student.objects.filter(enrol_year__range=(start,end))
+        # for student in students:
+        #     student.enrol_sem = semester
+        #     if student.program == '1':
+        #         grad_year = int(semester.academic_year.split('/')[0]) + 3
+        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+        #         grad_sem = semester.semester
+                
+        #     elif student.program == '2' or student.program == '3':
+        #         grad_year = int(semester.academic_year.split('/')[0]) + 1
+        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+        #         grad_sem = 2 if semester.semester == 1 else 1
+        #     else:
+        #         grad_year = int(semester.academic_year.split('/')[0]) + 2
+        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
+        #         grad_sem = 2 if semester.semester == 1 else 1
+
+        #     student.grad_sem = Semester.objects.filter(academic_year=grad_year, semester=grad_sem)
+    lecturers = Lecturer.objects.all()
+    students = Student.objects.all()
+    context = {
+        "students": students,
+        "lecturers": lecturers,
+        "page_name": "Manage Students",
+        "icon": "fa-solid fa-people-roof fa-lg",
+    }
+
+    if request.method == "POST":
+        
+        if 'manage-student' in request.POST:
+            student = Student.objects.get(id=request.POST['manage-student'])
+            student.user.full_name = request.POST['student_name'].upper()
+            student.matric_no = request.POST['student_matric'].upper()
+            student.enrol_year = datetime.strptime(request.POST['student_enrol'], '%Y-%m').date()
+            student.grad_year = datetime.strptime(request.POST['student_grad'], '%Y-%m').date()
+            student.user.is_active = 1 if 'student_active' in request.POST else 0
+            student.lecturer_id = request.POST['student_lect']
+            student.save()
+            student.user.save()
+
+        if 'delete-student' in request.POST:
+            student = Student.objects.get(id=request.POST['delete-student'])
+            student.delete()
+            student.user.delete()
+
+        return redirect ("manage-student")
+    return render (request, "manage_student.html", context)
+
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
+def manageLecturer (request):
+    lecturers = Lecturer.objects.all()
+    bac_counts = list()
+    cw_counts = list()
+    re_counts = list()
+    phd_counts = list()
+    for lecturer in lecturers:
+        bac_counts.append(Student.objects.filter(lecturer=lecturer, program=1).count())
+        cw_counts.append(Student.objects.filter(lecturer=lecturer, program=2).count())
+        re_counts.append(Student.objects.filter(lecturer=lecturer, program=3).count())
+        phd_counts.append(Student.objects.filter(lecturer=lecturer, program=4).count())
+    option_position = Lecturer.position.field.choices
+    lecturers_students = zip(lecturers,bac_counts,cw_counts,re_counts,phd_counts)
+    context = {
+        "lecturers_students": lecturers_students,
+        "option_position": option_position,
+        "page_name": "Manage Lecturers",
+        "icon": "fa-solid fa-chalkboard-user fa-lg"
+
+    }
+
+    if request.POST:
+        if 'manage-lecturer' in request.POST:
+            lecturer = Lecturer.objects.get(id=request.POST['manage-lecturer'])
+            lecturer.position = request.POST['lecturer_position']
+            lecturer.user.full_name = request.POST['lecturer_name'].upper()
+            lecturer.user.is_active = 1 if 'lecturer_active' in request.POST else 0
+            lecturer.save()
+            lecturer.user.save()
+        elif 'delete-lecturer' in request.POST:
+            lecturer = Lecturer.objects.get(id=request.POST['delete-lecturer'])
+            lecturer.delete()
+        return redirect ("manage-lecturer")
+    return render (request,"manage_lecturer.html", context)
+
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN', 'HEAD OF DEPARTMENT', 'LECTURER'])
+def postgradDetailsView (request):
+    selected_program = ""
+    if request.user.role in "HEAD OF DEPARTMENT SUPER ADMIN":
+        students = Student.objects.filter(program__in=[2,3,4], user__is_active=1)
+    elif "LECTURER" in request.user.role:
+        lecturer = Lecturer.objects.get(user=request.user)
+        students = Student.objects.filter(program__in=[2,3,4], user__is_active=1, lecturer=lecturer)
+
+    if request.method == 'POST':
+        if 'program' in request.POST:
+            selected_program = request.POST['program']
+            if not 'all' in request.POST['program']:
+                students = students.filter(program=request.POST['program'])
+        if 'submit-dates' in request.POST:
+            rm_date  = datetime.strptime(request.POST['rm_date'], "%Y-%m-%dT%H:%M") if request.POST['rm_date'] != "" else None
+            pd_date  = datetime.strptime(request.POST['pd_date'], "%Y-%m-%dT%H:%M") if request.POST['pd_date'] != "" else None
+            cd_date  = datetime.strptime(request.POST['cd_date'], "%Y-%m-%dT%H:%M") if request.POST['cd_date'] != "" else None
+            viva_date  = datetime.strptime(request.POST['viva_date'], "%Y-%m-%dT%H:%M") if request.POST['viva_date'] != "" else None
+            student = Student.objects.get(id=request.POST['submit-dates'])
+            student.rm_date = rm_date 
+            student.pd_date = pd_date
+            student.cd_date = cd_date
+            student.viva_date = viva_date
+            if 'rm' in request.POST:
+                student.rm_status = 1
+            else:
+                student.rm_status = 0
+            if 'pd' in request.POST:
+                student.pd_status = 1
+            else:
+                student.pd_status = 0
+            if 'cd' in request.POST:
+                student.cd_status = 1
+            else:
+                student.cd_status = 0
+            if 'viva' in request.POST:
+                student.viva_status = 1
+            else:
+                student.viva_status = 0
+            student.save()
+            return redirect ("postgrad")
+    context = {
+        "students": students,
+        "program_opt": Student.program.field.choices,
+        "selected_program": selected_program,
+        "page_name": "Postgraduate Students Details",
+        "icon": "fa-solid fa-graduation-cap fa-xl"
+    }
+    return render (request, "postgrad_details.html", context)
+
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
+def semesterDatesView (request):
+    current_date = datetime.now().date()
+    current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+    semesters = Semester.objects.all().order_by("-academic_year","semester")
+    student_enrol = list()
+    student_grad = list()
+    for semester in semesters:
+        student_enrol.append(Student.objects.filter(enrol_sem=semester).count())
+        student_grad.append(Student.objects.filter(grad_sem=semester, grad_sem__end__lte=current_date).count())
+    semesters = zip(semesters, student_enrol, student_grad)
+    context = {
+        "curr_sem": current_sem,
+        "semesters": semesters,
+        "page_name": "Manage Semester Dates",
+        "icon":"fa-solid fa-calendar-days fa-lg"
+    }
+    if request.method == 'POST':
+        if 'add-semester' in request.POST:
+            academic_year = request.POST['academic_year']
+            semester = request.POST['semester']
+            pattern = r'^20\d{2}/\d{2}$'
+            if re.match(pattern, academic_year):
+                if not Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
+                    sem = Semester()
+                    sem.academic_year = academic_year
+                    sem.semester = semester
+                    sem.start = request.POST['start']
+                    sem.end = request.POST['end']
+                    sem.save()
+                else:
+                    messages.warning(request, f'Semester {semester} Year {academic_year} already exists.')
+                    return redirect ("semesters")
+            else:
+                messages.error(request, f"{academic_year} does not meet the form of 20XX/XX. Please try again.")
+                return redirect ("semesters")
+        
+        if 'edit-semester' in request.POST:
+            semester = Semester.objects.get(id=request.POST['edit-semester'])
+            semester.start = request.POST['edit_start']
+            semester.end = request.POST['edit_end']
+            semester.save()
+
+        if 'delete' in request.POST:
+            sem = Semester.objects.get(id=request.POST['delete'])
+            sem.delete()
+
+        if 'update-status' in request.POST:            
+            users = User.objects.filter(role="STUDENT", is_active=1)
+            current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+            print(users.count())
+            print(current_year.academic_year)
+            for user in users:
+                student = Student.objects.get(user=user)
+                if student.grad_year <= current_year.start:
+                    user.is_active = 0
+                    user.save()
+            messages.success (request, f"Student status updated succesfully for Semester {current_year.semester} {current_year.academic_year}")
+        return redirect ("semesters")
+    return render (request, "semester.html", context)
+
+def graduateReportView (request):
+    semester_years = Semester.objects.values('academic_year').distinct().order_by("academic_year")
+    students = None
+    selected_sem = None
+
+    if request.method == 'POST':
+        academic_year = request.POST['academic_year']
+        semester = request.POST['semester']
+        if Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
+            selected_sem = Semester.objects.get(academic_year=academic_year, semester=semester)
+            students = Student.objects.filter(grad_sem=selected_sem)
+
+        else:
+            messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
+            return redirect("graduate-report")
+        
+    context = {
+        "semester_years": semester_years,
+        "students": students,
+        "selected_sem": selected_sem,
+        "graduate": 1,
+        "page_name": "Graduate Student Report",
+        "icon": "fa-solid fa-user-graduate fa-xl",
+    }
+
+    return render (request, "graduate_report.html",context)
+
+def activeReportView (request):
+    semester_years = Semester.objects.values('academic_year').distinct().order_by("academic_year")
+    students = None
+    selected_sem = None
+
+    if request.method == 'POST':
+        academic_year = request.POST['academic_year']
+        semester = request.POST['semester']
+        if Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
+            selected_sem = Semester.objects.get(academic_year=academic_year, semester=semester)
+            students = Student.objects.filter(enrol_year__lte=selected_sem.start, grad_year__gte=selected_sem.end)
+            
+        else:
+            messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
+            return redirect("active-report")
+    print(students)
+    context = {
+        "semester_years": semester_years,
+        "students": students,
+        "selected_sem": selected_sem,
+        "active": 1,
+        "page_name": "Active Student Report",
+        "icon": "fa-solid fa-school fa-xl",
+    }
+    return render (request, "graduate_report.html",context)
+
 # Create your views here.
 def contentPDF(request, student_id):
     student = Student.objects.get(id=student_id) 
@@ -76,8 +552,8 @@ def contentPDF(request, student_id):
     # Event Participation
     event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
     event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__type')
-    arts = Article.objects.filter(student=student, status=1, published__isnull=False)
-    awarded_arts = Article.objects.filter(published__isnull=True)
+    arts = Article.objects.filter(student=student, status=1, award__isnull=True)
+    awarded_arts = Article.objects.filter(student=student, award__isnull=False)
     
     # Event/Org Committee
     event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
@@ -123,9 +599,6 @@ def contentPDF(request, student_id):
     # Specify the filename for the downloadable file
     pdf_filename = f'{student.matric_no}_transcript.pdf'
 
-    
-
-
     return pdf_bytes, pdf_filename
     # return redirect ("generate-transcript", student.user.id)
 
@@ -142,6 +615,10 @@ def download_all_transcripts(request, semester_id):
     # Assuming you have a list of student IDs
     semester = Semester.objects.get(id=semester_id)
     students = Student.objects.filter(grad_sem=semester)
+
+    if not students:
+        messages.warning(request, f"No student records on graduation on {semester.academic_year} Sem {semester.semester}.")
+        return redirect ("print-all-transcripts")
 
     # Create a BytesIO object to store the zipped content
     zip_buffer = BytesIO()
@@ -162,303 +639,11 @@ def download_all_transcripts(request, semester_id):
     response['Content-Disposition'] = 'attachment; filename=all_transcripts.zip'
     return response
 
-def loginView(request):
-
-    login_page = 'login.html'
-
-    redirected_login_failed_link = 'login'
-
-    redirected_success_link_dict = {
-        'SUPER ADMIN' : 'dashboard',
-        'ADMIN' : 'dashboard',
-        'HEAD OF DEPARTMENT' : 'dashboard',
-        'LECTURER' : 'dashboard',
-        'STUDENT' : 'dashboard',
-    }
-
-    if request.method == 'POST':
-
-        email = request.POST['email'].strip()
-        password = request.POST['password'].strip()
-
-        try:  
-            user = User.objects.get(email=email)
-
-        except ObjectDoesNotExist:
-            messages.error(request, 'Account does not exist.')
-            return redirect(redirected_login_failed_link)
-
-        if not user.check_password(password):
-            messages.error(request, "Incorrect username or password.")
-            return redirect(redirected_login_failed_link)
-        else:  # if password correct
-            login(request, user)
-            messages.success(request, f"Welcome {user.full_name}.")
-        
-            if 'next' in request.GET:
-                if request.GET['next'] != '/':
-                    return redirect(request.GET['next'])
-
-            return redirect(redirected_success_link_dict[user.role])
-  
- # redirect if logged in 
-    if request.user.is_authenticated:
-        redirected_link = redirected_success_link_dict[request.user.role]
-        return redirect(redirected_link)
- 
-    return render(request, login_page)
-
-
-
-@login_required
-def logoutView(request):
-    logout(request)
-    messages.success(request,"You have been logged out.")
-    return redirect('login')
-
-def registerView(request):
-    current_date = datetime.now().date()
-    current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
-    option_position = Lecturer.position.field.choices
-    option_program = Student.program.field.choices
-    lecturers = Lecturer.objects.filter(user__is_active=1)
-
-    context = {
-        "option_position": option_position,
-        "option_program": option_program,
-        "lecturers": lecturers,
-    }
-    if request.method == 'POST':
-        print(request.POST)
-        email = request.POST['email']
-
-
-        if User.objects.filter(email=email):
-            messages.info(request, "Account already exist. Please proceed to login.")
-            return redirect('login')
-        
-        else:
-            role = request.POST['role']
-            new_user = User()
-            new_user.email = email
-            new_user.password = make_password(request.POST['password'])
-            new_user.role = role
-            new_user.full_name = request.POST['name'].upper()
-                  
-        
-            if new_user.role not in 'STUDENT':
-                lecturer = Lecturer()
-                lecturer.user = new_user
-                lecturer.position = request.POST['lecturer_position']
-                new_user.save()
-                lecturer.save()
-                messages.success(request,"Your account is registered successfully. Please proceed to login.")
-                return redirect('login')
-            
-            else:
-                new_user.contact = request.POST['contact']
-                new_user.address = request.POST['address']
-                new_user.save()
-                id = new_user.id
-                student = Student()
-                student.user_id = id
-                student.matric_no = new_user.email.split('@')[0].upper()
-                print(request.POST['program'])
-                student.program = request.POST['program']
-                student.enrol_sem = current_sem
-                if student.program == '1':
-                    grad_year = int(current_sem.academic_year.split('/')[0]) + 3
-                    grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-                    grad_sem = current_sem.semester
-                    
-                elif student.program == '2' or student.program == '3':
-                    grad_year = int(current_sem.academic_year.split('/')[0]) + 1
-                    grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-                    grad_sem = 2 if current_sem.semester == 1 else 1
-                else:
-                    grad_year = int(current_sem.academic_year.split('/')[0]) + 2
-                    grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-                    grad_sem = 2 if current_sem.semester == 1 else 1
-                if Semester.objects.filter(academic_year=grad_year, semester=grad_sem).exists():
-                    grad_semester = Semester.objects.get(academic_year=grad_year, semester=grad_sem)
-                else:
-                    grad_semester = Semester()
-                    grad_semester.academic_year = grad_year
-                    grad_semester.semester = grad_sem
-                    grad_semester.save()
-                student.lecturer = Lecturer.objects.get(user__role='HEAD OF DEPARTMENT')
-                student.grad_sem = grad_semester
-                student.save()
-
-                messages.success(request,"Your account is registered successfully. Please proceed to login.")
-                return redirect('login')
-    
-    return render(request, "register.html", context)
-
-def editProfile(request, id):
-    
-    student = Student.objects.get(user_id=id) if Student.objects.filter(user_id=id).exists() else None
-    user = User.objects.get(id=id)
-    lecturers = Lecturer.objects.filter(user__is_active=1)
-    context = {
-        "name": user.full_name,
-        "lecturers": lecturers,
-        "student": student,
-    }
-    
-
-    if request.method == 'POST':
-        student = Student.objects.get(user_id=id)
-        student.user = user
-        student.matric_no = request.POST['matric'].upper()
-        student.program = request.POST['program']
-        # student.enrol_year = datetime.strptime(request.POST['enrol'], '%Y-%m').date()
-        # student.grad_year = datetime.strptime(request.POST['grad'], '%Y-%m').date()
-        enrol_sem = Semester.objects.filter(academic_year=request.POST['enrol_year'], semester=request.POST['enrol_sem']).first()
-        grad_sem = Semester.objects.filter(academic_year=request.POST['grad_year'], semester=request.POST['grad_sem']).first()
-        if not enrol_sem:
-            enrol_sem = Semester()
-            enrol_sem.academic_year = request.POST['enrol_year']
-            enrol_sem.semester = request.POST['enrol_sem']
-            enrol_sem.save()
-        if not grad_sem:
-            grad_sem = Semester()
-            grad_sem.academic_year = request.POST['grad_year']
-            grad_sem.semester = request.POST['grad_sem']
-            grad_sem.save()
-        student.lecturer_id = request.POST['lecturer']
-        student.enrol_sem = enrol_sem
-        student.grad_sem = grad_sem
-        student.save()
-        user = User.objects.get(id=id)
-        user.full_name = request.POST['name'].upper()
-        user.contact = request.POST['contact']
-        user.address = request.POST['address']
-        user.save()
-
-   
-        messages.success(request, "Your profile is updated.")
-        return redirect('dashboard')
-        
-    return render(request, "edit_profile.html", context)
-
-def manageStudent (request):
-    students = Student.objects.all()
-    semesters = Semester.objects.all()
-    for semester in semesters:
-        start = semester.start
-        end = semester.end
-        students = Student.objects.filter(enrol_year__range=(start,end))
-        # for student in students:
-        #     student.enrol_sem = semester
-        #     if student.program == '1':
-        #         grad_year = int(semester.academic_year.split('/')[0]) + 3
-        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-        #         grad_sem = semester.semester
-                
-        #     elif student.program == '2' or student.program == '3':
-        #         grad_year = int(semester.academic_year.split('/')[0]) + 1
-        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-        #         grad_sem = 2 if semester.semester == 1 else 1
-        #     else:
-        #         grad_year = int(semester.academic_year.split('/')[0]) + 2
-        #         grad_year = str(grad_year) + '/' + f'{grad_year+1}'[2:]
-        #         grad_sem = 2 if semester.semester == 1 else 1
-
-        #     student.grad_sem = Semester.objects.filter(academic_year=grad_year, semester=grad_sem)
-    lecturers = Lecturer.objects.all()
-    students = Student.objects.all()
-    context = {
-        "students": students,
-        "lecturers": lecturers,
-    }
-
-    if request.method == "POST":
-        current_date = datetime.now().date()
-        if 'manage-student' in request.POST:
-            student = Student.objects.get(id=request.POST['manage-student'])
-            student.user.full_name = request.POST['student_name'].upper()
-            student.matric_no = request.POST['student_matric'].upper()
-            student.enrol_year = datetime.strptime(request.POST['student_enrol'], '%Y-%m').date()
-            student.grad_year = datetime.strptime(request.POST['student_grad'], '%Y-%m').date()
-            student.user.is_active = 1 if 'student_active' in request.POST else 0
-            student.lecturer_id = request.POST['student_lect']
-            student.save()
-            student.user.save()
-
-        if 'delete-student' in request.POST:
-            student = Student.objects.get(id=request.POST['delete-student'])
-            student.delete()
-            student.user.delete()
-
-        if 'update-status' in request.POST:            
-            users = User.objects.filter(role="STUDENT", is_active=1)
-            current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
-            print(users.count())
-            print(current_year.academic_year)
-            for user in users:
-                student = Student.objects.get(user=user)
-                if student.grad_year <= current_year.start:
-                    user.is_active = 0
-                    user.save()
-            messages.success (request, f"Student status updated succesfully for Semester {current_year.semester} {current_year.academic_year}")
-        
-        return redirect ("manage-student")
-    return render (request, "manage_student.html", context)
-
-def manageLecturer (request):
-    lecturers = Lecturer.objects.all()
-    student_counts = list()
-    for lecturer in lecturers:
-        student_counts.append(Student.objects.filter(lecturer=lecturer).count())
-    option_position = Lecturer.position.field.choices
-    lecturers_students = zip(lecturers,student_counts)
-    context = {
-        "lecturers_students": lecturers_students,
-        "option_position": option_position,
-
-    }
-
-    if request.POST:
-        if 'manage-lecturer' in request.POST:
-            lecturer = Lecturer.objects.get(id=request.POST['manage-lecturer'])
-            lecturer.position = request.POST['lecturer_position']
-            lecturer.user.full_name = request.POST['lecturer_name'].upper()
-            lecturer.user.is_active = 1 if 'lecturer_active' in request.POST else 0
-            lecturer.save()
-            lecturer.user.save()
-        elif 'delete-lecturer' in request.POST:
-            lecturer = Lecturer.objects.get(id=request.POST['delete-lecturer'])
-            lecturer.delete()
-        return redirect ("manage-lecturer")
-    return render (request,"manage_lecturer.html", context)
-
-def resetPasswordView(request):
-
-    context = {
-        "page_name": "Change Password",
-    }
-
-    if request.method == 'POST':
-        old_pw = request.POST['old_pw']        
-        new_pw = request.POST['new_pw']
-        if not request.user.check_password(old_pw):
-            print("incorrect")
-            messages.error(request, "Incorrect existing password!")
-            return redirect("change-password")
-        else:
-            user = User.objects.get(id=request.user.id)
-            user.password = make_password(new_pw)
-            user.save()
-            logout(request)
-            messages.success(request, "Password changed successfully. Please login again.")
-            return redirect ("login")
-    return render (request, "change_password.html",context)
-
 def printAllView (request):
     academic_years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
     context = {
-        "academic_years": academic_years
+        "academic_years": academic_years,
+    
     }
     if 'print_all' in request.POST:
         semester = Semester.objects.filter(academic_year=request.POST['academic_year'], semester=request.POST['semester'])
@@ -471,11 +656,20 @@ def printAllView (request):
         
         return redirect ("print-all-transcripts")
     return render (request, "print_all_transcripts.html", context)
+
+
+
 @login_required
 def generateTranscriptView(request, user_id):
+    page_name = "Generate Transcript"
+    icon = "fa-solid fa-file-alt fa-xl"
     current_date = datetime.now().date()
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
     student = ""
+    students = ""
+    if request.user.role in 'LECTURER':
+        lecturer = Lecturer.objects.get(user=request.user)
+        students = Student.objects.filter(lecturer=lecturer)
 
     if Student.objects.filter(user_id=user_id).exists():
         student = Student.objects.get(user_id=user_id) 
@@ -483,8 +677,8 @@ def generateTranscriptView(request, user_id):
         # Event Participation
         event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
         event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__type')
-        arts = Article.objects.filter(student=student, status=1, published__isnull=False)
-        awarded_arts = Article.objects.filter(published__isnull=True)
+        arts = Article.objects.filter(student=student, status=1, award__isnull=True)
+        awarded_arts = Article.objects.filter(student=student, status=1, award__isnull=False)
         
         # Event/Org Committee
         event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
@@ -499,6 +693,8 @@ def generateTranscriptView(request, user_id):
         # Other Competition
         other = OtherComp.objects.filter(student=student, status=1)
         context = {
+            "page_name": page_name,
+            "icon": icon,
             "student": student,
             "event_pars_in": event_pars_in,
             "event_pars_ex": event_pars_ex,
@@ -518,15 +714,19 @@ def generateTranscriptView(request, user_id):
             "transcript": True,
             "hod_name": hod_name,
             "current": current_year,
+            "students": students,
+            
         }
 
     else:
         context = {
+            "page_name": page_name,
+            "icon": icon,
             "transcript": False,
             "current": current_year,
+            "students": students,
         }
-    if request.method == 'POST':
-        
+    if request.method == 'POST':  
         if 'search' in request.POST:
             if Student.objects.filter(matric_no=request.POST['matric'].upper()).exists():
                 student = Student.objects.get(matric_no=request.POST['matric'].upper())
@@ -742,133 +942,9 @@ def dashboardView(request):
         }
         return render (request, "dashboard_lecturer.html", context)
     
-def postgradDetailsView (request):
-    selected_program = ""
-    if "HEAD OF DEPARTMENT" in request.user.role or "ADMIN" in request.user.role:
-        print("HOD OR ADMIN")
-        students = Student.objects.filter(program__in=[2,3,4], user__is_active=1)
-    elif "LECTURER" in request.user.role:
-        print("LECTURER")
-        lecturer = Lecturer.objects.get(user=request.user)
-        students = Student.objects.exclude(program='1', user__is_active=0).filter(lecturer=lecturer)
 
-    if request.method == 'POST':
-        if 'program' in request.POST:
-            selected_program = request.POST['program']
-            if not 'all' in request.POST['program']:
-                students = students.filter(program=request.POST['program'])
-        if 'submit-dates' in request.POST:
-            print(request.POST)
-            rm_date  = datetime.strptime(request.POST['rm_date'], "%Y-%m-%dT%H:%M") if request.POST['rm_date'] != "" else None
-            pd_date  = datetime.strptime(request.POST['pd_date'], "%Y-%m-%dT%H:%M") if request.POST['pd_date'] != "" else None
-            cd_date  = datetime.strptime(request.POST['cd_date'], "%Y-%m-%dT%H:%M") if request.POST['cd_date'] != "" else None
-            viva_date  = datetime.strptime(request.POST['viva_date'], "%Y-%m-%dT%H:%M") if request.POST['viva_date'] != "" else None
-            student = Student.objects.get(id=request.POST['submit-dates'])
-            student.rm_date = rm_date 
-            student.pd_date = pd_date
-            student.cd_date = cd_date
-            student.viva_date = viva_date
-            if 'rm' in request.POST:
-                student.rm_status = 1
-            else:
-                student.rm_status = 0
-            if 'pd' in request.POST:
-                student.pd_status = 1
-            else:
-                student.pd_status = 0
-            if 'cd' in request.POST:
-                student.cd_status = 1
-            else:
-                student.cd_status = 0
-            if 'viva' in request.POST:
-                student.viva_status = 1
-            else:
-                student.viva_status = 0
-            student.save()
-            return redirect ("postgrad")
-    context = {
-        "students": students,
-        "program_opt": Student.program.field.choices,
-        "selected_program": selected_program,
-    }
-    return render (request, "postgrad_details.html", context)
 
-def semesterDatesView (request):
-    current_date = datetime.now().date()
-    current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
-    semesters = Semester.objects.all()
-    context = {
-        "curr_sem": current_sem,
-        "semesters": semesters,
-    }
-    if request.method == 'POST':
-        if 'add-semester' in request.POST:
-            academic_year = request.POST['academic_year']
-            semester = request.POST['semester']
-            if not Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
-                sem = Semester()
-                sem.academic_year = academic_year
-                sem.semester = semester
-                sem.start = request.POST['start']
-                sem.end = request.POST['end']
-                sem.save()
-            else:
-                messages.error(request, f'Semester {semester} Year {academic_year} already exists.')
-        
-        if 'delete' in request.POST:
-            sem = Semester.objects.get(id=request.POST['delete'])
-            sem.delete()
-        return redirect ("semesters")
-    return render (request, "semester.html", context)
 
-def graduateReportView (request):
-    semester_years = Semester.objects.values('academic_year').distinct().order_by("academic_year")
-    students = None
-    selected_sem = None
-
-    if request.method == 'POST':
-        academic_year = request.POST['academic_year']
-        semester = request.POST['semester']
-        if Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
-            selected_sem = Semester.objects.get(academic_year=academic_year, semester=semester)
-            students = Student.objects.filter(grad_sem=selected_sem)
-
-        else:
-            messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
-            return redirect("graduate-report")
-        
-    context = {
-        "semester_years": semester_years,
-        "students": students,
-        "selected_sem": selected_sem,
-        "graduate": 1,
-    }
-
-    return render (request, "graduate_report.html",context)
-
-def activeReportView (request):
-    semester_years = Semester.objects.values('academic_year').distinct().order_by("academic_year")
-    students = None
-    selected_sem = None
-
-    if request.method == 'POST':
-        academic_year = request.POST['academic_year']
-        semester = request.POST['semester']
-        if Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
-            selected_sem = Semester.objects.get(academic_year=academic_year, semester=semester)
-            students = Student.objects.filter(enrol_year__lte=selected_sem.start, grad_year__gte=selected_sem.end)
-            
-        else:
-            messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
-            return redirect("active-report")
-        
-    context = {
-        "semester_years": semester_years,
-        "students": students,
-        "selected_sem": selected_sem,
-        "active": 1,
-    }
-    return render (request, "graduate_report.html",context)
     
 def get_student_details(request, student_id):
     try:
@@ -908,6 +984,23 @@ def get_lecturer_details(request, lecturer_id):
             'name': lecturer.user.full_name,
             'position': lecturer.position,
             'active': lecturer.user.is_active,
+            # Include other event details in the response as needed
+        }
+        return JsonResponse(response_data)
+    except Events.DoesNotExist:
+        return JsonResponse({'error': 'Lecturer not found'}, status=404)
+    
+def get_semester_details(request, semester_id):
+    try:
+        semester = Semester.objects.get(id=semester_id)
+        # Retrieve the necessary event details
+
+        response_data = {
+            'id': semester_id,
+            'academic_year': semester.academic_year,
+            'semester': semester.semester,
+            'start': semester.start,
+            'end': semester.end,
             # Include other event details in the response as needed
         }
         return JsonResponse(response_data)

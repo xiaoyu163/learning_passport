@@ -14,7 +14,6 @@
     }
 </script>
 {% if event %}
-    <h3>Delete Event Committee Documents</h3>
     <br>
     {% if events %}
         <form method="POST">
@@ -65,12 +64,13 @@
             </center>
         </form>
     {% else %}
-    <sub>No event committee list to be deleted.</sub>
+    <center>
+        <p>No event committee list to be deleted.</p>
+    </center>
     {% endif %}
 {% endif %}
 <!-- External Event -->
 {% if ex_event %}
-    <h3>Delete External Event Commitment Files</h3>
     <br>
     {% if ex_events %}
         <form method="POST">
@@ -119,12 +119,13 @@
             </center>
         </form>
     {% else %}
-    <sub>No external event committee list to be deleted.</sub>
+    <center>
+        <p>No external event committee list to be deleted.</p>
+    </center>
     {% endif %}
 {% endif %}
 <!-- Organisation -->
 {% if org %}
-    <h3>Delete Organisation Committee Documents</h3>
     <br>
     {% if orgs %}
         <form method="POST">
@@ -172,13 +173,14 @@
             </center>
         </form>
     {% else %}
-    <sub>No organisation committee list to be deleted.</sub>
+    <center>
+        <p>No organisation committee list to be deleted.</p>
+    </center>
     {% endif %}
 {% endif %}
 
 <!-- External Organisation -->
 {% if org_ex %}
-    <h3>Delete Organisation Committee Documents</h3>
     <br>
     {% if org_coms %}
         <form method="POST">
@@ -225,13 +227,14 @@
             </center>
         </form>
     {% else %}
-    <sub>No external organisation committee list to be deleted.</sub>
+    <center>
+        <p>No external organisation committee list to be deleted.</p>
+    </center>
     {% endif %}
 {% endif %}
 
 <!-- Other Competition -->
 {% if other %}
-    <h3>Delete Other Competition Documents</h3>
     <br>
     {% if others %}
         <form method="POST">
@@ -281,13 +284,14 @@
             </center>
         </form>
     {% else %}
-    <sub>No competition certificates to be deleted.</sub>
+    <center>
+        <p>No competition certificates to be deleted.</p>
+    </center>
     {% endif %}
 {% endif %}
 
 <!-- Article -->
 {% if article %}
-    <h3>Delete Articles Uploaded</h3>
     <br>
     {% if arts %}
         <form method="POST">
@@ -337,7 +341,9 @@
             </center>
         </form>
     {% else %}
-    <sub>No articles to be deleted.</sub>
+    <center>
+        <p>No articles to be deleted.</p>
+    </center>
     {% endif %}
 {% endif %}
 {% endblock %}

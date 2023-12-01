@@ -1,12 +1,66 @@
 {% extends "sidebar.html" %}
 {% block content %}
 {% load static %}
-<br>
-<h1>Semester Dates</h1>
-<br>
-<button class="btn btn-primary" type="button" data-mdb-toggle="modal" data-mdb-target="#semester" >Add Semester Date</button>
-<br><br>
-<h4>Current Semester: Semester {{curr_sem.semester}} Year {{curr_sem.academic_year}}</h4>
+<script>
+    $(document).ready(function () {
+        $('.manage-semester').click(function () {
+            console.log()
+            var semesterId = $(this).data('semester-id');
+
+            // Make an AJAX request to retrieve the event details
+            $.ajax({
+                url: '/get-semester-details/' + semesterId + '/',  // URL to your Django view for fetching event details
+                type: 'GET',
+
+                success: function (response) {
+                    semester_id = response.id;
+                    $('#edit-semester').val(semester_id);
+                    semester_year = response.academic_year;
+                    $('#edit_year').val(semester_year);
+                    semester_sem = response.semester;
+                    $('#edit_sem').val(semester_sem);
+                    semester_start = response.start
+                    $('#edit_start').val(semester_start);
+                    semester_end = response.end
+                    $('#edit_end').val(semester_end);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);  // Handle the error if necessary
+                }
+            });
+        });
+    });
+</script>
+<style>
+    .container {
+        display: flex;
+    }
+    .year-container {
+        flex: 2;
+    }
+    .button-container {
+        display: flex;
+        justify-content: flex-end; /* Align items to the right */
+        gap: 10px; 
+        flex:1
+    }
+</style>
+
+<div class="container container-fluid">
+    <div class="year-container">
+        <h4>Current Semester: Semester {{curr_sem.semester}} Year {{curr_sem.academic_year}}</h4>
+    </div>
+    <div class="button-container">
+        <button class="btn btn-primary" type="button" data-mdb-toggle="modal" data-mdb-target="#semester" >Add Semester Date</button>
+
+        <form method="POST">
+            {% csrf_token %}
+        <button class="btn btn-outline-primary" name="update-status">Update Student Status</button>
+        
+        </form>
+    </div>
+
+</div>
 <hr>
 <table class="table table-striped">
     <thead>
@@ -15,26 +69,58 @@
             <th>Semester</th>
             <th>Start Date</th>
             <th>End Date</th>
+            <th>Student Enrolled</th>
+            <th>Student Graduated</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        {% for sem in semesters %}
-        <tr>
-            <td>{{sem.academic_year}}</td>
-            <td>{{sem.semester}}</td>
-            <td>{{sem.start}}</td>
-            <td>{{sem.end}}</td>
-            <form method="POST">
-                {% csrf_token %}
-            <td>
-                <button class="btn btn-floating btn-danger" type="submit" name="delete" value="{{sem.id}}"
-                onclick="return confirm('Confirm to delete dates for Semester {{sem.semester}} Year {{sem.academic_year}}')">
-                    <i class="fa-solid fa-trash"></i>
+        {% for sem,enrol,grad in semesters %}
+            {% if sem.academic_year == curr_sem.academic_year and sem.semester == curr_sem.semester %}
+            <tr class="table-warning">
+                <td>{{sem.academic_year}}</td>
+                <td>{{sem.semester}}</td>
+                <td>{{sem.start}}</td>
+                <td>{{sem.end}}</td>
+                <td>{{enrol}}</td>
+                <td>{{grad}}</td>
+                <form method="POST">
+                    {% csrf_token %}
+                <td>
+                    <button type="button" class="manage-semester btn btn-floating" data-mdb-toggle="modal" data-mdb-target="#edit_modal"
+                    data-semester-id="{{ sem.id }}">
+                    <i class="fas fa-edit"></i>
                 </button>
-            </td>
-        </tr>
-        </form>
+                    <button class="btn btn-floating btn-danger" type="submit" name="delete" value="{{sem.id}}"
+                    onclick="return confirm('Confirm to delete dates for Semester {{sem.semester}} Year {{sem.academic_year}}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td>{{sem.academic_year}}</td>
+                <td>{{sem.semester}}</td>
+                <td>{{sem.start}}</td>
+                <td>{{sem.end}}</td>
+                <td>{{enrol}}</td>
+                <td>{{grad}}</td>
+                <form method="POST">
+                    {% csrf_token %}
+                <td>
+                    <button type="button" class="manage-semester btn btn-floating" data-mdb-toggle="modal" data-mdb-target="#edit_modal"
+                    data-semester-id="{{ sem.id }}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                &nbsp;
+                    <button class="btn btn-floating btn-danger" type="submit" name="delete" value="{{sem.id}}"
+                    onclick="return confirm('Confirm to delete dates for Semester {{sem.semester}} Year {{sem.academic_year}}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            </form>
+            {% endif %}
         {% endfor %}
     </tbody>
 </table>
@@ -50,14 +136,14 @@
                 <div class="modal-body">
 
                     <div class="form-outline">
-                        <input class="form-control" id="academic_year" name="academic_year" type="text">
-                        <label class="form-label" for="academic_year" style="margin-left: 0px;">Academic Year (20XX/XX)</label>
-                        <div class="form-notch">
-                            <div class="form-notch-leading" style="width: 9px;"></div>
-                            <div class="form-notch-middle" style="width: 40px;"></div>
-                            <div class="form-notch-trailing"></div>
-                        </div>
+                    <input type="text" class="form-control" id="academic_year" name="academic_year" required>
+                    <label class="form-label" for="academic_year" style="margin-left: 0px;">Academic Year (20xx/xx)</label>
+                    <div class="form-notch">
+                    <div class="form-notch-leading" style="width: 9px;"></div>
+                    <div class="form-notch-middle" style="width: 60px;"></div>
+                    <div class="form-notch-trailing"></div>
                     </div>
+                </div>     
                     <br>
                     <div class="form-floating">
                         <select class="form-select" id="semester" name="semester">
@@ -89,6 +175,64 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
                     <button id="add-semester" type="submit" class="btn btn-primary" name="add-semester">Save
+                        changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="edit_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Semester Dates</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-outline">
+                        <input class="form-control active" id="edit_year" name="edit_year" type="text" disabled>
+                        <label class="form-label" for="edit_year" style="margin-left: 0px;">Academic Year (20XX/XX)</label>
+                        <div class="form-notch">
+                            <div class="form-notch-leading" style="width: 9px;"></div>
+                            <div class="form-notch-middle" style="width: 140px;"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-floating">
+                        <select class="form-select" id="edit_sem" name="edit_sem" disabled>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                        <label for="semester">Semester</label>
+                    </div>
+                    <br>
+                    <label for="start">Start Date</label>
+                    <div class="form-outline">
+                        <input type="date" name="edit_start" id="edit_start" class="form-control active" required />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <label for="end">End Date</label>
+                    <div class="form-outline">
+                        <input type="date" name="edit_end" id="edit_end" class="form-control active" required />
+                        <div class="form-notch">
+                            <div class="form-notch-leading"></div>
+                            <div class="form-notch-trailing"></div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+                    <button id="edit-semester" type="submit" class="btn btn-primary" name="edit-semester">Save
                         changes</button>
                 </div>
             </div>

@@ -26,6 +26,7 @@ urlpatterns = [
      path('generate_transcript/<int:user_id>/', views.generateTranscriptView, name="generate-transcript"),
      path('get-student-details/<int:student_id>/', views.get_student_details, name='get-student-details'),
      path('get-lecturer-details/<int:lecturer_id>/', views.get_lecturer_details, name='get-lecturer-details'),
+     path('get-semester-details/<int:semester_id>/', views.get_semester_details, name='get-semester-details'),
      path('semester-dates', views.semesterDatesView, name="semesters"),
      path('graduate-report', views.graduateReportView, name="graduate-report"),
      path('active-report', views.activeReportView, name="active-report"),

@@ -2,12 +2,28 @@
 
 {% block content %}
 {% load static %}
-<h1>Print All Transcripts</h1>
-<br>
+<style>
+    .container {
+        max-width: 500px;
+        border-radius: 10px;
+        align-items: center;
+        padding: 40px;
+    }
+
+    select {
+        width:95%; 
+        margin:10px auto;
+    }
+</style>>
+
+<center>
+<div class="container border container-fluid">
 <form method="POST">
     {% csrf_token %}
-    <div class="form-floating" style="width:50%">
-        <select class="form-select" id="year" name="academic_year">
+    <h3>Print All Transcripts</h3>
+    <br>
+    <div class="form-floating">
+        <select class="form-select custom_margin_top" id="year" name="academic_year">
             {% for year in academic_years %}
             <option value="{{year.academic_year}}" {% if year.academic_year == current.academic_year %} selected {% endif %}>{{year.academic_year}}</option>
             {% endfor %}
@@ -15,19 +31,21 @@
         <label for="year">Academic Year</label>
     </div>
     <br>
-    <div class="form-floating" style="width:50%">
-        <select class="form-select" name="semester">
+    <div class="form-floating">
+        <select class="form-select custom_margin_top" name="semester">
             <option value="1" {% if current.semester == 1 %} selected {% endif %}>Semester 1</option>
             <option value="2" {% if current.semester == 2 %} selected {% endif %}>Semester 2</option>
         </select>
         <label for="year">Semester</label>
     </div>
     <br>
-    <div class="input-group">
-        <button type="submit" class="btn btn-outline-primary" name="print_all">
-            <i class="fa-solid fa-file-zipper"></i> &nbsp;
-            Download All</button>
+    <div class="row custom_margin_top">
+        <button type='submit' class="btn btn-dark" name="print_all" style='width:95%; margin:10px auto;'>
+            <i class="fa-solid fa-file-zipper fa-lg"></i> &nbsp;
+            Download All
+        </button>
     </div>
 </form>
-
+</div>
+</center>
 {% endblock %}

@@ -46,6 +46,8 @@ def eventListView (request):
         "events": events,
         "event_parts": event_parts,
         "option_obj": option_obj,
+        "page_name": "Events",
+        "icon": "fa-solid fa-calendar-days"
     }
     if request.method == 'POST':
         if 'add_event' in request.POST or 'edit_event' in request.POST:
@@ -137,7 +139,7 @@ def eventDetailView (request, id):
         "end_day": event.end.strftime("%A") if event.end else None,
         "parts": parts,
         "curr_event" : curr_event,
-        "page_name": "Event Detail"
+        
     }
     if request.method == 'POST':
         print(request.POST)
@@ -198,7 +200,8 @@ def takeAttendanceView (request):
            
             "events": events,
             "reg_events": reg_events,
-            "page_name": "Registered Event"
+            "page_name": "Registered Event",
+            "icon": "fa-solid fa-calendar-check fa-xl"
         }
     elif request.user.role in 'SUPER ADMIN':
         all_event = Events.objects.order_by("-start")
@@ -218,6 +221,8 @@ def takeAttendanceView (request):
         context = {
             "all_event": all_event,
             "att_event": att_event,
+            "page_name": "Manage Attendance",
+            "icon": "fa-solid fa-calendar-check fa-xl"
         }
     if request.method == 'POST':
         
@@ -242,7 +247,9 @@ def adminAttendaceView (request, event_id):
     context = {
         "event": event,
         "participants": participants,
-        "students": students
+        "students": students,
+        "page_name": "Manage Attendance",
+        "icon": "fa-solid fa-calendar-check fa-xl"
     }
     if request.method == 'POST':
         if 'enable' in request.POST:
@@ -299,11 +306,12 @@ def get_event_details(request, event_id):
 
 @login_required
 def announcementListView(request):
-    if request.user.role in 'SUPER ADMIN':
+    if request.user.role in 'SUPER ADMIN LECTURER HEAD OF DEPARTMENT':
         anns = Announcement.objects.all().order_by("-created_time")
         general_anns = Announcement.objects.filter(category=1).order_by("-created_time")
         event_anns = Announcement.objects.filter(category=2).order_by("-created_time")
         others_anns = Announcement.objects.filter(category=3).order_by("-created_time")
+
     else:
         program = Student.objects.get(user=request.user.id).program
         if program == 1:
@@ -353,6 +361,8 @@ def announcementListView(request):
         "others_anns": others_anns,
         "cat_obj": cat_obj,
         "for_obj": for_obj,
+        "page_name": "Announcement",
+        "icon": "fa-solid fa-bullhorn fa-xl"
     }
     return render (request, "announcement.html", context)
 

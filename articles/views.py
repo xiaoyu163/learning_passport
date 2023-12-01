@@ -386,7 +386,8 @@ def verEventView(request):
     }
 
     context = {
-        "page_name": "Verify Event Comittee",
+        "page_name": "Verify Event Committee",
+        "icon":"fa-solid fa-file-circle-check",
         "pending_data": pending_data,
         "approved_data": approved_data,
         "rejected_data": rejected_data,
@@ -454,8 +455,6 @@ def verEventView(request):
             # os.remove(file_path)
             event_par.save()
                        
-
-           
         elif 'internal_delete' in request.POST:
             event = Events.objects.get(id=request.POST['internal_delete'])
             if Event_Participants.objects.filter(event=event).exists():
@@ -522,7 +521,8 @@ def verOrgView(request):
         "rejected": True,
     }
     context = {
-        "page_name": "Verify Organisation Comittee",
+        "page_name": "Verify Organisation Committee",
+        "icon":"fa-solid fa-file-circle-check",
         "pending_data": pending_data,
         "approved_data": approved_data,
         "rejected_data": rejected_data,
@@ -625,6 +625,7 @@ def verArtView(request):
     }
     context = {
         "page_name": "Verify Article",
+        "icon":"fa-solid fa-file-circle-check",
         "pending_data": pending_data,
         "approved_data": approved_data,
         "rejected_data": rejected_data,
@@ -677,6 +678,7 @@ def verOtherView (request):
     }
     context = {
         "page_name": "Verify Co-curricular Awards",
+        "icon":"fa-solid fa-file-circle-check",
         "pending_data": pending_data,
         "approved_data": approved_data,
         "rejected_data": rejected_data,
@@ -716,6 +718,8 @@ def deleteEventDocView(request):
     context = {
         "events": events,
         "event": 1,
+        "page_name": "Delete Event Documents",
+        "icon": "fa-solid fa-file-circle-minus fa-xl"
     }
     if request.method =='POST':
         print(request.POST)
@@ -738,6 +742,8 @@ def deleteExEventDocView(request):
     context = {
         "ex_events": ex_events,
         "ex_event": 1,
+        "page_name": "Delete External Event Documents",
+        "icon": "fa-solid fa-file-circle-minus fa-xl"
     }
     if request.method =='POST':
         print(request.POST)
@@ -759,6 +765,8 @@ def deleteOrgDocView(request):
     context = {
         "orgs": orgs,
         "org": 1,
+        "page_name": "Delete Organisation Documents",
+        "icon": "fa-solid fa-file-circle-minus fa-xl"
     }
     if request.method =='POST':
         for elem in request.POST:
@@ -780,6 +788,8 @@ def deleteExOrgDocView(request):
     context = {
         "org_coms": org_coms,
         "org_ex": 1,
+        "page_name": "Delete Organisation Documents",
+        "icon": "fa-solid fa-file-circle-minus fa-xl"
     }
     if request.method =='POST':
         for elem in request.POST:
@@ -800,6 +810,8 @@ def deleteOtherDocView(request):
     context = {
         "others": others,
         "other": 1,
+        "page_name": "Delete Co-curricular Documents",
+        "icon": "fa-solid fa-file-circle-minus fa-xl"
     }
     if request.method =='POST':
         for elem in request.POST:
@@ -819,6 +831,8 @@ def deleteArtDocView(request):
     context = {
         "arts": arts,
         "article": 1,
+        "page_name": "Delete Articles",
+        "icon": "fa-solid fa-file-circle-minus fa-xl"
     }
     if request.method =='POST':
         for elem in request.POST:
@@ -832,6 +846,7 @@ def deleteArtDocView(request):
                 art.save()
         return redirect ("delete-art-doc")
     return render (request, "delete-document.html", context)
+
 def statusView(request):
     student = Student.objects.get(user=request.user.id)
     events = Events.objects.filter(file_by=student).exclude(file__exact='')

@@ -62,25 +62,55 @@
             });
         });
     });
+
+    function search() {
+      // Declare variables
+      var input, filter, table, tr, matric,name, i, txtValue;
+      input = document.getElementById("search_text");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("dates_table");
+      tr = table.getElementsByTagName("tr");
+    
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        matric = tr[i].getElementsByTagName("td")[1];
+        name = tr[i].getElementsByTagName("td")[0];
+        
+        if (matric || name) {
+          matricValue = matric.textContent || matric.innerText;
+          nameValue = name.textContent || name.innerText;
+          console.log(matricValue)
+          console.log(nameValue)
+          if (matricValue.toUpperCase().indexOf(filter) > -1 || nameValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
     </script>
 </head>
-<h1>Postgraduate Students Details</h1>
+
+
+<center>
+<input id="search_text" type="text" class="form-control" style="width:50%" placeholder="Search for matric number or name..." onkeyup="search()">
 <br>
 <form method="POST">
     {% csrf_token %}
-    <div class="form-floating">
+
         <select class="form-select" id="program" name="program" onchange="submit()" style="width:50%">
             <option value="all" {% if selected_program == 'all' %}selected{% endif %}>All</option>
             <option value="2" {% if selected_program == '2' %}selected{% endif %}>Master of Chinese Studies (Coursework)</option>
             <option value="3" {% if selected_program == '3' %}selected{% endif %}>Master of Arts (Research)</option>
             <option value="4" {% if selected_program == '4' %}selected{% endif %}>Doctor of Philosophy (Ph.D)</option>
         </select>
-        <label for="program">Program</label>
-    </div>
+   
 </form>
-
+</center>
+<br>
 <div class="students_table">
-    <table class="table table-responsive">
+    <table id="dates_table" class="table table-responsive">
         <tr>
             <thead>
                 <th>Student Name</th>
@@ -108,7 +138,7 @@
                 {% if student.rm_date %}
                 <td class="text-nowrap">
                     <div class="ms-3">
-                        <p class="fw-bold mb-1">{{student.rm_date.date}}</p>
+                        <p class="fw-bold mb-1">{{student.rm_date.day}}/{{student.rm_date.month}}/{{student.rm_date.year}}</p>
                         <p class="text-muted mb-0">{{student.rm_date.time}}</p>
                         {% if student.rm_status %}
                         <span class="badge badge-primary rounded-pill d-inline">Passed</span>
@@ -118,12 +148,12 @@
                     </div>
                 </td>
                 {% else %}
-                <td><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
+                <td style="vertical-align: middle;"><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
                 {% endif %}
                 {% if student.pd_date %}
                 <td class="text-nowrap">
                     <div class="ms-3">
-                        <p class="fw-bold mb-1">{{student.pd_date.date}}</p>
+                        <p class="fw-bold mb-1">{{student.pd_date.day}}/{{student.pd_date.month}}/{{student.pd_date.year}}</p>
                         <p class="text-muted mb-0">{{student.pd_date.time}}</p>
                         {% if student.pd_status %}
                         <span class="badge badge-primary rounded-pill d-inline">Passed</span>
@@ -138,7 +168,7 @@
                 {% if student.cd_date %}
                 <td class="text-nowrap">
                     <div class="ms-3">
-                        <p class="fw-bold mb-1">{{student.cd_date.date}}</p>
+                        <p class="fw-bold mb-1">{{student.cd_date.day}}/{{student.cd_date.month}}/{{student.cd_date.year}}</p>
                         <p class="text-muted mb-0">{{student.cd_date.time}}</p>
                         {% if student.cd_status %}
                         <span class="badge badge-primary rounded-pill d-inline">Passed</span>
@@ -148,12 +178,12 @@
                     </div>
                 </td>
                 {% else %}
-                <td><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
+                <td style="vertical-align: middle;"><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
                 {% endif %}
                 {% if student.viva_date %}
                 <td class="text-nowrap">
                     <div class="ms-3">
-                        <p class="fw-bold mb-1">{{student.viva_date.date}}</p>
+                        <p class="fw-bold mb-1">{{student.viva_date.day}}/{{student.viva_date.month}}/{{student.viva_date.year}}</p>
                         <p class="text-muted mb-0">{{student.viva_date.time}}</p>
                         {% if student.viva_status %}
                         <span class="badge badge-primary rounded-pill d-inline">Passed</span>
@@ -163,7 +193,7 @@
                     </div>
                 </td>
                 {% else %}
-                <td><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
+                <td style="vertical-align: middle;"><span class="badge badge-danger rounded-pill d-inline">Not Scheduled</span></td>
                 {% endif %}
                 <td>
                     <button class="dates-button btn btn-floating" 

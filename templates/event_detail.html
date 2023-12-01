@@ -4,94 +4,145 @@
 
 <head>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/detail.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .flex-container {
+            display: flex;
+            align-items: stretch;
+
+        }
+
+        .left-container,
+        .right-container {
+            position: relative;
+            padding: 30px;
+            transform: none;
+            /* Remove box shadow on hover */
+        }
+
+        .card:hover {
+            transform: none;
+            /* Remove box shadow on hover */
+        }
+
+        .left-container {
+            flex: 1;
+            padding: 30px 30px 30px 40px;
+            border-radius: 10px 30px 30px 10px;
+            margin-right: -1px;
+            flex-direction: column;
+            max-width: 300px;
+            max-height: 100%;
+            align-items: center;
+            vertical-align: middle;
+
+        }
+
+        .circle {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: white;
+        }
+
+        .left-circle {
+            left: -10px;
+        }
+
+        .right-circle {
+            right: -10px;
+        }
+
+        .img-container {
+            box-sizing: border-box;
+            overflow: hidden;
+
+        }
+
+
+        .img-fluid {
+            height: auto;
+            width: auto;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .gap {
+            width: 30px;
+        }
+
+        .right-container {
+            flex: 2;
+            margin-left: -1px;
+            border-radius: 30px 10px 10px 30px;
+            flex-direction: column;
+            max-width: 600px;
+            max-height: fit-content;
+            border-left: 2px dotted white;
+            /* To overlap the dotted border with the left container */
+        }
+
+        .desc {
+            max-width: 900px;
+            margin-left: 2%;
+        }
+
+        .title {
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .button-container{
+            margin-left: 1%;
+        }
+    </style>
 </head>
-<h1>Event Details</h1>
-<br>
-{% if 'ADMIN' in request.user.role %}
-<button class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#poster_modal">Edit Event Poster</button>
-<br><br>
-{% endif %}
-{% if event.poster %}
-<div class="img-container">
-    <img src="{{event.poster.url}}" alt="Event Poster">
-</div>
-<br>
-{% endif %}
-<div class="container">
 
-    <div class="left-side">
-        <div class="card profile-card">
-            <div class="card-body">
-                <h4 class="card-title">{{event.c_name}}</h4>
-                <h4 class="card-title">{{event.e_name}}</h4>
+<body>
+
+    <br>
+    <div class="container container-fluid flex-container">
+        <div class="card text-bg-dark detail-card left-container">
+            <div class="circle left-circle"></div>
+            {% if event.poster %}
+            <div class="img-container">
+                <center>
+                    <img class="img-fluid" src="{{event.poster.url}}" alt="Event Poster">
+                </center>
             </div>
-        </div>
-        <br>
-        {% if event.desc %}
-        <div class="card profile-card">
-            <div class="card-body">
-                <p class="card-text">{{event.desc}}</p>
-            </div>
-        </div>
-        {% endif %}
-        <br>
-        <div>
-            {% if request.user.role in 'SUPER ADMIN' %}
-            <a href="{% url 'admin-attendance' event.id %}" id="admin-attendance-button" class="btn btn-primary"><i
-                    class="fas fa-calendar-alt"></i> Attendance</a>
-            {% endif %}
-            {% if request.user.role in 'STUDENT' %}
-                {% if curr_event and parts %}
-                    {% if parts.attendance == 1 %} 
-                        <button  class="btn btn-primary" disabled>
-                            Attendance Submitted
-                        </button>
-                    {% else %}
-                        <form method="POST">
-                            {% csrf_token %}
-                            <button type="submit" name="attendance" class="btn btn-primary" onclick='return confirm("Confirm to take attendance for {{event.e_name}}?")' >
-                                Take Attendance 
-                            </button>
-                        </form>
-                    {% endif %}
-                {% else %}
-                    {% if parts %}
-                    <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#reg_event_modal"
-                        disabled>
-                        Registered
-                    </button>
-                    {% else %}
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#reg_event_modal">
-                        Register
-                    </button>
-                    {% endif %}
-                {% endif %}
             {% endif %}
         </div>
-    </div>
-    <div class="right-side">
-        <div class="card border border-info">
-            <div class="card-body">
-                {% if start_date not in end_date %}
-                <h5>Start</h5>
-                <p class="body-text">
-                    <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
-                </p>
+        <div class="card text-bg-dark detail-card right-container">
+            <div class="circle right-circle"></div>
+            {% if start_date not in end_date %}
+            <div class="container container-fluid flex-container">
+                <div class="detail-left">
+                    <h5>Start</h5>
+                    <p class="body-text">
+                        <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
+                    </p>
 
-                <p class="body-text">
-                    <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}}
-                </p>
-
-
-                <h5>End</h5>
-                <p class="body-text">
-                    <i class="fa-solid fa-calendar"></i> &nbsp; {{end_date}} ({{end_day}})
-                </p>
-                <p class="body-text">
-                    <i class="fa-solid fa-clock"></i> &nbsp; {{end_time}}
-                </p>
-                {% else %}
+                    <p class="body-text">
+                        <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}}
+                    </p>
+                </div>
+                <div class="gap"></div>
+                <div class="detail-right">
+                    <h5>End</h5>
+                    <p class="body-text">
+                        <i class="fa-solid fa-calendar"></i> &nbsp; {{end_date}} ({{end_day}})
+                    </p>
+                    <p class="body-text">
+                        <i class="fa-solid fa-clock"></i> &nbsp; {{end_time}}
+                    </p>
+                </div>
+            </div>
+            {% else %}
+            <div>
                 <h5>Date</h5>
                 <p class="body-text">
                     <i class="fa-solid fa-calendar"></i> &nbsp; {{start_date}} ({{start_day}})
@@ -101,25 +152,76 @@
                 <p class="body-text">
                     <i class="fa-solid fa-clock"></i> &nbsp; {{start_time}} - {{end_time}}
                 </p>
-                {% endif %}
-
+            </div>
+            {% endif %}
+            <div class="detail-left">
                 <h5>Venue</h5>
                 <p class="body-text">
                     <i class="fa-solid fa-location-dot"></i> &nbsp; {{event.venue}}
                 </p>
-
-                {% if event.speaker %}
+            </div>
+            {% if event.speaker %}
+            <div class="detail-left">
                 <h5>Speaker</h5>
                 <p class="body-text">
                     <i class="fa-solid fa-microphone"></i> &nbsp; {{event.speaker}}
                 </p>
-                {% endif %}
-                </p>
             </div>
-        </div>
-    </div>
-</div>
+            {% endif %}
 
+        </div>
+
+    </div>
+    <br>
+    <div class="desc">
+        <p class="title">{{event.e_name}}</p>
+        <p class="title">{{event.c_name}}</p>
+        {% if event.desc %}
+        <hr>
+        <p>{{event.desc}}</p>
+        {% endif %}
+    </div>
+
+    <div class="button-container">
+        {% if request.user.role in 'SUPER ADMIN' %}
+            <div class="container container-fluid" style="display: flex;">
+                <button class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#poster_modal"><i class="fa-solid fa-file-image fa-lg"></i>&nbsp;&nbsp;&nbsp;Edit Event Poster</button>
+                    &nbsp; &nbsp; &nbsp;
+                <a href="{% url 'admin-attendance' event.id %}" id="admin-attendance-button" class="btn btn-secondary"><i
+                        class="fa-solid fa-calendar-alt fa-lg"></i>&nbsp; &nbsp; &nbsp; Attendance</a>
+                
+            </div>
+            <br><br>
+            {% endif %}
+
+            {% if request.user.role in 'STUDENT' %}
+            {% if curr_event and parts %}
+                {% if parts.attendance == 1 %} 
+                    <button  class="btn btn-primary" disabled>
+                        Attendance Submitted
+                    </button>
+                {% else %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="attendance" class="btn btn-primary" onclick='return confirm("Confirm to take attendance for {{event.e_name}}?")' >
+                            Take Attendance 
+                        </button>
+                    </form>
+                {% endif %}
+            {% else %}
+                {% if parts %}
+                <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#reg_event_modal"
+                    disabled>
+                    Registered
+                </button>
+                {% else %}
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#reg_event_modal">
+                    Register
+                </button>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
 
 <!-- Edit Poster Modal -->
 <form method="POST" enctype="multipart/form-data">
@@ -133,14 +235,14 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                        Upload New Event Poster: <br>
-                        <input type="file" id="poster" name="poster">
+                        <label class="form-label" for="customFile">Upload New Event Poster:</label>
+                        <input type="file" class="form-control" id="poster" name="poster"/>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <input name="event_id" hidden />
-                    <button type="submit" class="btn btn-success" name="poster">Yes</button>
-                    <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" name="poster">Submit</button>
                 </div>
             </div>
         </div>
@@ -163,12 +265,16 @@
                 </div>
                 <div class="modal-footer">
                     <input id="reg_event_id" name="event_id" hidden />
-                    <button type="submit" class="btn btn-success" name="register">Yes</button>
-                    <button type="button" class="btn btn-danger" data-mdb-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">No</button>
+                    <button type="submit" class="btn btn-primary" name="register">Yes</button>
                 </div>
             </div>
         </div>
         <div>
 </form>
+
+
+
+</body>
 
 {% endblock %}

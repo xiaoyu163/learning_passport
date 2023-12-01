@@ -6,8 +6,11 @@
 <head>
   <link rel="stylesheet" href="{% static 'css/event_list.css' %}">
 </head>
-<h1>Take Attendance</h1>
+<style>
+
+</style>
 <br />
+<div class="container container-fluid">
 {% if request.user.role in 'STUDENT' %}
 {% for part in events %}
 <br />
@@ -63,26 +66,27 @@
   <div class="card-footer">
 
     {% if part.attendance == 1 %}
-      <button type="button" class="btn btn-primary" name="attendance" disabled>
-        Attendance Submitted
-      </button>
+    <button type="button" class="btn btn-primary" name="attendance" disabled>
+      Attendance Submitted
+    </button>
     {% else %}
-      {% if part.event.attendance == 1 %}
-        <button type="button" class="btn btn-primary" name="attendance" disabled>
-          Take Attendance
-        </button>
- 
-      {% else %}      
-        <button type="button" class="btn btn-primary" name="attendance" disabled>
-          Attendance Disabled
-        </button>
-      {% endif %}
-      {% endif %}
+    {% if part.event.attendance == 1 %}
+    <button type="button" class="btn btn-primary" name="attendance" disabled>
+      Take Attendance
+    </button>
+
+    {% else %}
+    <button type="button" class="btn btn-primary" name="attendance" disabled>
+      Attendance Disabled
+    </button>
+    {% endif %}
+    {% endif %}
   </div>
 
 
 </div>
 {% endfor %}
+</div>
 <br>
 {% elif request.user.role in 'SUPER ADMIN' %}
 

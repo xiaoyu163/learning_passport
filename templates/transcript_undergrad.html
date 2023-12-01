@@ -14,25 +14,48 @@
         }
     </style>
 </head>
-{% if request.user.role in 'SUPER ADMIN' %}
-<h5> Show Student's Transcript </h5>
+<br>
+
+{% if request.user.role in 'SUPER ADMIN HEAD OF DEPARTMENT' %}
+
 <form method="POST">
     {% csrf_token %}
-    <div class="input-group">
-        <div class="form-outline" style="width: 30%;">
-            <input type="text" id="matric" name="matric" class="form-control">
-            <label class="form-label" for="art_title" style="margin-left: 0px;">Student Matric Number</label>
-            <div class="form-notch">
-                <div class="form-notch-leading" style="width: 9px;"></div>
-                <div class="form-notch-middle" style="width: 87.2px;"></div>
-                <div class="form-notch-trailing"></div>
+        <div class="input-group">
+            <div class="form-outline" style="width: 30%;">
+                <input type="text" id="matric" name="matric" class="form-control">
+                <label class="form-label" for="matric" style="margin-left: 0px;">Student Matric Number</label>
+                <div class="form-notch">
+                    <div class="form-notch-leading" style="width: 9px;"></div>
+                    <div class="form-notch-middle" style="width: 87.2px;"></div>
+                    <div class="form-notch-trailing"></div>
+                </div>
             </div>
+            <button type="submit" class="btn btn-outline-primary" name="search"><i class="fas fa-search"></i></button>
+        </div>
+  
+</form>
+<br>
+{% endif %}
+
+{% if request.user.role in 'LECTURER' %}
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="input-group" style="width: 50%;">
+        <div class="form-floating" >
+            <select name="matric" class="form-select">
+                {% for stu in students %}
+                <option value="{{stu.matric_no}}" {% if stu.id == student.id %} selected {% endif %}>{{stu.user.full_name}}({{stu.matric_no}})</option>
+                {% endfor %}
+            </select>
+            <label for="matric">Display Trasncript for</label>
         </div>
         <button type="submit" class="btn btn-outline-primary" name="search"><i class="fas fa-search"></i></button>
     </div>
 </form>
 <br>
 {% endif %}
+
 {% if transcript %}
 
 <div id="content" style="margin:0; padding:0;">

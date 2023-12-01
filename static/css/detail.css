@@ -14,9 +14,9 @@
     border-radius: 5px;
 }
 
-.img-container {
+/* .img-container {
     text-align: center;
-}
+} */
 
 .center-container img {
     max-width: 100%; /* Ensure the image does not exceed the viewport width */

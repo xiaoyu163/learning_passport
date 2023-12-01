@@ -41,6 +41,13 @@
   body {
     font-size: 0.9rem;
   }
+
+  .header i {
+    color:#3965f7;
+  }
+
+
+
   .page-wrapper .sidebar-wrapper,
   .sidebar-wrapper .sidebar-brand > a,
   .sidebar-wrapper .sidebar-dropdown > a:after,
