@@ -4,7 +4,7 @@
 <h3>Event Comittee List Upload</h3>
 <img src="{% static 'img/Excel.png' %}" alt="Excel Icon">
 
-<br><br>
+
 <a href="{% url 'event-com-form' %}" type="button" class="btn btn-outline-primary">
     Add Event Committee
 </a>
@@ -12,6 +12,7 @@
 <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#upload_event"> Add for External
     Event</button>
 <br><br>
+<hr>
 <div class="container-fluid table-responsive">
     <h3> Event Committee List Uploaded </h3>
     {% if forms %}

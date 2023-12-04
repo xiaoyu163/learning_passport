@@ -36,12 +36,13 @@ def submitEventView(request):
     event_pars = Event_Participants.objects.exclude(file__exact='').exclude(file__exact=None).filter(student=student)
 
     context = {
-        "page_name": "Upload Event Documents",
+        "page_name": "Upload Event Files",
         "option_obj": option_obj,
         "events_in": events_in,
         "events_ex": events_ex,
         "events": events,
         "event_pars": event_pars,
+        "icon": "fa-solid fa-file-arrow-up"
     }
 
     if request.POST:
@@ -153,6 +154,7 @@ def submitOrgView(request):
         "orgs_ex": orgs_ex,
         "orgs_in": orgs_in,
         "org_list_ex":org_list_ex,
+        "icon": "fa-solid fa-file-arrow-up",
     }
 
     if request.POST:
@@ -240,7 +242,9 @@ def submitArticleView(request):
     arts = Article.objects.filter(student=student)
     context = {
         "page_name": "Upload Articles",
-        "arts": arts
+        "arts": arts,
+        "icon": "fa-solid fa-file-arrow-up",
+
     }
     if request.method == 'POST':
         print(request.POST)
@@ -313,7 +317,9 @@ def submitOtherComp (request):
     student = Student.objects.get(user_id=request.user.id)
     comps = OtherComp.objects.filter(student=student)
     context = {
-        "comps": comps
+        "comps": comps,
+        "page_name": "Co-curricular Events File Upload",
+        "icon": "fa-solid fa-file-arrow-up",
     }
     if request.method == 'POST':
         if 'other_submit' in request.POST:
@@ -407,34 +413,37 @@ def verEventView(request):
 
         elif 'approve_in' in request.POST:
             print(request.POST)
-            student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
-            event = Events.objects.get(id=request.POST['approve_in'])
-            event.status = 1
-            
-            file_url = event.file.url
-            file_path = base_dir + file_url
+            try:
+                student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
+                event = Events.objects.get(id=request.POST['approve_in'])
+                event.status = 1
+                
+                file_url = event.file.url
+                file_path = base_dir + file_url
 
-            com_df = pd.read_excel(file_path,  names=["position", "matric"])
-            
-            for com in com_df.iterrows():
-                print(com[1]['matric'].upper())
-                if not Student.objects.filter(
-                    matric_no=com[1]['matric'].upper()).exists():
-                    student_df.loc[len(student_df.index)] = [com[1]['matric'].upper(), com[1]['position']]
-                else:
-                    student = Student.objects.get(
-                        matric_no=com[1]['matric'].upper())
-                    if Event_Participants.objects.filter(event=event, student=student).exists():
-                        event_par = Event_Participants.objects.get(
-                            event=event, student=student)
+                com_df = pd.read_excel(file_path,  names=["position", "matric"])
+                
+                for com in com_df.iterrows():
+                    if not Student.objects.filter(
+                        matric_no=str(com[1]['matric']).upper()).exists():
+                        student_df.loc[len(student_df.index)] = [str(com[1]['matric']).upper(), com[1]['position']]
                     else:
-                        event_par = Event_Participants()
-                        event_par.event = event
-                        event_par.student = student
-                    match_position = re.search(r'[A-Za-z\s]+', com[1]['position'])
-                    event_par.position = match_position[0].strip()
-                    event_par.status = 1
-                    event_par.save()
+                        student = Student.objects.get(
+                            matric_no=str(com[1]['matric']).upper())
+                        if Event_Participants.objects.filter(event=event, student=student).exists():
+                            event_par = Event_Participants.objects.get(
+                                event=event, student=student)
+                        else:
+                            event_par = Event_Participants()
+                            event_par.event = event
+                            event_par.student = student
+                        match_position = re.search(r'[A-Za-z\s]+', com[1]['position'])
+                        event_par.position = match_position[0].strip()
+                        event_par.status = 1
+                        event_par.save()
+            except Exception as e:
+                messages.error(request, f"{e}. The uploaded file does not match the required format.")
+                return redirect ("verify-event")
             # event.file = None
             # event.filename= None
             # os.remove(file_path)
@@ -576,7 +585,7 @@ def verOrgView(request):
             else:
                 org_com = OrgComittee.objects.get(id=request.POST['approve_ex'])
                 org_com.status = 1
-                # file_url = org_com.file.url
+                file_url = org_com.file.url
                 # org_com.file = None 
                 # org_com.filename = None
                 org_com.save()

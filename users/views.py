@@ -133,7 +133,7 @@ def registerView(request):
             password = request.POST['password']
             # If email exists in system
             if User.objects.filter(email=email):
-                messages.info(request, "Account already exist. Please proceed to login.")
+                messages.error(request, "Account already exist. Please proceed to login.")
                 return redirect('login')
             
             # Check password
@@ -483,10 +483,12 @@ def semesterDatesView (request):
             print(users.count())
             print(current_year.academic_year)
             for user in users:
-                student = Student.objects.get(user=user)
-                if student.grad_year <= current_year.start:
-                    user.is_active = 0
-                    user.save()
+                student = Student.objects.filter(user=user)
+                if student:
+                    if student.first().grad_year and current_year:
+                        if student.first().grad_year <= current_year.start:
+                            user.is_active = 0
+                            user.save()
             messages.success (request, f"Student status updated succesfully for Semester {current_year.semester} {current_year.academic_year}")
         return redirect ("semesters")
     return render (request, "semester.html", context)

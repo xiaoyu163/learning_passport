@@ -12,6 +12,7 @@
 <br />
 <div class="container container-fluid">
 {% if request.user.role in 'STUDENT' %}
+<!-- Enable attendance / attendance in time -->
 {% for part in events %}
 <br />
 <div class="card">
@@ -28,7 +29,7 @@
 
   <!-- Take attendance button if attendance is not submitted and event attendance is enabled -->
 
-  {% if part.attendance != 1 and part.event.attendance == 1 %}
+  {% if part.attendance != 1 %}
   <form method="POST">
     {% csrf_token %}
     <div class="card-footer">

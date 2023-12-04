@@ -74,8 +74,7 @@
  
 </script>
 </head>
-<h3>Organisation Comittee List Upload</h3>
-<br>
+
 <img src="{% static 'img/Excel.png' %}" alt="Excel Icon">
 <a href="{% url 'download_excel' 'organisation_comittee_template' %}">Download Organisation Committee List Template</a>
 <br>
@@ -92,7 +91,7 @@
   External Organisation Commitment
 </button>
 <br><br>
-
+<hr>
 <div class="container-fluid table-responsive">
   <h3> Organisation Committee List Uploaded</h3>
   {% if orgs_in or orgs_ex %}

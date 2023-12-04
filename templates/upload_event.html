@@ -69,8 +69,7 @@
  
 </script>
 </head>
-<h3>Curricular Event Comittee Upload</h3>
-<br>
+
 <img src="{% static 'img/Excel.png' %}" alt="Excel Icon">
 <a href="{% url 'download_excel' 'event_comittee_template' %}">Download Comittee List Template</a>
 <br><br>
@@ -86,6 +85,7 @@
 </button>
 
 <br><br>
+<hr>
 <div class="container-fluid table-responsive">
   <h3> Event Committee List Uploaded </h3>
   {% if events or event_pars %}
@@ -272,7 +272,7 @@
           <div class="form-floating">
             <select id="event_name_e" class="form-select" name="event_id" onchange="checkOtherOption(this)" required>
               {% for event in events_in %}
-              <option value="{{event.id}}">{{event.e_name}} </option>
+              <option value="{{event.id}}">{{event.e_name}} ({{event.year}})</option>
               {% endfor %}
               <option value="other">Other</option>
             </select>
