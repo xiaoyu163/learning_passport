@@ -132,7 +132,7 @@
                 </div>
             </div>
             <br>
-            <div>
+           
                 <!-- <form method="POST">
                     {% csrf_token %}
 
@@ -148,45 +148,56 @@
                         <label for="event_select">Select Event Name</label>
                     </div>
                 </form> -->
-                <div id="plotly-graph"></div>
-            </div>
+            <div id="plotly-graph"></div>
+            
         </div>
         <div class="right-side">
             <div>
                 <h5 class="fw-bold mb-1">Upcoming Events</h5>
+                {% if upcoming_events %}
                 <a class="mb-0" href="{% url 'events' %}">View all</a>
+                {% endif %}
             </div>
-            {% for event in upcoming_events %}
-            <a href="{% url 'event-detail' event.id %}">
-            <div class="card p-1 m-1 border border-info">
-                <div class="card-header p-1 m-1">
-                    <strong>{{event.e_name}}</strong>
+            {% if upcoming_events %}
+                {% for event in upcoming_events %}
+                <a href="{% url 'event-detail' event.id %}">
+                <div class="card p-1 m-1 border border-info">
+                    <div class="card-header p-1 m-1">
+                        <strong>{{event.e_name}}</strong>
+                    </div>
+                    <div class="card-body p-1 m-1">
+                        {{event.start.date}}
+                    </div>
                 </div>
-                <div class="card-body p-1 m-1">
-                    {{event.start.date}}
-                </div>
-            </div>
-            </a>
+                </a>
+                <br>
+                {% endfor %}
+            {% else %}
+            <sub>No upcoming event.</sub>
             <br>
-            {% endfor %}
+            {% endif %}
             <div>
                 <h5 class="fw-bold mb-1">Announcements</h5>
+                {% if announcements %}
                 <a class="mb-0" href="{% url 'announcements' %}">View all</a>
+                {% endif %}
             </div>
-            
-            {% for ann in announcements %}
-            <div class="card p-1 m-1 border border-info">
-                <div class="card-header p-1 m-1">
-                 <strong>{{ann.title}}</strong>
+            {% if announcements %}
+                {% for ann in announcements %}
+                <div class="card p-1 m-1 border border-info">
+                    <div class="card-header p-1 m-1">
+                    <strong>{{ann.title}}</strong>
+                    </div>
+                    <div class="card-body p-1 m-1">
+                        {{ann.content}}
+                    </div>
                 </div>
-                <div class="card-body p-1 m-1">
-                    {{ann.content}}
-                </div>
-            </div>
-            <br>
-            {% endfor %}
+                <br>
+                {% endfor %}
+            {% else %}
+            <sub>No announcement.</sub>
+            {% endif %}
         </div>
-    <!-- </div> -->
 </div>
 
 

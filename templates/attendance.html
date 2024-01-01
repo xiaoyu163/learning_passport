@@ -89,7 +89,7 @@
 {% endfor %}
 </div>
 <br>
-{% elif request.user.role in 'SUPER ADMIN' %}
+{% elif request.user.role in 'SUPER ADMIN LECTURER HEAD OF DEPARTMENT' %}
 
 <form method="POST">
   {% csrf_token %}

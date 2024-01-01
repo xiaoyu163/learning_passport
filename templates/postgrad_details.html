@@ -109,6 +109,7 @@
 </form>
 </center>
 <br>
+{% if students %}
 <div class="students_table">
     <table id="dates_table" class="table table-responsive">
         <tr>
@@ -208,6 +209,9 @@
         </tbody>
     </table>
 </div>
+{% else %}
+<center><sub>No postgraduate students.</sub></center>
+{% endif %}
 
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}

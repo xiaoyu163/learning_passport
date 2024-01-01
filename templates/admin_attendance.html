@@ -31,11 +31,12 @@
 </form>
 <br>
 
-<input id="myInput" type="text" class="form-control" placeholder="Search for matric number..." onkeyup="myFunction()">
+<input id="search" type="text" class="form-control" placeholder="Search for matric number..." onkeyup="searchFunction()">
     
 
 
 <br><br>
+{% if participants %}
 <form method="POST">
     {% csrf_token %}
  
@@ -85,21 +86,25 @@
           });
     </script>
 </form> 
+{% else %}
+<center><sub>No student.</sub></center>
+{% endif %}
 <script>
-    function myFunction() {
+    function searchFunction() {
       // Declare variables
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput");
+      var input, filter, table, tr, matric,name, i, txtValue;
+      input = document.getElementById("search");
       filter = input.value.toUpperCase();
       table = document.getElementById("attendance_table");
       tr = table.getElementsByTagName("tr");
-    
       // Loop through all table rows, and hide those who don't match the search query
       for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[1];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        matric = tr[i].getElementsByTagName("td")[1];
+        name = tr[i].getElementsByTagName("td")[0];
+        if (matric || name) {
+          matricValue = matric.textContent || matric.innerText;
+          nameValue = name.textContent || name.innerText;
+          if (matricValue.toUpperCase().indexOf(filter) > -1  || nameValue.toUpperCase().indexOf(filter) > -1) {
             tr[i].style.display = "";
           } else {
             tr[i].style.display = "none";

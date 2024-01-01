@@ -354,7 +354,7 @@ def manageLecturer (request):
         re_counts.append(Student.objects.filter(lecturer=lecturer, program=3).count())
         phd_counts.append(Student.objects.filter(lecturer=lecturer, program=4).count())
     option_position = Lecturer.position.field.choices
-    lecturers_students = zip(lecturers,bac_counts,cw_counts,re_counts,phd_counts)
+    lecturers_students = zip(lecturers,bac_counts,cw_counts,re_counts,phd_counts) if lecturers else None
     context = {
         "lecturers_students": lecturers_students,
         "option_position": option_position,
@@ -434,13 +434,13 @@ def postgradDetailsView (request):
 def semesterDatesView (request):
     current_date = datetime.now().date()
     current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
-    semesters = Semester.objects.all().order_by("-academic_year","semester")
+    all_semesters = Semester.objects.all().order_by("-academic_year","semester")
     student_enrol = list()
     student_grad = list()
-    for semester in semesters:
+    for semester in all_semesters:
         student_enrol.append(Student.objects.filter(enrol_sem=semester).count())
         student_grad.append(Student.objects.filter(grad_sem=semester, grad_sem__end__lte=current_date).count())
-    semesters = zip(semesters, student_enrol, student_grad)
+    semesters = zip(all_semesters, student_enrol, student_grad) if student_enrol or student_grad else None
     context = {
         "curr_sem": current_sem,
         "semesters": semesters,
@@ -754,25 +754,15 @@ def generateTranscriptView(request, user_id):
 def dashboardView(request):
     current_date = datetime.now().date()
     if request.user.role in 'SUPER ADMIN':
-    
-        year_list = list()
-        par_list = list()
 
         years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
-
-        
         current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
         selected_year = current_year
-        event_selection = Events.objects.values('e_name').distinct()
-        event_name = Events.objects.all().first().e_name
-        upcoming_events = Events.objects.filter(start__gte=current_year.start)
-        selected = event_name
-        events = Events.objects.filter(e_name=event_name)
         upcoming_events = Events.objects.filter(start__gte=current_date).order_by("start")[:2]
         announcements = Announcement.objects.order_by("-created_time")[:2]
-        num_active = Student.objects.filter(user__is_active=1).count()
-        num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count()
-        num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end).count()
+        num_active = Student.objects.filter(user__is_active=1).count() if selected_year else None
+        num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count() if selected_year else None
+        num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end).count() if selected_year else None
         study_level = 1
         
         if request.method == 'POST':
@@ -874,8 +864,6 @@ def dashboardView(request):
 
         context = {
             "graph_json": graph_json,
-            "event_selection": event_selection,
-            "selected": selected,
             "selected_year": selected_year,
             "years": years,
             "num_active": num_active,

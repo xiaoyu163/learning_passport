@@ -71,6 +71,8 @@
     </center>
 
 <br>
+
+{% if lecturers_students %}
 <form method="POST">
     {% csrf_token %}
     
@@ -127,8 +129,9 @@
         {% endfor %}
     </table>
 </form>
-
-
+{% else %}
+<center><sub>No lecturer.</sub></center>
+{% endif %}
 <!-- Edit Modal -->
 <form method="POST">
     {% csrf_token %}

@@ -203,8 +203,10 @@ def takeAttendanceView (request):
             "page_name": "Registered Event",
             "icon": "fa-solid fa-calendar-check fa-xl"
         }
-    elif request.user.role in 'SUPER ADMIN':
+    elif request.user.role in 'SUPER ADMIN LECTURER HEAD OF DEPARTMENT':
+        print("In admin attendance")
         all_event = Events.objects.order_by("-start")
+        print(all_event)
         att_event = list()
         for event in all_event:
             current_time = datetime.now()

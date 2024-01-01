@@ -160,14 +160,7 @@
                     <i class="fa-solid fa-location-dot"></i> &nbsp; {{event.venue}}
                 </p>
             </div>
-            {% if event.speaker %}
-            <div class="detail-left">
-                <h5>Speaker</h5>
-                <p class="body-text">
-                    <i class="fa-solid fa-microphone"></i> &nbsp; {{event.speaker}}
-                </p>
-            </div>
-            {% endif %}
+            
 
         </div>
 
@@ -176,6 +169,11 @@
     <div class="desc">
         <p class="title">{{event.e_name}}</p>
         <p class="title">{{event.c_name}}</p>
+        {% if event.speaker %}
+                <p class="body-text">
+                    <i class="fa-solid fa-microphone"></i> &nbsp; {{event.speaker}}
+                </p>
+            {% endif %}
         {% if event.desc %}
         <hr>
         <p>{{event.desc}}</p>
