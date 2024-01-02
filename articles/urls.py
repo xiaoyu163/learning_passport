@@ -13,6 +13,7 @@ urlpatterns = [
     path('verify/org', views.verOrgView, name="verify-org"),
     path('verify/article', views.verArtView, name="verify-article"),
     path('verify/other', views.verOtherView, name="verify-other"),
+    path('delete-documents', views.deleteDocView, name="delete-docs"),
     path('delete/event', views.deleteEventDocView, name="delete-event-doc"),
     path('delete/ex-event', views.deleteExEventDocView, name="delete-ex-event-doc"),
     path('delete/org', views.deleteOrgDocView, name="delete-org-doc"),

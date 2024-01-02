@@ -106,15 +106,17 @@
 
 
 
-    <!-- Add Event Button for SUPER ADMIN -->
-    {% if request.user.role in 'SUPER ADMIN' %}
-      <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#event_modal">
-        <i class="fa fa-calendar-plus"></i> &nbsp;
-        Add Event
-      </button>
-      <br>
+  <!-- Add Event Button for SUPER ADMIN -->
+  {% if request.user.role in 'SUPER ADMIN' %}
+    <button type="button" class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#event_modal">
+      <i class="fa fa-calendar-plus"></i> &nbsp;
+      Add Event
+    </button>
+    <br>
+  {% endif %}
 
-      {% for event in events %}
+  {% if request.user.role in 'SUPER ADMIN HEAD OF DEPARTMENT LECTURER' %}
+    {% for event in events %}
       <div class="card-container">
         <br />
         <div class="card">
@@ -123,23 +125,25 @@
               <strong>{% if event.c_name %}{{event.c_name}}<br>{% endif %} {{event.e_name}}</strong>
             </a>
             <!-- Edit Button for SUPER ADMIN -->
-            <form method="POST">
-              {% csrf_token %}
-              <div class="button-container d-flex align-items-center">
-                <a href="{% url 'admin-attendance' event.id %}" id="admin-attendance-button" class="btn btn-light">
-                  <i class="fas fa-calendar-alt"></i>
-                </a>
-                <button id="edit-button" type="button" class="edit-button btn btn-primary" data-mdb-toggle="modal"
-                  data-mdb-target="#edit_modal" data-event-id="{{ event.id }}">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <input name="event_id" value={{event.id}} hidden>
-                <button class="btn btn-danger" type="submit" name="delete_event"
-                  onclick="return confirm('Confirm to delete {{event.e_name}}?')">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </form>
+            {% if request.user.role in 'SUPER ADMIN' %}
+              <form method="POST">
+                {% csrf_token %}
+                <div class="button-container d-flex align-items-center">
+                  <a href="{% url 'admin-attendance' event.id %}" id="admin-attendance-button" class="btn btn-light">
+                    <i class="fas fa-calendar-alt"></i>
+                  </a>
+                  <button id="edit-button" type="button" class="edit-button btn btn-primary" data-mdb-toggle="modal"
+                    data-mdb-target="#edit_modal" data-event-id="{{ event.id }}">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <input name="event_id" value={{event.id}} hidden>
+                  <button class="btn btn-danger" type="submit" name="delete_event"
+                    onclick="return confirm('Confirm to delete {{event.e_name}}?')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </form>
+            {% endif %}
           </div>
           <div class="card-body">
             Date: {{event.start.date}} <br />
@@ -148,7 +152,8 @@
         </div>
       </div>
       <br>
-      {% endfor %}
+    {% endfor %}
+   
 
   {% else %}
     <!-- Event List for Students -->

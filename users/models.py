@@ -75,8 +75,6 @@ class Lecturer(models.Model):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     matric_no = models.CharField(max_length=10)
-    enrol_year = models.DateField(null=True)
-    grad_year = models.DateField(null=True)
     Program = (
         (1, "Bachelor of Arts Chinese Studies"),
         (2, "Master of Chinese Studies (Coursework)"),
@@ -102,7 +100,7 @@ class Organisation(models.Model):
     internal = models.BooleanField()
     file = models.FileField(upload_to='org_com/')
     filename = models.CharField(max_length=100, null = True)
-    file_by = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    file_by = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     status = models.BooleanField(null=True)
 
 class OrgComittee(models.Model):

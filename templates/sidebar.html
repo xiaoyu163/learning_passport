@@ -163,11 +163,11 @@
                             {% if request.user.role in 'SUPER ADMIN' %}
                             
                                 <li class="sidebar-dropdown">
-                                    <a href="#">
+                                    <a href="{% url 'delete-docs' %}">
                                         <i class="fa-solid fa-file-circle-xmark"></i>
                                         <span>Delete Documents</span>
                                     </a>
-                                    <div class="sidebar-submenu">
+                                    <!-- <div class="sidebar-submenu">
                                         <ul>
                                             <li>
                                                 <a href="{% url 'delete-event-doc' %}"> Event Documets </a>
@@ -189,7 +189,7 @@
                                             </li>
                                             
                                         </ul>
-                                    </div>
+                                    </div> -->
                                 </li>
 
                             {% endif %}

@@ -56,8 +56,12 @@ import pypandoc
 import tempfile
 from tempfile import NamedTemporaryFile
 from django.template.loader import render_to_string
+import pytz
 
 base_dir = str(settings.BASE_DIR).replace("\\", "/")
+# Set the time zone to Malaysia
+malaysia_timezone = pytz.timezone('Asia/Kuala_Lumpur')
+
 
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = 'password_reset.html'
@@ -69,8 +73,10 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
                       "please make sure you've entered the address you registered with, and check your spam folder."
     success_url = reverse_lazy('login')
 
-def loginView(request):
+# Get the current time in Malaysia
+current_date = datetime.now(malaysia_timezone)
 
+def loginView(request):
     redirected_login_failed_link = 'login'
 
     redirected_success_link_dict = {
@@ -149,7 +155,6 @@ def registerView(request):
                     return render (request, "register2.html", context)
         
         if 'register-details' in request.POST:
-            current_date = datetime.now().date()
             current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
             
             user = User()         
@@ -289,10 +294,10 @@ def resetPasswordView(request):
 def manageStudent (request):
     students = Student.objects.all()
     semesters = Semester.objects.all()
-    for semester in semesters:
-        start = semester.start
-        end = semester.end
-        students = Student.objects.filter(enrol_year__range=(start,end))
+    # for semester in semesters:
+        # start = semester.start
+        # end = semester.end
+        # students = Student.objects.filter(enrol_year__range=(start,end))
         # for student in students:
         #     student.enrol_sem = semester
         #     if student.program == '1':
@@ -312,9 +317,11 @@ def manageStudent (request):
         #     student.grad_sem = Semester.objects.filter(academic_year=grad_year, semester=grad_sem)
     lecturers = Lecturer.objects.all()
     students = Student.objects.all()
+    academic_year = Semester.objects.values('academic_year').distinct().order_by('academic_year')
     context = {
         "students": students,
         "lecturers": lecturers,
+        "academic_year": academic_year,
         "page_name": "Manage Students",
         "icon": "fa-solid fa-people-roof fa-lg",
     }
@@ -325,8 +332,22 @@ def manageStudent (request):
             student = Student.objects.get(id=request.POST['manage-student'])
             student.user.full_name = request.POST['student_name'].upper()
             student.matric_no = request.POST['student_matric'].upper()
-            student.enrol_year = datetime.strptime(request.POST['student_enrol'], '%Y-%m').date()
-            student.grad_year = datetime.strptime(request.POST['student_grad'], '%Y-%m').date()
+            enrol_year = request.POST['student_enrol_year']
+            enrol_semester = request.POST['student_enrol_sem']
+            grad_year = request.POST['student_grad_year']
+            grad_semester = request.POST['student_grad_sem']
+            enrol_sem = Semester.objects.filter(academic_year=enrol_year, semester=enrol_semester).first()
+            grad_sem = Semester.objects.filter(academic_year=grad_year, semester=grad_semester).first()
+            if enrol_sem:
+                student.enrol_sem = enrol_sem
+            else:
+                messages.error(request, f'Dates for Session {enrol_year} Semester {enrol_semester} does not exists. Please add the dates in Manage Semester Dates page.')
+                return redirect ("manage-student")
+            if grad_sem:
+                student.grad_sem = grad_sem
+            else:
+                messages.error(request, f'Dates for Session {grad_year} Semester {grad_semester} does not exists. Please add the dates in Manage Semester Dates page.')
+                return redirect ("manage-student")
             student.user.is_active = 1 if 'student_active' in request.POST else 0
             student.lecturer_id = request.POST['student_lect']
             student.save()
@@ -432,7 +453,7 @@ def postgradDetailsView (request):
 @login_required
 @role_required(['SUPER ADMIN', 'ADMIN'])
 def semesterDatesView (request):
-    current_date = datetime.now().date()
+    current_date = current_date
     current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
     all_semesters = Semester.objects.all().order_by("-academic_year","semester")
     student_enrol = list()
@@ -549,7 +570,7 @@ def activeReportView (request):
 # Create your views here.
 def contentPDF(request, student_id):
     student = Student.objects.get(id=student_id) 
-    current_date = datetime.now().date()
+    current_date = current_date
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
     # Event Participation
     event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
@@ -665,7 +686,7 @@ def printAllView (request):
 def generateTranscriptView(request, user_id):
     page_name = "Generate Transcript"
     icon = "fa-solid fa-file-alt fa-xl"
-    current_date = datetime.now().date()
+
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
     student = ""
     students = ""
@@ -752,7 +773,6 @@ def generateTranscriptView(request, user_id):
    
 @login_required
 def dashboardView(request):
-    current_date = datetime.now().date()
     if request.user.role in 'SUPER ADMIN':
 
         years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
@@ -945,8 +965,10 @@ def get_student_details(request, student_id):
             'id': student_id,
             'matric': student.matric_no,
             'name': student.user.full_name,
-            'enrol': student.enrol_year,
-            'grad': student.grad_year,
+            'enrol_year': student.enrol_sem.academic_year,
+            'grad_year': student.grad_sem.academic_year,
+            'enrol_sem': student.enrol_sem.semester,
+            'grad_sem': student.grad_sem.semester,
             'active': student.user.is_active,
             'student_lect': student.lecturer_id,
             'rm_date': student.rm_date,

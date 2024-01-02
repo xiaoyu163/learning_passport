@@ -8,6 +8,14 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import os
+import pytz
+
+# Set the time zone to Malaysia
+malaysia_timezone = pytz.timezone('Asia/Kuala_Lumpur')
+
+# Get the current time in Malaysia
+current_time = datetime.now(malaysia_timezone)
+
 
 # def examplePage(request):
 #     return render (request, "try.html")
@@ -22,13 +30,13 @@ def dynamicInput (request):
     return render (request, "event_com_form.html", context)
 @login_required
 def eventListView (request):
-    # base_dir = settings.BASE_DIR
-    # print("Base dir: ", base_dir)
-    current_date = datetime.now()
-    if request.user.role in 'STUDENT':
-        events = Events.objects.filter(internal=1, start__gte=current_date).order_by("-start")
-    else:
+    base_dir = settings.BASE_DIR
+
+    if request.user.role in 'SUPER ADMIN':
         events = Events.objects.filter(internal=1).order_by("-start")
+    else:
+        events = Events.objects.filter(internal=1, start__gte=current_time).order_by("-start")
+        
     option_obj = Events.type.field.choices
     parts = list()
     if request.user.role in 'STUDENT':
@@ -38,7 +46,7 @@ def eventListView (request):
             parts.append(part)
     else:
         parts = ''
-    print(events)
+    
     event_parts = zip(events,parts)
   
     
@@ -115,12 +123,11 @@ def eventDetailView (request, id):
     if request.user.role in 'STUDENT':
         student = Student.objects.get(user_id=request.user.id)
         parts = Event_Participants.objects.get(student=student, event=event) if Event_Participants.objects.filter(student=student, event=event).exists() else None
-        current_time = datetime.now()
         if event.enable_attendance == 1:
             curr_event = 1
         else:
             if event.start and event.end:
-                if event.start.replace(tzinfo=None) <= current_time <= event.end.replace(tzinfo=None) and event.attendance==1:
+                if event.start <= current_time <= event.end and event.attendance==1:
                     curr_event = 1
                 else:
                     curr_event = 0
@@ -175,11 +182,10 @@ def takeAttendanceView (request):
         parts = Event_Participants.objects.filter(student=student, registered=1)
         # To store registered event that are currently not available for attendance
         reg_events = list()
-        current_time = datetime.now()
         for part in parts:
             print(part)
-            start_time = part.event.start.replace(tzinfo=None) if part.event.start else None
-            end_time = part.event.end.replace(tzinfo=None) if part.event.end else None
+            start_time = part.event.start if part.event.start else None
+            end_time = part.event.end if part.event.end else None
             if part.event.enable_attendance==1:
                 events.append(part)
             elif start_time and end_time :
@@ -190,12 +196,6 @@ def takeAttendanceView (request):
             else:
                     reg_events.append(part)
             
-        # parts = parts.filter(event__in=events)
-        print("Participation")
-        print(parts)
-        print("Event")
-        print(events)
-        # par_events = zip(parts, events)
         context = {
            
             "events": events,
@@ -204,18 +204,18 @@ def takeAttendanceView (request):
             "icon": "fa-solid fa-calendar-check fa-xl"
         }
     elif request.user.role in 'SUPER ADMIN LECTURER HEAD OF DEPARTMENT':
-        print("In admin attendance")
         all_event = Events.objects.order_by("-start")
-        print(all_event)
         att_event = list()
         for event in all_event:
-            current_time = datetime.now()
-            start = event.start.replace(tzinfo=None) if event.start else None
-            end = event.end.replace(tzinfo=None) if event.end else None
+            start = event.start if event.start else None
+            end = event.end if event.end else None
             if event.enable_attendance == 1:
                 att_event.append(event)
-            elif start and end:
+            elif start and end and event.attendance==1:
                 if start <= current_time <= end:
+                    print("Start: ", start)
+                    print("End: ", end)
+                    print("Current: ", current_time)
                     att_event.append(event)
                 
                 

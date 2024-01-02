@@ -24,7 +24,7 @@ base_dir = str(settings.BASE_DIR).replace("\\", "/")
 def submitEventView(request):
    
     option_obj = Events.type.field.choices
-    events_in = Events.objects.filter(internal=1).exclude(status=1).exclude(file__isnull=False)
+    events_in = Events.objects.filter(internal=1, filename__isnull=True).exclude(status=1)
     events_ex = Events.objects.filter(internal=0).exclude(status=1)
 
     student = Student.objects.get(user=request.user.id)
@@ -444,9 +444,7 @@ def verEventView(request):
             except Exception as e:
                 messages.error(request, f"{e}. The uploaded file does not match the required format.")
                 return redirect ("verify-event")
-            # event.file = None
-            # event.filename= None
-            # os.remove(file_path)
+          
             
             if len(student_df) > 0:
                 noMatricEmail(request, [request.user], [request.user], student_df, event.e_name)
@@ -457,22 +455,20 @@ def verEventView(request):
         elif 'approve_ex' in request.POST:
             event_par = Event_Participants.objects.get(id=request.POST['approve_ex'])
             event_par.status = 1
-            file_url = event_par.file.url
-            file_path = base_dir + file_url  
-            # event_par.file = None  
-            # event_par.filename = None
-            # os.remove(file_path)
             event_par.save()
                        
         elif 'internal_delete' in request.POST:
             event = Events.objects.get(id=request.POST['internal_delete'])
+
+            # Check for attendance record
             if Event_Participants.objects.filter(event=event).exists():
                 event_com = Event_Participants.objects.filter(event=event)
                 for com in event_com:
                     if com.registered == None and com.attendance == None:
                         com.delete()
                     else:
-                        os.remove(base_dir + com.file.url) if com.file else None
+                        os.remove(base_dir + com.file.url) if com.file else None 
+                        com.position = None
                         com.file = None
                         com.filename = None
                         com.status = None            
@@ -489,9 +485,6 @@ def verEventView(request):
             com = Event_Participants.objects.get(id=request.POST['external_delete'])
             os.remove(base_dir + com.file.url) if com.file else None
             com.delete()
-            
-            
-
         return redirect("verify-event")
 
     return render(request, "verify_event.html", context)
@@ -549,48 +542,45 @@ def verOrgView(request):
             org_com.save()
         elif 'approve_in' in request.POST or 'approve_ex' in request.POST:
             if 'approve_in' in request.POST:
-                org = Organisation.objects.get(id=request.POST['approve_in'])
-                org.status = 1
+                try:
+                    org = Organisation.objects.get(id=request.POST['approve_in'])
+                    org.status = 1
 
-                file_url = org.file.url
-                file_path = base_dir + file_url 
-                com_df = pd.read_excel(
-                    file_path,  names=["position", "matric"])
-                student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
-                for com in com_df.iterrows():
-                    if not Student.objects.filter(
-                        matric_no=com[1]['matric'].upper()).exists():
-                        student_df.loc[len(student_df.index)] = [com[1]['matric'],com[1]['position']]
-                    else:
-                        student = Student.objects.get(
-                            matric_no=com[1]['matric'].upper())
-                        if OrgComittee.objects.filter(org=org, student=student).exists():
-                            org_com = OrgComittee.objects.get(org=org, student=student)
+                    file_url = org.file.url
+                    file_path = base_dir + file_url 
+                    com_df = pd.read_excel(
+                        file_path,  names=["position", "matric"])
+                    student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
+                    for com in com_df.iterrows():
+                        if not Student.objects.filter(
+                            matric_no=com[1]['matric'].upper()).exists():
+                            student_df.loc[len(student_df.index)] = [com[1]['matric'],com[1]['position']]
                         else:
-                            org_com = OrgComittee()
-                            org_com.org = org
-                            org_com.student = student
-                        match_position = re.search(r'[A-Za-z\s]+', com[1]['position'])
-                        org_com.position = match_position[0].strip()
-                        org_com.status = 1
-                        org_com.save()
+                            student = Student.objects.get(
+                                matric_no=com[1]['matric'].upper())
+                            if OrgComittee.objects.filter(org=org, student=student).exists():
+                                org_com = OrgComittee.objects.get(org=org, student=student)
+                            else:
+                                org_com = OrgComittee()
+                                org_com.org = org
+                                org_com.student = student
+                            match_position = re.search(r'[A-Za-z\s]+', com[1]['position'])
+                            org_com.position = match_position[0].strip()
+                            org_com.status = 1
+                            org_com.save()
+                except Exception as e:
+                    messages.error(request, f"{e}. The uploaded file does not match the required format.")
+                    return redirect ("verify-org")
                 
                 if len(student_df)>0:
                     noMatricEmail(request, [request.user], [request.user], student_df, org.name)
                     messages.error(request, f"Invalid matric number exists in the file. Please check email for details.")
-
-                
-                # org.file = None
                 org.save()
+
             else:
                 org_com = OrgComittee.objects.get(id=request.POST['approve_ex'])
                 org_com.status = 1
-                file_url = org_com.file.url
-                # org_com.file = None 
-                # org_com.filename = None
                 org_com.save()
-                file_path = base_dir + file_url 
-            # os.remove(file_path) 
 
         elif 'delete_in' in request.POST:
             org = Organisation.objects.get(id=request.POST['delete_in'])
@@ -650,14 +640,12 @@ def verArtView(request):
         elif "art_approve" in request.POST:
             art = Article.objects.get(id=request.POST['art_approve'])
             art.status = 1
-            # file_url = art.file.url
-            # file_path = base_dir + file_url
-            # os.remove(file_path)
-            # art.file = None
-            # art.filename = None
             art.save()
         elif "art_delete" in request.POST:
             art = Article.objects.get(id=request.POST['art_delete'])
+            file_url = art.file.url
+            file_path = base_dir + file_url
+            os.remove(file_path)
             art.delete()
 
         return redirect("verify-article")
@@ -701,12 +689,7 @@ def verOtherView (request):
         elif 'approve' in request.POST:
             comp = OtherComp.objects.get(id=request.POST['approve'])
             comp.status = 1
-            # file_url = comp.file.url
-            # file_path = base_dir + file_url
-            # comp.filename = None
-            # comp.file = None
             comp.save()
-            os.remove(file_path)
 
         elif 'other_delete' in request.POST:
             comp = OtherComp.objects.get(id=request.POST['other_delete'])
@@ -719,6 +702,97 @@ def verOtherView (request):
 
 
     return render (request, "verify_other.html", context)
+
+def deleteDocView(request):
+    events = Events.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
+    ex_events = Event_Participants.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
+    orgs = Organisation.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
+    org_coms = OrgComittee.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
+    others = OtherComp.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
+    arts = Article.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
+
+    context = {
+        "events": events,
+        "ex_events": ex_events,
+        "orgs": orgs,
+        "org_coms": org_coms,
+        "others": others,
+        "arts": arts,
+        "page_name": "Delete Uploaded Documents",
+        "icon": "fa-solid fa-file-circle-minus fa-xl"
+    }
+
+    if request.method =='POST':
+        if 'delete-in-event' in request.POST:
+            for elem in request.POST:
+                if elem.isnumeric():
+                    elem = int(elem)
+                    event = Events.objects.get(id=elem)
+                    file_path = base_dir + event.file.url
+                    event.file = None
+                    event.filename = None
+                    event.file_by = None
+                    os.remove(file_path)
+                    event.save()
+        elif 'delete-ex-event' in request.POST:
+            for elem in request.POST:
+                if elem.isnumeric():
+                    elem = int(elem)
+                    ex_event = Event_Participants.objects.get(id=elem)
+                    file_path = base_dir + ex_event.file.url
+                    ex_event.file = None
+                    ex_event.filename = None
+                    os.remove(file_path)
+                    ex_event.save()
+        elif 'delete-in-org' in request.POST:
+            for elem in request.POST:
+                if elem.isnumeric():
+                    elem = int(elem)
+                    org = Organisation.objects.get(id=elem)
+                    file_path = base_dir + org.file.url
+                    org.file = None
+                    org.filename = None
+                    org.file_by = None
+                    os.remove(file_path)
+                    org.save()
+        elif 'delete-ex-org' in request.POST:
+            for elem in request.POST:
+                if elem.isnumeric():
+                    elem = int(elem)
+                    org = OrgComittee.objects.get(id=elem)
+                    file_path = base_dir + org.file.url
+                    org.file = None
+                    org.filename = None
+                    os.remove(file_path)
+                    org.save()
+        elif 'delete-others' in request.POST:
+            for elem in request.POST:
+                if elem.isnumeric():
+                    elem = int(elem)
+                    other = OtherComp.objects.get(id=elem)
+                    file_path = base_dir + other.file.url
+                    other.file = None
+                    other.filename = None
+                    os.remove(file_path)
+                    other.save()
+        elif 'delete-art' in request.POST:
+            for elem in request.POST:
+                if elem.isnumeric():
+                    elem = int(elem)
+                    art = Article.objects.get(id=elem)
+                    file_path = base_dir + art.file.url
+                    art.file = None
+                    art.filename = None
+                    os.remove(file_path)
+                    art.save()
+        else:
+            print(request.POST)
+            messages.warning(request, "No document deleted. Please try again.")
+            return redirect("delete-docs")
+        messages.success(request, "Documents deleted successfully.")
+        return redirect ("delete-docs")
+            
+    return render (request, "delete_doc.html", context)
 
 def deleteEventDocView(request):
    

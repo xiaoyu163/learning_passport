@@ -1,0 +1,363 @@
+{% extends "sidebar.html" %}
+
+{% block content %}
+{% load static %}
+<div class="announcement-tabs">
+    <ul class="nav nav-tabs" id="announcementTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="in-event-tab" data-toggle="tab" href="#in_event" role="tab">Internal
+                Event</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="ex-event-tab" data-toggle="tab" href="#ex_event" role="tab">External Event</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="in-org-tab" data-toggle="tab" href="#in_org" role="tab">Internal Organisation</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="ex-org-tab" data-toggle="tab" href="#ex_org" role="tab">External Organisation</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="others-tab" data-toggle="tab" href="#others" role="tab">Co-curricular</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="art-tab" data-toggle="tab" href="#art" role="tab">Articles</a>
+        </li>
+    </ul>
+</div>
+<div class="tab-content" id="documentTabContent">
+    <br>
+    <div class="tab-pane fade show active" id="in_event" role="tabpanel">
+        <!-- Content for "All" tab goes here -->
+        {% if events %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="in-event-all" class="form-check-input" type="checkbox"
+                                    onclick="javascript:checkAll('in-event-all')" />
+                                <label for="check-all">Event Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+                {% for event in events %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input in-event-box" type="checkbox" name="{{ event.id }}"> {{event.e_name}}
+                        </div>
+                    </td>
+                    <td>{{event.year}}</td>
+                    <td>{{event.file_by.user.full_name}}</td>
+                    <td>
+                        <a href="{{ event.file.url }}">{{event.filename}}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete-in-event">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+        {% else %}
+        <center>
+            <p>No internal event committee list to be deleted.</p>
+        </center>
+        {% endif %}
+
+    </div>
+    <div class="tab-pane fade" id="ex_event" role="tabpanel">
+        {% if ex_events %}
+        <form method="POST">
+            {% csrf_token %}
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="ex-event-all" class="form-check-input" type="checkbox"
+                                    onclick="javascript:checkAll('ex-event-all')" />
+                                <label for="check-all">Event Name</label>
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+                    </tr>
+                </thead>
+
+                {% for event in ex_events %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input ex-event-box" type="checkbox" name="{{ event.id }}">
+                            {{event.event.e_name}}
+                        </div>
+                    </td>
+                    <td>{{event.event.year}}</td>
+                    <td>{{event.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ event.file.url }}">{{event.filename}}</a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete-ex-event">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+        {% else %}
+        <center>
+            <p>No external event committee list to be deleted.</p>
+        </center>
+        {% endif %}
+    </div>
+    <div class="tab-pane fade" id="in_org" role="tabpanel">
+        {% if orgs %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="in-org-all" class="form-check-input" type="checkbox"
+                                    onclick="javascript:checkAll('in-org-all')" />
+                                <label for="check-all">Organisation Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for org in orgs %}
+                <tr>
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input in-org-box" type="checkbox" name="{{ org.id }}"> {{org.name}}
+                        </div>
+                    </td>
+                    <td>{{org.year}}</td>
+                    <td>{{org.file_by.user.full_name}}</td>
+                    <td>
+                        <a href="{{ org.file.url }}">{{org.filename}}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete-in-org">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+        {% else %}
+        <center>
+            <p>No organisation committee list to be deleted.</p>
+        </center>
+        {% endif %}
+    </div>
+    <div class="tab-pane fade" id="ex_org" role="tabpanel">
+        {% if org_coms %}
+        <form method="POST">
+            {% csrf_token %}
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="ex-org-all" class="form-check-input" type="checkbox"
+                                    onclick="javascript:checkAll('ex-org-all')" />
+                                <label for="check-all">Organisation Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for org in org_coms %}
+                <tr>
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input ex-org-box" type="checkbox" name="{{ org.id }}"> {{org.org.name}}
+                        </div>
+                    </td>
+                    <td>{{org.org.year}}</td>
+                    <td>{{org.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ org.file.url }}">{{org.filename}}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete-ex-org">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+        {% else %}
+        <center>
+            <p>No external organisation committee list to be deleted.</p>
+        </center>
+        {% endif %}
+    </div>
+    <div class="tab-pane fade" id="others" role="tabpanel">
+        {% if others %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="others-all" class="form-check-input" type="checkbox"
+                                    onclick="javascript:checkAll('others-all')" />
+                                <label for="check-all">Competition Name</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for event in others %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input others-box" type="checkbox" name="{{ event.id }}"> {{event.name}}
+                        </div>
+                    </td>
+                    <td>{{event.year}}</td>
+                    <td>{{event.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ event.file.url }}">{{event.filename}}</a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete-others">
+                    Delete Selected Documents
+                </button>
+            </center>
+        </form>
+        {% else %}
+        <center>
+            <p>No competition certificates to be deleted.</p>
+        </center>
+        {% endif %}
+    </div>
+    <div class="tab-pane fade" id="art" role="tabpanel">
+        {% if arts %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox select-all">
+                                <input id="art-all" class="form-check-input" type="checkbox" 
+                                    onclick="javascript:checkAll('art-all')" />
+                                <label for="check-all">Article Title</label>
+
+                            </div>
+                        </th>
+                        <th>Year</th>
+                        <th>Submitted by</th>
+                        <th>File Download</th>
+
+                    </tr>
+                </thead>
+
+                {% for art in arts %}
+                <tr>
+
+                    <td>
+                        <div class="checkbox rows">
+                            <input class="form-check-input art-box" type="checkbox" name="{{ art.id }}"> {{art.title}}
+                        </div>
+                    </td>
+                    <td>{{art.year}}</td>
+                    <td>{{art.student.user.full_name}}</td>
+                    <td>
+                        <a href="{{ art.file.url }}">{{art.filename}}</a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </table>
+
+            <center>
+                <button class="btn btn-danger" type="submit" name="delete-art">
+                    Delete Selected Articles
+                </button>
+            </center>
+        </form>
+        {% else %}
+        <center>
+            <p>No articles to be deleted.</p>
+        </center>
+        {% endif %}
+    </div>
+
+    <script>
+        function checkAll(o) {
+            var checkbox = document.getElementById(o);
+            var boxstr = o.split("-all",1) + "-box"
+            console.log(boxstr)
+            var boxes = document.getElementsByClassName(boxstr)
+            console.log(boxes)
+            for (var x = 0; x < boxes.length; x++) {
+                var obj = boxes[x];
+                if (obj.type == "checkbox") {
+                    if (obj.name != "check")
+                        obj.checked = checkbox.checked;
+                }
+            }
+        }
+    </script>
+    {% endblock %}

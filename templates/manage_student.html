@@ -3,21 +3,21 @@
 {% load static %}
 <head>
     <script>
-         <link rel="stylesheet" type="text/css" href="{% static 'css/manage.css' %}"></link>
+        //  <link rel="stylesheet" type="text/css" href="{% static 'css/manage.css' %}"></link>
     </script>
 </head>
 <script>
     $(document).ready(function () {
         $('.manage-student').click(function () {
-            console.log()
+            
             var studentId = $(this).data('student-id');
-
             // Make an AJAX request to retrieve the event details
             $.ajax({
                 url: '/get-student-details/' + studentId + '/',  // URL to your Django view for fetching event details
                 type: 'GET',
 
                 success: function (response) {
+                   
                     student_id = response.id;
                     $('#manage-student').val(student_id);
                     student_name = response.name;
@@ -25,19 +25,29 @@
                     student_matric = response.matric;
                     $('#student_matric').val(student_matric);
 
-                    student_enrol = new Date(response.enrol)
-                    var formattedEnrol = student_enrol.toISOString().substring(0, 7);
-                    console.log(formattedEnrol)
-                    $('#student_enrol').val(formattedEnrol);
+                    // student_enrol = new Date(response.enrol)
+                    // var formattedEnrol = student_enrol.toISOString().substring(0, 7);
+                    // console.log(formattedEnrol)
+                    // $('#student_enrol').val(formattedEnrol);
 
-                    student_grad = new Date(response.grad)
-                    var formattedGrad = student_grad.toISOString().substring(0, 7);
-                    $('#student_grad').val(formattedGrad);
+                    // student_grad = new Date(response.grad)
+                    // var formattedGrad = student_grad.toISOString().substring(0, 7);
+                    // $('#student_grad').val(formattedGrad);
+
+                    student_enrol_year = response.enrol_year
+                    $('#student_enrol_year').val(student_enrol_year);
+                    student_enrol_sem = response.enrol_sem
+                    $('#student_enrol_sem').val(student_enrol_sem);
+
+                    student_grad_year = response.grad_year
+                    $('#student_grad_year').val(student_grad_year);
+                    student_grad_sem = response.grad_sem
+                    $('#student_grad_sem').val(student_grad_sem);
+
                     student_lect = response.student_lect;
                     $('#student_lect').val(student_lect);
 
                     var student_active = response.active
-                    console.log(student_active)
                     if (student_active == true) {
                         $('#student_active').prop('checked', true);
                     }
@@ -111,8 +121,8 @@
             </td>
             <td>
                 <div class="ms-3">
-                    <p class="mb-0">{{student.enrol_year}}</p>
-                    <p class="mb-0">{{student.grad_year}}</p>
+                    <p class="mb-0">{{student.enrol_sem.academic_year}} Sem {{student.enrol_sem.semester}} </p>
+                    <p class="mb-0">{{student.grad_sem.academic_year}} Sem {{student.grad_sem.semester}}</p>
                 </div>
             </td>
             <td>
@@ -178,21 +188,43 @@
                         </div>
                     </div>
                     <br>
-                    <label for="student_enrol">Enrolment Month</label>
-                    <div class="form-outline">
-                        <input type="month" name="student_enrol" id="student_enrol" class="form-control" required />
-                        <div class="form-notch">
-                            <div class="form-notch-leading"></div>
-                            <div class="form-notch-trailing"></div>
+                    Enrolment
+                    <div style="display: flex;">
+                        <div class="form-floating" style="width:50%">
+                            <select class="form-select" name="student_enrol_year" id="student_enrol_year">
+                            {% for year in academic_year %}
+                            <option value="{{year.academic_year}}">{{year.academic_year}}</option>
+                            {% endfor %}
+                            </select>
+                            <label class="form-label" for="student_enrol_year" style="margin-left: 0px;">Session</label>
+                        </div>
+                        &nbsp;
+                        <div class="form-floating" style="width:50%">
+                            <select class="form-select" name="student_enrol_sem" id="student_enrol_sem">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                            <label class="form-label" for="student_enrol_sem" style="margin-left: 0px;">Semester</label>
                         </div>
                     </div>
                     <br>
-                    <label for="student_grad">Graduation Month</label>
-                    <div class="form-outline">
-                        <input type="month" name="student_grad" id="student_grad" class="form-control" required />
-                        <div class="form-notch">
-                            <div class="form-notch-leading"></div>
-                            <div class="form-notch-trailing"></div>
+                    Graduation
+                    <div style="display: flex;">
+                        <div class="form-floating" style="width:50%">
+                            <select class="form-select" name="student_grad_year" id="student_grad_year">
+                            {% for year in academic_year %}
+                            <option value="{{year.academic_year}}">{{year.academic_year}}</option>
+                            {% endfor %}
+                            </select>
+                            <label class="form-label" for="student_grad_year" style="margin-left: 0px;">Session</label>
+                        </div>
+                        &nbsp;
+                        <div class="form-floating" style="width:50%">
+                            <select class="form-select" name="student_grad_sem" id="student_grad_sem">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                            <label class="form-label" for="student_grad_sem" style="margin-left: 0px;">Semester</label>
                         </div>
                     </div>
                     <br>
