@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-_980un8=9_qw*mx7y!_!lfk_2r_5)pw-mxu5_ad-9epj9wu(_0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["127.0.0.1","learningpassport.me", "learning-passport-633550e98be1.herokuapp.com"]
 
 LOGIN_URL = '/login'
 
