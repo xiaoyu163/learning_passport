@@ -452,9 +452,8 @@ def postgradDetailsView (request):
 @login_required
 @role_required(['SUPER ADMIN', 'ADMIN'])
 def semesterDatesView (request):
-    current_date = current_date
     current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
-    all_semesters = Semester.objects.all().order_by("-academic_year","semester")
+    all_semesters = Semester.objects.exclude(start__isnull=True).order_by("-academic_year","semester")
     student_enrol = list()
     student_grad = list()
     for semester in all_semesters:
@@ -481,8 +480,15 @@ def semesterDatesView (request):
                     sem.end = request.POST['end']
                     sem.save()
                 else:
-                    messages.warning(request, f'Semester {semester} Year {academic_year} already exists.')
-                    return redirect ("semesters")
+                    semester = Semester.objects.get(academic_year=academic_year, semester=semester)
+                    if semester.start or semester.end:
+                        messages.warning(request, f'Semester {semester} Year {academic_year} already exists.')
+                        return redirect ("semesters")
+                    else:
+                        semester.start = request.POST['start']
+                        semester.end = request.POST['end']
+                        semester.save()
+                        return redirect ("semesters")
             else:
                 messages.error(request, f"{academic_year} does not meet the form of 20XX/XX. Please try again.")
                 return redirect ("semesters")
