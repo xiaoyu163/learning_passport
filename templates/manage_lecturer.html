@@ -66,6 +66,13 @@
     }
 
 </script>
+
+<div>
+<h3>Head of Department: {{hod_name}}</h3>
+
+<button class="btn btn-primary" data-mdb-toggle="modal" data-mdb-target="#hod_modal">Change Head of Department</button>
+</div>
+<hr>
 <center>
     <input id="search_text" type="text" class="form-control" style="width:50%" placeholder="Search for lecturer's name..." onkeyup="search()">
     </center>
@@ -181,5 +188,40 @@
             </div>
         </div>
     </div>
+</form>
+
+<!-- Modal -->
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+<div class="modal fade" id="hod_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Head of Department</h5>
+          <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-floating">
+                
+                <select class="form-select" id="new_hod" name="id">
+                    {% for lecturer in lecturers %}
+                    <option value="{{lecturer.id}}" {% if hod_name == lecturer.full_name %} selected {% endif %}>{{lecturer.full_name}}</option>
+                    {% endfor %}
+                </select>
+                <label for="new_hod">Head of Department (new)</label>
+            </div>
+            
+            <br>
+          
+            <label class="form-label" for="customFile">Signature:</label>
+            <input type="file" class="form-control" id="signature" name="signature" accept=".jpg,.jpeg,.png" required/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-mdb-ripple-init data-mdb-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" name="change-hod" data-mdb-ripple-init>Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 {% endblock %}

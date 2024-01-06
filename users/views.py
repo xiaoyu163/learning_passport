@@ -368,6 +368,9 @@ def manageLecturer (request):
     cw_counts = list()
     re_counts = list()
     phd_counts = list()
+    hod = User.objects.get(role='HEAD OF DEPARTMENT')
+    hod_name = hod.full_name
+    all_lecturers = User.objects.filter(is_active=1).exclude(role__in=['SUPER ADMIN', 'STUDENT'])
     for lecturer in lecturers:
         bac_counts.append(Student.objects.filter(lecturer=lecturer, program=1).count())
         cw_counts.append(Student.objects.filter(lecturer=lecturer, program=2).count())
@@ -378,6 +381,8 @@ def manageLecturer (request):
     context = {
         "lecturers_students": lecturers_students,
         "option_position": option_position,
+        "hod_name": hod_name,
+        "lecturers": all_lecturers,
         "page_name": "Manage Lecturers",
         "icon": "fa-solid fa-chalkboard-user fa-lg"
 
@@ -394,6 +399,18 @@ def manageLecturer (request):
         elif 'delete-lecturer' in request.POST:
             lecturer = Lecturer.objects.get(id=request.POST['delete-lecturer'])
             lecturer.delete()
+        elif 'change-hod' in request.POST:
+            hod.role = 'LECTURER'
+            hod.save()
+            new_hod = User.objects.get(id=request.POST['id'])
+            new_hod.role = 'HEAD OF DEPARTMENT'
+            new_hod.save()
+            new_file = request.FILES['signature']
+            static_path = str(settings.STATIC_ROOT).replace("\\","/")
+            file_path = static_path + "/img/hod_sign.png"
+            with open(file_path, 'wb') as destination:
+                for chunk in new_file.chunks():
+                    destination.write(chunk)
         return redirect ("manage-lecturer")
     return render (request,"manage_lecturer.html", context)
 
@@ -559,15 +576,12 @@ def activeReportView (request):
             if selected_sem.start and selected_sem.end:
                 students = Student.objects.filter(enrol_sem__start__lte=selected_sem.start).exclude(grad_sem__end__lte=selected_sem.start)
             else:
-                print("No date")
                 messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
                 return redirect("active-report")
             
         else:
-            print("No object")
             messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
             return redirect("active-report")
-    print(students)
   
     context = {
         "semester_years": semester_years,
