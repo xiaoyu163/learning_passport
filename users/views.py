@@ -556,12 +556,19 @@ def activeReportView (request):
         semester = request.POST['semester']
         if Semester.objects.filter(academic_year=academic_year, semester=semester).exists():
             selected_sem = Semester.objects.get(academic_year=academic_year, semester=semester)
-            students = Student.objects.filter(enrol_year__lte=selected_sem.start, grad_year__gte=selected_sem.end)
+            if selected_sem.start and selected_sem.end:
+                students = Student.objects.filter(enrol_sem__start__lte=selected_sem.start).exclude(grad_sem__end__lte=selected_sem.start)
+            else:
+                print("No date")
+                messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
+                return redirect("active-report")
             
         else:
+            print("No object")
             messages.error(request, f"No record for Year {academic_year} Semester {semester}.")
             return redirect("active-report")
     print(students)
+  
     context = {
         "semester_years": semester_years,
         "students": students,
@@ -575,7 +582,6 @@ def activeReportView (request):
 # Create your views here.
 def contentPDF(request, student_id):
     student = Student.objects.get(id=student_id) 
-    current_date = current_date
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
     # Event Participation
     event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')

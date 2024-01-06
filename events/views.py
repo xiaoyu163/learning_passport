@@ -241,7 +241,7 @@ def takeAttendanceView (request):
 def adminAttendaceView (request, event_id):
     event = Events.objects.get(id=event_id)
     par_id = list()
-    participants = Event_Participants.objects.filter(event_id=event_id)
+    participants = Event_Participants.objects.filter(event_id=event_id, attendance=1)
     for par in participants:
         par_id.append(par.student_id)
     students = Student.objects.filter(user__is_active=True).exclude(id__in=par_id)
