@@ -229,7 +229,6 @@ def editProfile(request, id):
     if request.method == 'POST':
         if 'STUDENT' in request.user.role:
             student = Student.objects.get(user_id=id)
-            student.user = user
             student.matric_no = request.POST['matric'].upper()
             student.program = request.POST['program']
             # student.enrol_year = datetime.strptime(request.POST['enrol'], '%Y-%m').date()

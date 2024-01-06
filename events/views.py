@@ -35,8 +35,8 @@ def eventListView (request):
     if request.user.role in 'SUPER ADMIN':
         events = Events.objects.filter(internal=1).order_by("-start")
     else:
-        events = Events.objects.filter(internal=1, start__gte=current_time).order_by("-start")
-        
+        events = Events.objects.filter(internal=1, start__gte=current_time.replace(tzinfo=None)).order_by("-start")
+   
     option_obj = Events.type.field.choices
     parts = list()
     if request.user.role in 'STUDENT':
@@ -183,19 +183,21 @@ def takeAttendanceView (request):
         # To store registered event that are currently not available for attendance
         reg_events = list()
         for part in parts:
-            print(part)
             start_time = part.event.start if part.event.start else None
             end_time = part.event.end if part.event.end else None
+            print("Start: ", start_time)
+            print("End: ", end_time)
+            print("Now: ", current_time)
             if part.event.enable_attendance==1:
                 events.append(part)
             elif start_time and end_time :
-                if start_time <= current_time <= end_time and part.event.attendance==1:
+                if start_time.replace(tzinfo=None) <= current_time.replace(tzinfo=None) <= end_time.replace(tzinfo=None) and part.event.attendance==1:
                     events.append(part)
                 else:
                     reg_events.append(part)
             else:
                     reg_events.append(part)
-            
+        print(events)
         context = {
            
             "events": events,
