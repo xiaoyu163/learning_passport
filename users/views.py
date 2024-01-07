@@ -595,14 +595,18 @@ def activeReportView (request):
 
 # Create your views here.
 def contentPDF(request, student_id):
+
     student = Student.objects.get(id=student_id) 
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
+
     # Event Participation
     event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
     event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__type')
+
+    # Article
     arts = Article.objects.filter(student=student, status=1, award__isnull=True)
-    awarded_arts = Article.objects.filter(student=student, award__isnull=False)
-    
+    awarded_arts = Article.objects.filter(student=student, award__isnull=False)    
+
     # Event/Org Committee
     event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
     event_coms_ex = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=0).order_by('event__start')
@@ -615,6 +619,7 @@ def contentPDF(request, student_id):
 
     # Other Competition
     other = OtherComp.objects.filter(student=student, status=1)
+
     context = {
         "student": student,
         "event_pars_in": event_pars_in,
@@ -640,14 +645,13 @@ def contentPDF(request, student_id):
         dynamic_html_content = render_to_string('pdf_undergrad.html', context)  
     else:
         dynamic_html_content = render_to_string('pdf_postgrad.html', context)
-    htmldoc = HTML(string=dynamic_html_content, base_url=request.build_absolute_uri())
-    # pdf_path = f'{student.matric_no}_transcript.pdf'
-    pdf_bytes = htmldoc.write_pdf()
 
-    # Specify the filename for the downloadable file
+    htmldoc = HTML(string=dynamic_html_content, base_url=request.build_absolute_uri())
+    pdf_bytes = htmldoc.write_pdf()
     pdf_filename = f'{student.matric_no}_transcript.pdf'
 
     return pdf_bytes, pdf_filename
+
     # return redirect ("generate-transcript", student.user.id)
 
 def generatePDF (request, student_id):
@@ -902,7 +906,7 @@ def dashboardView(request):
         # fig = px.line(par_df, x="Year", y="Participants", title=f'Number of Participants for {event_name}')
         # fig.update_traces(mode="lines+markers")
         # fig.update_xaxes(tickvals=year_list)
-        # fig.update_yaxes(dtick=1)
+        fig.update_yaxes(dtick=1)
         fig.update_xaxes(rangeslider_visible=True)
         graph_json = fig.to_json()
 
