@@ -906,7 +906,7 @@ def dashboardView(request):
         # fig = px.line(par_df, x="Year", y="Participants", title=f'Number of Participants for {event_name}')
         # fig.update_traces(mode="lines+markers")
         # fig.update_xaxes(tickvals=year_list)
-        fig.update_yaxes(dtick=1)
+        # fig.update_yaxes(dtick=1)
         fig.update_xaxes(rangeslider_visible=True)
         graph_json = fig.to_json()
 
