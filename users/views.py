@@ -807,7 +807,7 @@ def dashboardView(request):
         years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
         current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
         selected_year = current_year
-        upcoming_events = Events.objects.filter(start__gte=current_date).order_by("start")[:2]
+        upcoming_events = Events.objects.filter(start__gte=current_date.replace(tzinfo=None)).order_by("start")[:2]
         announcements = Announcement.objects.order_by("-created_time")[:2]
         num_active = Student.objects.filter(user__is_active=1).count() if selected_year else None
         num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count() if selected_year else None
