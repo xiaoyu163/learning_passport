@@ -14,6 +14,32 @@
 <head>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+    <script>
+        $(document).ready(function() {
+            // Function to toggle the class based on window width
+            function toggleClassBasedOnWidth() {
+                var windowWidth = $(window).width();
+                var $container = $("#container");
+                var $right = $("#right");
+                if (windowWidth > 900) {
+                    $container.css('display', 'flex');
+                    $right.css('display', 'flex');
+                } else {
+                    $container.css('display', 'block');
+                    $right.css('display', 'block');
+                }
+            }
+            
+            // Call the function on page load
+            toggleClassBasedOnWidth();
+            
+            // Bind the function to the window resize event
+            $(window).resize(function() {
+                toggleClassBasedOnWidth();
+            });
+        });
+      
+    </script>
 </head>
 
 <div style="display: flex; align-items: center;">
@@ -23,11 +49,11 @@
     <h1 style="margin-left: 10px;">Dashboard</h1>
   </div>
   
-<div class="container contaner-fluid">
+<div id="container" class="container container-fluid">
     <!-- <div class="dashboard"> -->
-        <div class="left-side">
-            <div class="container">
-                <div class="left">
+        <div id="left-side" class="left-side">
+            <div class="flex-container" style="display:flex;">
+                <div id="left" class="left">
                     <form method="POST">
                         {% csrf_token %}
                         <div class="custom-small-form-floating">
@@ -75,7 +101,7 @@
                     <br>
                 </div>
                 <div class="gap"></div>
-                <div class="right">              
+                <div id="right" class="right">              
                     <div class="card p-1 m-1 border border-primary">
                         <div class="card-body p-1 m-1" style="text-align: right;">
                             <div class="card-text p-1 m-1">
@@ -152,13 +178,14 @@
             
         </div>
         <div class="right-side">
+            {% if upcoming_events %}
             <div>
                 <h5 class="fw-bold mb-1">Upcoming Events</h5>
                 {% if upcoming_events %}
                 <a class="mb-0" href="{% url 'events' %}">View all</a>
                 {% endif %}
             </div>
-            {% if upcoming_events %}
+            
                 {% for event in upcoming_events %}
                 <a href="{% url 'event-detail' event.id %}">
                 <div class="card p-1 m-1 border border-info">
@@ -174,13 +201,14 @@
                 {% endfor %}
          
             {% endif %}
+            {% if announcements %}
             <div>
                 <h5 class="fw-bold mb-1">Announcements</h5>
                 {% if announcements %}
                 <a class="mb-0" href="{% url 'announcements' %}">View all</a>
                 {% endif %}
             </div>
-            {% if announcements %}
+            
                 {% for ann in announcements %}
                 <div class="card p-1 m-1 border border-info">
                     <div class="card-header p-1 m-1">

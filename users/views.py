@@ -57,6 +57,7 @@ import tempfile
 from tempfile import NamedTemporaryFile
 from django.template.loader import render_to_string
 import pytz
+from PIL import Image
 
 base_dir = str(settings.BASE_DIR).replace("\\", "/")
 # Set the time zone to Malaysia
@@ -408,9 +409,28 @@ def manageLecturer (request):
             new_file = request.FILES['signature']
             static_path = str(settings.STATIC_ROOT).replace("\\","/")
             file_path = static_path + "/img/hod_sign.png"
+            
             with open(file_path, 'wb') as destination:
                 for chunk in new_file.chunks():
                     destination.write(chunk)
+            
+            def resize_image(input_path, output_path, new_height):
+                # Open the image file
+                with Image.open(input_path) as img:
+                    # Calculate the new width to maintain the aspect ratio
+                    aspect_ratio = img.width / img.height
+                    new_width = round(aspect_ratio * new_height)
+
+                    # Resize the image
+                    resized_img = img.resize((new_width, new_height))
+
+                    # Save the resized image
+                    resized_img.save(output_path)
+
+            new_height = 80
+
+            resize_image(file_path, file_path, new_height)
+
         return redirect ("manage-lecturer")
     return render (request,"manage_lecturer.html", context)
 
@@ -780,8 +800,12 @@ def generateTranscriptView(request, user_id):
         }
     if request.method == 'POST':  
         if 'search' in request.POST:
-            if Student.objects.filter(matric_no=request.POST['matric'].upper()).exists():
-                student = Student.objects.get(matric_no=request.POST['matric'].upper())
+            matric_input = request.POST['matric'].upper()
+            if '/' in matric_input:
+                matric_input = matric_input.split('/')[0]
+
+            if Student.objects.filter(matric_no=matric_input).exists():
+                student = Student.objects.get(matric_no=matric_input.upper())
                 user_id = student.user_id
                 return redirect ("generate-transcript", user_id=user_id)
             

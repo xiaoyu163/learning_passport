@@ -5,6 +5,34 @@
 <head>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+
+    <script>
+      $(document).ready(function() {
+          // Function to toggle the class based on window width
+          function toggleClassBasedOnWidth() {
+              var windowWidth = $(window).width();
+              var $container = $("#container");
+              var $right = $("#right");
+              if (windowWidth > 1240) {
+                  $container.css('display', 'flex');
+                  $right.css('display', 'flex');
+              } else {
+                  $container.css('display', 'block');
+                  $right.css('display', 'block');
+              }
+          }
+          
+          // Call the function on page load
+          toggleClassBasedOnWidth();
+          
+          // Bind the function to the window resize event
+          $(window).resize(function() {
+              toggleClassBasedOnWidth();
+          });
+      });
+    
+  </script>
+  
 </head>
 
 <h1> Dashboard </h1>

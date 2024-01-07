@@ -5,6 +5,33 @@
 <head>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+
+  <script>
+    $(document).ready(function() {
+        // Function to toggle the class based on window width
+        function toggleClassBasedOnWidth() {
+            var windowWidth = $(window).width();
+            var $container = $("#container");
+            var $right = $("#right");
+            if (windowWidth > 1240) {
+                $container.css('display', 'flex');
+                $right.css('display', 'flex');
+            } else {
+                $container.css('display', 'block');
+                $right.css('display', 'block');
+            }
+        }
+        
+        // Call the function on page load
+        toggleClassBasedOnWidth();
+        
+        // Bind the function to the window resize event
+        $(window).resize(function() {
+            toggleClassBasedOnWidth();
+        });
+    });
+  
+</script>
 </head>
 <div style="display: flex; align-items: center;">
   <div style="height: 10%; width: 30%;">
@@ -13,7 +40,7 @@
   <h1 style="margin-left: 10px;">Dashboard</h1>
 </div>
 
-<div class="container">
+<div id="container" class="container">
   <div class="left-side">
     <div class="container">
 
@@ -46,7 +73,7 @@
 
       <div class="gap"></div>
       {% if student.program == 1 %}
-        <div class="info-cards">
+        <div id="right" class="info-cards">
 
           <div class="card info-card card1">
             <div class="card-body">

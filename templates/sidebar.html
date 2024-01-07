@@ -21,11 +21,35 @@
     <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
 
     <title>{{request.resolver_match.url_name}}</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        
+        $(document).ready(function() {
+          // Function to toggle the class based on window width
+          function toggleClassBasedOnWidth() {
+            var windowWidth = $(window).width();
+            var $pageWrapper = $("#pageWrapper");
+      
+            if (windowWidth > 800) {
+              $pageWrapper.addClass("toggled");
+            } else {
+              $pageWrapper.removeClass("toggled");
+            }
+          }
+      
+          // Call the function on page load
+          toggleClassBasedOnWidth();
+      
+          // Bind the function to the window resize event
+          $(window).resize(function() {
+            toggleClassBasedOnWidth();
+          });
+        });
+    </script>
 </head>
 
 <body>
-    <div class="page-wrapper chiller-theme toggled">
+    <div id="pageWrapper" class="page-wrapper chiller-theme">
         <a id="show-sidebar" class="btn btn-sm btn-dark" href="#">
             <i class="fas fa-bars"></i>
         </a>
