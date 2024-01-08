@@ -182,43 +182,6 @@
                                     </ul>
                                 </div>
                             </li>
-                            
-                            
-                            {% if request.user.role in 'SUPER ADMIN' %}
-                            
-                                <li class="sidebar-dropdown">
-                                    <a href="{% url 'delete-docs' %}">
-                                        <i class="fa-solid fa-file-circle-xmark"></i>
-                                        <span>Delete Documents</span>
-                                    </a>
-                                    <!-- <div class="sidebar-submenu">
-                                        <ul>
-                                            <li>
-                                                <a href="{% url 'delete-event-doc' %}"> Event Documets </a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'delete-ex-event-doc' %}"> External Event Document </a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'delete-org-doc' %}"> Internal Org Document </a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'delete-ex-org-doc' %}"> External Org Document </a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'delete-other-doc' %}"> Other Comp Document </a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'delete-art-doc' %}"> Articles </a>
-                                            </li>
-                                            
-                                        </ul>
-                                    </div> -->
-                                </li>
-
-                            {% endif %}
-                        
-
 
                             {% if 'STUDENT' in request.user.get_role_display %}
                                 <li class="sidebar-dropdown">
@@ -271,6 +234,16 @@
                                         </ul>
                                     </div>
                                 </li>
+                                
+                            
+                                <li class="sidebar-dropdown">
+                                    <a href="{% url 'delete-docs' %}">
+                                        <i class="fa-solid fa-file-circle-xmark"></i>
+                                        <span>Delete Documents</span>
+                                    </a>
+                                </li>
+
+                     
 
                             {% endif %}
 
