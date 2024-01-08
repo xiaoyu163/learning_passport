@@ -11,9 +11,9 @@
         // Function to toggle the class based on window width
         function toggleClassBasedOnWidth() {
             var windowWidth = $(window).width();
-            var $container = $("#container");
+            var $container = $("#flex-container");
             var $right = $("#right");
-            if (windowWidth > 1240) {
+            if (windowWidth > 1200) {
                 $container.css('display', 'flex');
                 $right.css('display', 'flex');
             } else {
@@ -40,10 +40,8 @@
   <h1 style="margin-left: 10px;">Dashboard</h1>
 </div>
 
-<div id="container" class="container">
-  <div class="left-side">
-    <div class="container">
-
+<div id="flex-container" class="container">
+  <div class="left-side" style="display:flex;">
       <div class="card profile-card">
         <div class="card-header">
           <h4 class="card-title">My Profile</h4>
@@ -68,7 +66,7 @@
           <center>
             <a href="{% url 'edit-profile' student.user.id %}">Edit Profile Details</a>
           </center>
-          </div>
+        </div>
       </div>
 
       <div class="gap"></div>
@@ -193,8 +191,6 @@
       </div>
 
       {% endif %}
-      
-    </div>
   </div>
   <div class="right-side">
     {% if registered_event %}
@@ -234,5 +230,5 @@
     {% endfor %}
   </div>
 </div>
-</div>
+
 {% endblock %}

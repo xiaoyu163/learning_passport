@@ -21,7 +21,7 @@
                 var windowWidth = $(window).width();
                 var $container = $("#container");
                 var $right = $("#right");
-                if (windowWidth > 900) {
+                if (windowWidth > 1100) {
                     $container.css('display', 'flex');
                     $right.css('display', 'flex');
                 } else {
@@ -49,11 +49,11 @@
     <h1 style="margin-left: 10px;">Dashboard</h1>
   </div>
   
-<div id="container" class="container container-fluid">
-    <!-- <div class="dashboard"> -->
-        <div id="left-side" class="left-side">
+<div  class="container container-fluid">
+    <div id="container" class="flex-container">
+        <div class="left-side">
             <div class="flex-container" style="display:flex;">
-                <div id="left" class="left">
+                <div class="left">
                     <form method="POST">
                         {% csrf_token %}
                         <div class="custom-small-form-floating">
@@ -78,7 +78,7 @@
                                     <option value="1" {% if selected_year.semester == 1 %} selected {% endif %}>1</option>
                                     <option value="2" {% if selected_year.semester == 2 %} selected {% endif %}>2</option>
                                 </select>
-                                <label for="semester">Semester</label>
+                                <label for="semester">Sem</label>
                             </div>
                         </div>
                         <br>
@@ -112,7 +112,7 @@
                                 <sub>Active Students </sub>
                                 <p>
                                     <strong>
-                                        Year {{selected_year.academic_year}} Semester
+                                        Year {{selected_year.academic_year}} Sem
                                         {{selected_year.semester}}
                                     </strong>
                                 </p>
@@ -130,7 +130,7 @@
                                 <sub>Events Hosted </sub>
                                 <p>
                                     <strong>
-                                        Year {{selected_year.academic_year}} Semester
+                                        Year {{selected_year.academic_year}} Sem
                                         {{selected_year.semester}}
                                     </strong>
                                 </p>
@@ -148,7 +148,7 @@
                                 <sub>Articles Submitted </sub>
                                 <p>
                                     <strong>
-                                        Year {{selected_year.academic_year}} Semester
+                                        Year {{selected_year.academic_year}} Sem
                                         {{selected_year.semester}}
                                     </strong>
                                 </p>
@@ -158,22 +158,6 @@
                 </div>
             </div>
             <br>
-           
-                <!-- <form method="POST">
-                    {% csrf_token %}
-
-                    <div class="form-floating">
-                        <select class="form-select" id="event_select" name="event_name"
-                            aria-label="Default select example" onchange="submit()">
-                            {% for event in event_selection %}
-                            <option value="{{event.e_name}}" {% if event.e_name == selected %} selected {% endif %}>
-                                {{event.e_name}}
-                            </option>
-                            {% endfor %}
-                        </select>
-                        <label for="event_select">Select Event Name</label>
-                    </div>
-                </form> -->
             <div id="plotly-graph"></div>
             
         </div>
@@ -223,6 +207,7 @@
          
             {% endif %}
         </div>
+    </div>
 </div>
 
 
