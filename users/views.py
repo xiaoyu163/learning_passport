@@ -694,21 +694,24 @@ def download_all_transcripts(request, semester_id):
 
     # Create a BytesIO object to store the zipped content
     zip_buffer = BytesIO()
+    try:
+        with zipfile.ZipFile(zip_buffer, 'a') as zip_file:
+            for student in students:
+                # Generate a single student transcript PDF
+                pdf_bytes, pdf_filename = contentPDF(request,student.id)
 
-    with zipfile.ZipFile(zip_buffer, 'a') as zip_file:
-        for student in students:
-            # Generate a single student transcript PDF
-            pdf_bytes, pdf_filename = contentPDF(request,student.id)
+                # Add the PDF content to the zip file
+                zip_file.writestr(pdf_filename, pdf_bytes)
 
-            # Add the PDF content to the zip file
-            zip_file.writestr(pdf_filename, pdf_bytes)
+        # Close the zip file
+        zip_buffer.seek(0)
 
-    # Close the zip file
-    zip_buffer.seek(0)
-
-    # Create a Django HttpResponse with the zip file content
-    response = HttpResponse(zip_buffer, content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename=all_transcripts.zip'
+        # Create a Django HttpResponse with the zip file content
+        response = HttpResponse(zip_buffer, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=all_transcripts.zip'
+    except Exception as e:
+        messages.error(request, e)
+        return redirect ("print-all-transcripts")
     return response
 
 def printAllView (request):
