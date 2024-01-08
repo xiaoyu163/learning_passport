@@ -74,9 +74,9 @@ def eventListView (request):
             event.desc = request.POST['event_desc']
             event.internal = request.POST['internal']
             attendance = 1 if 'enable' in request.POST else 0
-            print(request.FILES)
             if 'poster' in request.FILES:
                 event.poster = request.FILES['poster']
+                event.filename = request.FILES['poster']
             event.attendance = attendance
             event.save()
 
@@ -161,6 +161,7 @@ def eventDetailView (request, id):
         
         elif "poster" in request.POST:
             event.poster = request.FILES['poster']
+            event.filename = request.FILES['poster']
             event.save()
             return redirect (request.get_full_path())
 
@@ -300,6 +301,8 @@ def get_event_details(request, event_id):
             'speaker': event.speaker,
             'attendance': event.attendance,
             'on_time': event.enable_attendance,
+            'poster': event.poster.url,
+            'filename': event.filename,
             # Include other event details in the response as needed
         }
         return JsonResponse(response_data)

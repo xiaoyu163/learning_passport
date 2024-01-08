@@ -181,7 +181,7 @@
     </div>
 
     <div class="button-container">
-        {% if request.user.role in 'SUPER ADMIN' %}
+        {% if request.user.role in 'SUPER ADMIN LECTURER HEAD OF DEPARTMENT' %}
             <div class="container container-fluid" style="display: flex;">
                 <button class="btn btn-outline-primary" data-mdb-toggle="modal" data-mdb-target="#poster_modal"><i class="fa-solid fa-file-image fa-lg"></i>&nbsp;&nbsp;&nbsp;Edit Event Poster</button>
                     &nbsp; &nbsp; &nbsp;
@@ -234,7 +234,7 @@
                 <div class="modal-body">
                     <div>
                         <label class="form-label" for="customFile">Upload New Event Poster:</label>
-                        <input type="file" class="form-control" id="poster" name="poster"/>
+                        <input type="file" class="form-control" id="poster" name="poster" accept=".jpg,.jpeg,.png"/>
                     </div>
                 </div>
                 <div class="modal-footer">

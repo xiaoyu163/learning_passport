@@ -73,15 +73,14 @@
     
       // Loop through all table rows, and hide those who don't match the search query
       for (i = 0; i < tr.length; i++) {
-        matric = tr[i].getElementsByTagName("td")[1];
+        // matric = tr[i].getElementsByTagName("td")[1];
         name = tr[i].getElementsByTagName("td")[0];
         
         if (matric || name) {
-          matricValue = matric.textContent || matric.innerText;
+        //   matricValue = matric.textContent || matric.innerText;
           nameValue = name.textContent || name.innerText;
-          console.log(matricValue)
           console.log(nameValue)
-          if (matricValue.toUpperCase().indexOf(filter) > -1 || nameValue.toUpperCase().indexOf(filter) > -1) {
+          if (nameValue.toUpperCase().indexOf(filter) > -1) {
             tr[i].style.display = "";
           } else {
             tr[i].style.display = "none";
@@ -114,8 +113,7 @@
     <table id="dates_table" class="table table-responsive">
         <tr>
             <thead>
-                <th>Student Name</th>
-                <th>Matric Number</th>
+                <th>Name (Matric No)</th>
                 <th>Program</th>
                 {% if not 'LECTURER' in request.user.role %}
                 <th>Supervisor</th>
@@ -130,8 +128,12 @@
         <tbody>
             {% for student in students %}
             <tr>
-                <td>{{student.user.full_name}}</td>
-                <td>{{student.matric_no}}</td>
+                <td>
+                    <div class="ms-3">
+                        <p class="fw-bold mb-1">{{student.user.full_name}}</p>
+                        <p class="text-muted mb-0">{{student.matric_no}}</p>
+                    </div>
+                </td>
                 <td>{{student.get_program_display}}</td>
                 {% if not 'LECTURER' in request.user.role %}
                 <td>{{student.lecturer.user.full_name}}</td>

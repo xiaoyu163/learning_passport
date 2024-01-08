@@ -204,8 +204,31 @@
 
       {% endif %}
   </div>
-  {% if registered_event or announcements %}
+
+  {% if registered_event or announcements or student.cd_date or student.pd_date or student.rm_date or student.viva_date %}
   <div class="right-side">
+    
+    {% if student.cd_date or student.pd_date or student.rm_date or student.viva_date %}
+   
+    <div class="card border border-success">
+      <div class="card-header">
+        <strong>Important Dates</strong>
+      </div>
+      <div class="card-body">
+        <sub>RM date</sub>
+        <p><strong>{{student.rm_date}}</strong></p>
+        <sub>PD date</sub>
+        <p><strong>{{student.pd_date}}</strong></p>
+        <sub>CD date</sub>
+        <p><strong>{{student.cd_date}}</strong></p>
+        <sub>Viva date</sub>
+        <p><strong>{{student.viva_date}}</strong></p>
+      </div>
+    </div>
+   
+    <br>
+    {% endif %}
+    {% endif %}
     {% if registered_event %}
     <div>
       <h5 class="fw-bold mb-1">Registered Events</h5>
