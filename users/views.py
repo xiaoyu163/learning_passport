@@ -556,6 +556,8 @@ def semesterDatesView (request):
         return redirect ("semesters")
     return render (request, "semester.html", context)
 
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
 def graduateReportView (request):
     semester_years = Semester.objects.values('academic_year').distinct().order_by("academic_year")
     students = None
@@ -583,6 +585,8 @@ def graduateReportView (request):
 
     return render (request, "graduate_report.html",context)
 
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
 def activeReportView (request):
     semester_years = Semester.objects.values('academic_year').distinct().order_by("academic_year")
     students = None
@@ -714,6 +718,8 @@ def download_all_transcripts(request, semester_id):
         return redirect ("print-all-transcripts")
     return response
 
+@login_required
+@role_required(['SUPER ADMIN', 'HEAD OF DEPARTMENT', 'ADMIN'])
 def printAllView (request):
     academic_years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
     context = {

@@ -21,6 +21,8 @@ from utils.emails import noMatricEmail
 # Create your views here.
 base_dir = str(settings.BASE_DIR).replace("\\", "/")
 
+@login_required
+@role_required(['STUDENT'])
 def submitEventView(request):
    
     option_obj = Events.type.field.choices
@@ -143,7 +145,8 @@ def submitEventView(request):
 
     return render(request, "upload_event.html", context)
 
-
+@login_required
+@role_required(['STUDENT'])
 def submitOrgView(request):
     student = Student.objects.get(user=request.user.id)
     orgs_in = Organisation.objects.filter(file_by=student).exclude(internal=0)
@@ -236,7 +239,8 @@ def submitOrgView(request):
 
     return render(request, "upload_org.html", context)
 
-
+@login_required
+@role_required(['STUDENT'])
 def submitArticleView(request):
     student = Student.objects.get(user=request.user.id)
     arts = Article.objects.filter(student=student)
@@ -313,6 +317,8 @@ def submitArticleView(request):
 
     return render(request, "upload_article.html", context)
 
+@login_required
+@role_required(['STUDENT'])
 def submitOtherComp (request):
     student = Student.objects.get(user_id=request.user.id)
     comps = OtherComp.objects.filter(student=student)
@@ -703,6 +709,8 @@ def verOtherView (request):
 
     return render (request, "verify_other.html", context)
 
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
 def deleteDocView(request):
     events = Events.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
     ex_events = Event_Participants.objects.filter(file__isnull=False, status__in=[1,0]).exclude(file__exact="")
@@ -794,6 +802,8 @@ def deleteDocView(request):
             
     return render (request, "delete_doc.html", context)
 
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
 def deleteEventDocView(request):
    
     events = Events.objects.filter(file__isnull=False).exclude(file__exact="")
@@ -819,6 +829,8 @@ def deleteEventDocView(request):
         return redirect ("delete-event-doc")
     return render (request, "delete-document.html", context)
 
+@login_required
+@role_required(['SUPER ADMIN', 'ADMIN'])
 def deleteExEventDocView(request):
    
     ex_events = Event_Participants.objects.filter(file__isnull=False).exclude(file__exact="")
@@ -865,6 +877,8 @@ def deleteOrgDocView(request):
         return redirect ("delete-org-doc")
     return render (request, "delete-document.html", context)
 
+@login_required
+@role_required(['ADMIN'])
 def deleteExOrgDocView(request):
    
     org_coms = OrgComittee.objects.filter(file__isnull=False).exclude(file__exact="")
@@ -887,6 +901,8 @@ def deleteExOrgDocView(request):
         return redirect ("delete-ex-org-doc")
     return render (request, "delete-document.html", context)
 
+@login_required
+@role_required(['SUPER ADMIN','ADMIN'])
 def deleteOtherDocView(request):
    
     others = OtherComp.objects.filter(file__isnull=False).exclude(file__exact="")
@@ -930,6 +946,8 @@ def deleteArtDocView(request):
         return redirect ("delete-art-doc")
     return render (request, "delete-document.html", context)
 
+@login_required
+@role_required(['STUDENT'])
 def statusView(request):
     student = Student.objects.get(user=request.user.id)
     events = Events.objects.filter(file_by=student).exclude(file__exact='')

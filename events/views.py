@@ -6,6 +6,7 @@ from users.models import User,Student
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from users.decorators import role_required
 from django.http import JsonResponse
 import os
 import pytz
@@ -28,6 +29,7 @@ def dynamicInput (request):
         "event_name": "Event 1"
     }
     return render (request, "event_com_form.html", context)
+
 @login_required
 def eventListView (request):
     base_dir = settings.BASE_DIR
@@ -117,7 +119,7 @@ def eventListView (request):
         return redirect ("events")
     return render (request, "event_list.html", context) 
 
-
+@login_required
 def eventDetailView (request, id):
     event = Events.objects.get(id=id)
     if request.user.role in 'STUDENT':
@@ -239,6 +241,8 @@ def takeAttendanceView (request):
             return redirect("attendance")
     return render (request, "attendance.html", context)
 
+@login_required
+@role_required(['SUPER ADMIN', 'HEAD OF DEPARTMENT', 'LECTURER'])
 def adminAttendaceView (request, event_id):
     event = Events.objects.get(id=event_id)
     par_id = list()
