@@ -12,13 +12,25 @@
         function toggleClassBasedOnWidth() {
             var windowWidth = $(window).width();
             var $container = $("#flex-container");
+            var $card1 = $("#card1");
+            var $card2 = $("#card2");
+            var $card3 = $("#card3");
+            var $card4 = $("#card4");
             var $right = $("#right");
             if (windowWidth > 1200) {
                 $container.css('display', 'flex');
                 $right.css('display', 'flex');
+                $card1.css('width', '');
+                $card2.css('width', '');
+                $card3.css('width', '');
+                $card4.css('width', '');
             } else {
                 $container.css('display', 'block');
                 $right.css('display', 'block');
+                $card1.css('width', '100%');
+                $card2.css('width', '100%');
+                $card3.css('width', '100%');
+                $card4.css('width', '100%');
             }
         }
         
@@ -41,7 +53,7 @@
 </div>
 
 <div id="flex-container" class="container">
-  <div class="left-side" style="display:flex;">
+  <div id="left-container" class="left-side" style="display:flex;">
       <div class="card profile-card">
         <div class="card-header">
           <h4 class="card-title">My Profile</h4>
@@ -73,7 +85,7 @@
       {% if student.program == 1 %}
         <div id="right" class="info-cards">
 
-          <div class="card info-card card1">
+          <div id="card1" class="card info-card card1">
             <div class="card-body">
               <center>
                 <div class="card-text">
@@ -87,13 +99,13 @@
             </div>
           </div>
 
-          <div class="card info-card card2">
+          <div id="card2" class="card info-card card2">
             <div class="card-body">
               <center>
                 <div class="card-text">
                   <h1><i class="fa-solid fa-handshake" style="color: #ed1d4d"></i></h1>
                   <strong>
-                    <p class="info-title">Event<br>Commitments </p>
+                    <p class="info-title">Event<br>Commitment</p>
                   </strong>
                   <h3>{{com_count}}</h3>
                 </div>
@@ -102,13 +114,13 @@
           </div>
           
           
-          <div class="card info-card card3">
+          <div id="card3" class="card info-card card3">
             <div class="card-body">
               <center>
                 <div class="card-text">
                   <h1><i class="fa-solid fa-users" style="color: #1b8be3"></i></h1>
                   <strong>
-                    <p class="info-title">Organisation<br>Commitments </p>
+                    <p class="info-title">Organisation<br>Commitment</p>
                   </strong>
                   <h3>{{org_count}}</h3>
                 </div>
@@ -116,7 +128,7 @@
             </div>
           </div>
 
-          <div class="card info-card card4">
+          <div id="card4" class="card info-card card4">
             <div class="card-body">
               <center>
                 <div class="card-text">
@@ -133,7 +145,7 @@
         </div>
       {% else %}
       <div class="info-cards">
-        <div class="card info-card card1">
+        <div id="card1" class="card info-card card1">
           <div class="card-body">
             <center>
               <div class="card-text">
@@ -146,7 +158,7 @@
             </center>
           </div>
         </div>
-        <div class="card info-card card2">
+        <div id="card2" class="card info-card card2">
           <div class="card-body">
             <center>
               <div class="card-text">
@@ -161,7 +173,7 @@
         </div>
         
         
-        <div class="card info-card card3">
+        <div id="card3" class="card info-card card3">
           <div class="card-body">
             <center>
               <div class="card-text">
@@ -175,7 +187,7 @@
           </div>
         </div>
 
-        <div class="card info-card card4">
+        <div id="card4" class="card info-card card4">
           <div class="card-body">
             <center>
               <div class="card-text">
@@ -192,6 +204,7 @@
 
       {% endif %}
   </div>
+  {% if registered_event or announcements %}
   <div class="right-side">
     {% if registered_event %}
     <div>
@@ -232,6 +245,7 @@
     {% endfor %}
     {% endif %}
   </div>
+  {% endif %}
 </div>
 
 {% endblock %}

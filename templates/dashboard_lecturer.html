@@ -13,12 +13,24 @@
               var windowWidth = $(window).width();
               var $container = $("#flex-container");
               var $right = $("#right");
+              var $card1 = $("#card1");
+              var $card2 = $("#card2");
+              var $card3 = $("#card3");
+              var $card4 = $("#card4");
               if (windowWidth > 1200) {
                   $container.css('display', 'flex');
                   $right.css('display', 'flex');
+                  $card1.css('width', '');
+                  $card2.css('width', '');
+                  $card3.css('width', '');
+                  $card4.css('width', '');
               } else {
                   $container.css('display', 'block');
                   $right.css('display', 'block');
+                  $card1.css('width', '100%');
+                  $card2.css('width', '100%');
+                  $card3.css('width', '100%');
+                  $card4.css('width', '100%');
               }
           }
           
@@ -66,7 +78,7 @@
     <div class="gap"></div>
 
     <div id="right" class="info-cards">
-      <div class="card info-card card1">
+      <div id="card1" class="card info-card card1">
         <div class="card-body">
           <center>
             <div class="card-text">
@@ -79,7 +91,7 @@
           </center>
         </div>
       </div>
-      <div class="card info-card card2">
+      <div id="card2" class="card info-card card2">
         <div class="card-body">
           <center>
             <div class="card-text">
@@ -92,7 +104,7 @@
           </center>
         </div>
       </div>
-      <div class="card info-card card3">
+      <div id="card3" class="card info-card card3">
         <div class="card-body">
           <center>
             <div class="card-text">
@@ -105,7 +117,7 @@
           </center>
         </div>
       </div>
-      <div class="card info-card card4">
+      <div id="card4" class="card info-card card4">
         <div class="card-body">
           <center>
             <div class="card-text">
