@@ -988,6 +988,8 @@ def dashboardView(request):
     else:
         lecturer = Lecturer.objects.get(user=request.user)
         print(lecturer)
+        upcoming_events = Events.objects.filter(start__gte=current_date.replace(tzinfo=None)).order_by("start")[:2]
+        announcements = Announcement.objects.order_by("-created_time")[:2]
         students = Student.objects.filter(lecturer=lecturer)
         undergrad_students = students.filter(program=1)
         master_cw = students.filter(program=2)
@@ -1002,6 +1004,8 @@ def dashboardView(request):
             "master_cw": len(master_cw),
             "master_re": len(master_re),
             "phd": len(phd_students),
+            "events": upcoming_events,
+            "announcements": announcements,
         }
         return render (request, "dashboard_lecturer.html", context)
     

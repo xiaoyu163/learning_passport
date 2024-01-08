@@ -213,6 +213,8 @@
     {% endfor %}
 
     {% endif %}
+
+    {% if announcements %}
     <div>
       <h5 class="fw-bold mb-1">Announcements</h5>
       <a class="mb-0" href="{% url 'announcements' %}">View all</a>
@@ -228,6 +230,7 @@
     </div>
     <br>
     {% endfor %}
+    {% endif %}
   </div>
 </div>
 

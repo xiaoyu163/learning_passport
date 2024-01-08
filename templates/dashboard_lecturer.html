@@ -11,9 +11,9 @@
           // Function to toggle the class based on window width
           function toggleClassBasedOnWidth() {
               var windowWidth = $(window).width();
-              var $container = $("#container");
+              var $container = $("#flex-container");
               var $right = $("#right");
-              if (windowWidth > 1240) {
+              if (windowWidth > 1200) {
                   $container.css('display', 'flex');
                   $right.css('display', 'flex');
               } else {
@@ -38,7 +38,8 @@
 <h1> Dashboard </h1>
 <br>
 
-<div class="container">
+<div id="flex-container" class="container">
+  <div class="left-side" style="display:flex;">
     <div class="card profile-card">
         <div class="card-header">
             <h4 class="card-title">My Profile</h4>
@@ -64,62 +65,103 @@
 
     <div class="gap"></div>
 
-    <div class="info-cards">
-        <div class="card info-card card1">
-            <div class="card-body">
-              <center>
-                <div class="card-text">
-                  <h1><i class="fa-solid fa-graduation-cap" style="color: #6151fb"></i></h1>
-                  <strong>
-                    <p class="info-title">Bachelor of Arts<br>Chinese Studies</p>
-                  </strong>
-                  <h3>{{undergrad}}</h3>
-                </div>
-              </center>
+    <div id="right" class="info-cards">
+      <div class="card info-card card1">
+        <div class="card-body">
+          <center>
+            <div class="card-text">
+              <h1><i class="fa-solid fa-graduation-cap" style="color: #6151fb"></i></h1>
+              <strong>
+                <p class="info-title">Bachelor of Arts<br>Chinese Studies</p>
+              </strong>
+              <h3>{{undergrad}}</h3>
             </div>
-          </div>
-          <div class="card info-card card2">
-            <div class="card-body">
-              <center>
-                <div class="card-text">
-                  <h1><i class="fa-solid fa-book" style="color: #ed1d4d"></i></h1>
-                  <strong>
-                    <p class="info-title">Master of Chinese Studies<br>(Coursework)</p>
-                  </strong>
-                  <h3>{{master_cw}}</h3>
-                </div>
-              </center>
+          </center>
+        </div>
+      </div>
+      <div class="card info-card card2">
+        <div class="card-body">
+          <center>
+            <div class="card-text">
+              <h1><i class="fa-solid fa-book" style="color: #ed1d4d"></i></h1>
+              <strong>
+                <p class="info-title">Master of Chinese Studies<br>(Coursework)</p>
+              </strong>
+              <h3>{{master_cw}}</h3>
             </div>
-          </div>
-          <div class="card info-card card3">
-            <div class="card-body">
-              <center>
-                <div class="card-text">
-                  <h1><i class="fa-solid fa-flask" style="color: #1b8be3"></i></h1>
-                  <strong>
-                    <p class="info-title">Master of Arts <br>(Research) </p>
-                  </strong>
-                  <h3>{{master_re}}</h3>
-                </div>
-              </center>
+          </center>
+        </div>
+      </div>
+      <div class="card info-card card3">
+        <div class="card-body">
+          <center>
+            <div class="card-text">
+              <h1><i class="fa-solid fa-flask" style="color: #1b8be3"></i></h1>
+              <strong>
+                <p class="info-title">Master of Arts <br>(Research) </p>
+              </strong>
+              <h3>{{master_re}}</h3>
             </div>
-          </div>
-          <div class="card info-card card4">
-            <div class="card-body">
-              <center>
-                <div class="card-text">
-                  <h1><i class="fa-solid fa-clipboard-check" style="color: #ffa01f"></i></h1>
-                  <strong>
-                    <p class="info-title">Doctor of Philosophy<br>(Ph.D) </p>
-                  </strong>
-                  <h3>{{phd}}</h3>
-                </div>
-              </center>
+          </center>
+        </div>
+      </div>
+      <div class="card info-card card4">
+        <div class="card-body">
+          <center>
+            <div class="card-text">
+              <h1><i class="fa-solid fa-clipboard-check" style="color: #ffa01f"></i></h1>
+              <strong>
+                <p class="info-title">Doctor of Philosophy<br>(Ph.D) </p>
+              </strong>
+              <h3>{{phd}}</h3>
             </div>
-          </div>
+          </center>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if events or announcements %}
+  <div class="right-side">
+    {% if events %}
+    <div>
+      <h5 class="fw-bold mb-1">Registered Events</h5>
+      <a class="mb-0" href="{% url 'attendance' %}">View all</a>
     </div>
 
-    <div class="gap"></div>
+    {% for event in events %}
+    <a href="{% url 'event-detail' event.id %}">
+      <div class="card border border-info">
+        <div class="card-body">
+          <p><strong>{{event.e_name}}</strong>
+            <br>{{event.start.date}}
+          </p>
+        </div>
+      </div>
+    </a>
+    <br>
+    {% endfor %}
+
+    {% endif %}
+
+    {% if announcements %}
+    <div>
+      <h5 class="fw-bold mb-1">Announcements</h5>
+      <a class="mb-0" href="{% url 'announcements' %}">View all</a>
+    </div>
+    {% for ann in announcements %}
+    <div class="card border border-info">
+      <div class="card-header">
+        <strong>{{ann.title}}</strong>
+      </div>
+      <div class="card-body">
+        {{ann.content}}
+      </div>
+    </div>
+    <br>
+    {% endfor %}
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
 
 <br>

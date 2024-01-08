@@ -22,7 +22,6 @@
     flex: 2.0;
     background-color: #fff; /* Light grey background for analytics */
     padding: 20px;
-    display: flex;
 }
 
 .right-side {
