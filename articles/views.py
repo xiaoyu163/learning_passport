@@ -124,7 +124,8 @@ def submitEventView(request):
         
         elif 'internal_delete' in request.POST:
             event = Events.objects.get(id=request.POST['internal_delete'])
-            os.remove(base_dir + event.file.url)
+            if event.file:
+                os.remove(base_dir + event.file.url)
             event.file = None
             event.filename = None
             event.file_by = None
@@ -133,7 +134,8 @@ def submitEventView(request):
         
         elif 'external_delete' in request.POST:
             event_com = Event_Participants.objects.get(id=request.POST['external_delete'])
-            os.remove(base_dir + event_com.file.url)
+            if event_com.file:
+                os.remove(base_dir + event_com.file.url)
             event_com.file = None
             event_com.filename = None
             event_com.status = None
@@ -224,14 +226,16 @@ def submitOrgView(request):
 
         elif 'internal_delete' in request.POST:
             org = Organisation.objects.get(id=request.POST['internal_delete'])
-            file_path = base_dir + org.file.url
-            os.remove(file_path)
+            if org.file:
+                file_path = base_dir + org.file.url
+                os.remove(file_path)
             org.delete()
         
         elif 'external_delete' in request.POST:
             org_com = OrgComittee.objects.get(id=request.POST['external_delete'])
-            file_path = base_dir + org_com.file.url
-            os.remove(file_path)
+            if org_com.file:
+                file_path = base_dir + org_com.file.url
+                os.remove(file_path)
             org_com.delete()
 
         return redirect("upload-org")
@@ -305,13 +309,11 @@ def submitArticleView(request):
             print(article)
             
         elif 'art_delete' in request.POST:
-            print("In delete")
             art = Article.objects.get(id=request.POST['art_delete'])
-            file_url = art.file.url
-            print(file_url)
-            file_path = base_dir + file_url
-            print(file_path)
-            os.remove(file_path)
+            if art.file:
+                file_url = art.file.url
+                file_path = base_dir + file_url
+                os.remove(file_path)
             art.delete()
         return redirect ("upload-article")
 
@@ -350,8 +352,9 @@ def submitOtherComp (request):
             comp.save()
         elif 'other_delete' in request.POST:
             comp = OtherComp.objects.get(id=request.POST['other_delete'])
-            file_path = base_dir + comp.file.url
-            os.remove(file_path)
+            if comp.file:
+                file_path = base_dir + comp.file.url
+                os.remove(file_path)
             comp.delete()
 
         return redirect("upload-other")
@@ -649,9 +652,10 @@ def verArtView(request):
             art.save()
         elif "art_delete" in request.POST:
             art = Article.objects.get(id=request.POST['art_delete'])
-            file_url = art.file.url
-            file_path = base_dir + file_url
-            os.remove(file_path)
+            if art.file:
+                file_url = art.file.url
+                file_path = base_dir + file_url
+                os.remove(file_path)
             art.delete()
 
         return redirect("verify-article")

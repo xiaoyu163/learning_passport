@@ -305,7 +305,7 @@ def get_event_details(request, event_id):
             'speaker': event.speaker,
             'attendance': event.attendance,
             'on_time': event.enable_attendance,
-            'poster': event.poster.url,
+            'poster': event.poster.url if event.poster else None,
             'filename': event.filename,
             # Include other event details in the response as needed
         }

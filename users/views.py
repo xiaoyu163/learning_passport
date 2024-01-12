@@ -842,7 +842,8 @@ def dashboardView(request):
         selected_year = current_year
         upcoming_events = Events.objects.filter(start__gte=current_date.replace(tzinfo=None)).order_by("start")[:2]
         announcements = Announcement.objects.order_by("-created_time")[:2]
-        num_active = Student.objects.filter(user__is_active=1).count() if selected_year else None
+        num_active =  Student.objects.filter(enrol_sem__start__lte=current_year.start).exclude(grad_sem__end__lte=current_year.start).count()
+
         num_event = Events.objects.filter(start__gte=selected_year.start, end__lte=selected_year.end).count() if selected_year else None
         num_article = Article.objects.filter(date__gte=selected_year.start, date__lte=selected_year.end).count() if selected_year else None
         study_level = 1
@@ -896,7 +897,7 @@ def dashboardView(request):
                     elif study_level == '4':
                         num_active = active.filter(program=4).count()
                 else:
-                    students = Student.objects.filter(grad_sem__end__gte=selected_year.start, enrol_sem__start__lte=selected_year.start)
+                    students = Student.objects.filter(enrol_sem__start__lte=selected_year.start).exclude(grad_sem__end__lte=selected_year.start)
                     
                     if study_level == 'All':
                         num_active = students.count()
