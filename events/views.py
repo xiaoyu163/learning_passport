@@ -14,24 +14,9 @@ import pytz
 # Set the time zone to Malaysia
 malaysia_timezone = pytz.timezone('Asia/Kuala_Lumpur')
 
-# Get the current time in Malaysia
-current_time = datetime.now(malaysia_timezone)
-
-
-# def examplePage(request):
-#     return render (request, "try.html")
-
-# Create your views here.
-
-
-def dynamicInput (request):
-    context = {
-        "event_name": "Event 1"
-    }
-    return render (request, "event_com_form.html", context)
-
 @login_required
 def eventListView (request):
+    current_time = datetime.now(malaysia_timezone)
     base_dir = settings.BASE_DIR
 
     if request.user.role in 'SUPER ADMIN':
@@ -68,7 +53,7 @@ def eventListView (request):
             event.c_name = request.POST['event_name_c']
             event.e_name = request.POST['event_name_e']
             event.start = datetime.strptime(request.POST['event_start'], '%Y-%m-%dT%H:%M')
-            event.end = datetime.strptime(request.POST['event_end'], '%Y-%m-%dT%H:%M')           
+            event.end = datetime.strptime(request.POST['event_end'], '%Y-%m-%dT%H:%M')
             event.year = request.POST['event_start'][0:4]
             event.venue = request.POST['event_venue']
             event.speaker = request.POST['event_speaker']
@@ -121,6 +106,7 @@ def eventListView (request):
 
 @login_required
 def eventDetailView (request, id):
+    current_time = datetime.now(malaysia_timezone)
     event = Events.objects.get(id=id)
     if request.user.role in 'STUDENT':
         student = Student.objects.get(user_id=request.user.id)
@@ -178,6 +164,7 @@ def eventDetailView (request, id):
 
 @login_required
 def takeAttendanceView (request):
+    current_time = datetime.now(malaysia_timezone)
     if request.user.role in 'STUDENT':
         # To store event that attendance are currently available
         events = list()
@@ -188,9 +175,9 @@ def takeAttendanceView (request):
         for part in parts:
             start_time = part.event.start if part.event.start else None
             end_time = part.event.end if part.event.end else None
-            print("Start: ", start_time)
-            print("End: ", end_time)
-            print("Now: ", current_time)
+            print("Start: ", start_time.replace(tzinfo=None))
+            print("End: ", end_time.replace(tzinfo=None))
+            print("Now: ", current_time.replace(tzinfo=None))
             if part.event.enable_attendance==1:
                 events.append(part)
             elif start_time and end_time :

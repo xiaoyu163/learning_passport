@@ -75,7 +75,7 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     success_url = reverse_lazy('login')
 
 # Get the current time in Malaysia
-current_date = datetime.now(malaysia_timezone)
+
 
 def loginView(request):
     redirected_login_failed_link = 'login'
@@ -125,6 +125,7 @@ def logoutView(request):
     return redirect('login')
 
 def registerView(request):
+    current_date = datetime.now(malaysia_timezone)
     option_position = Lecturer.position.field.choices
     option_program = Student.program.field.choices
     lecturers = Lecturer.objects.filter(user__is_active=1)
@@ -489,6 +490,7 @@ def postgradDetailsView (request):
 @login_required
 @role_required(['SUPER ADMIN', 'ADMIN'])
 def semesterDatesView (request):
+    current_date = datetime.now(malaysia_timezone)
     current_sem = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
     all_semesters = Semester.objects.exclude(start__isnull=True).order_by("-academic_year","semester")
     student_enrol = list()
@@ -619,7 +621,7 @@ def activeReportView (request):
 
 # Create your views here.
 def contentPDF(request, student_id):
-
+    current_date = datetime.now(malaysia_timezone)
     student = Student.objects.get(id=student_id) 
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
 
@@ -742,6 +744,7 @@ def printAllView (request):
 
 @login_required
 def generateTranscriptView(request, user_id):
+    current_date = datetime.now(malaysia_timezone)
     page_name = "Generate Transcript"
     icon = "fa-solid fa-file-alt fa-xl"
 
@@ -835,6 +838,7 @@ def generateTranscriptView(request, user_id):
    
 @login_required
 def dashboardView(request):
+    current_date = datetime.now(malaysia_timezone)
     if request.user.role in 'SUPER ADMIN':
 
         years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
