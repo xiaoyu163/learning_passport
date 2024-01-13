@@ -6,6 +6,7 @@ from users.models import User,Student
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from users.decorators import role_required
 from django.http import JsonResponse
 import os
@@ -93,13 +94,17 @@ def eventListView (request):
             
             event.delete()
             base_dir = str(settings.BASE_DIR).replace("\\","/")
-            if event.file:
-                file_url = event.file.url
-                file_path = base_dir + file_url
-                os.remove(file_path)
-            if event.poster:
-                poster_path = base_dir + event.poster.url
-                os.remove(poster_path)
+            try:
+                if event.file:
+                    file_url = event.file.url
+                    file_path = base_dir + file_url
+                    os.remove(file_path)
+                if event.poster:
+                    poster_path = base_dir + event.poster.url
+                    os.remove(poster_path)
+            except Exception as e:
+                messages.error(request, e)
+                return redirect("events")
 
         return redirect ("events")
     return render (request, "event_list.html", context) 
