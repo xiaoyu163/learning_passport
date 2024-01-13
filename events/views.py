@@ -103,7 +103,7 @@ def eventListView (request):
                     poster_path = base_dir + event.poster.url
                     os.remove(poster_path)
             except Exception as e:
-                messages.error(request, e)
+                # messages.error(request, e)
                 return redirect("events")
 
         return redirect ("events")
