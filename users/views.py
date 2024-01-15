@@ -626,12 +626,12 @@ def contentPDF(request, student_id):
     current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
 
     # Event Participation
-    event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
-    event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__type')
+    event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__start','event__type')
+    event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__start','event__type')
 
     # Article
-    arts = Article.objects.filter(student=student, status=1, award__isnull=True)
-    awarded_arts = Article.objects.filter(student=student, award__isnull=False)    
+    arts = Article.objects.filter(student=student, status=1, award__isnull=True).order_by('date')
+    awarded_arts = Article.objects.filter(student=student, award__isnull=False).order_by('date')  
 
     # Event/Org Committee
     event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
@@ -644,7 +644,7 @@ def contentPDF(request, student_id):
     hod_name = User.objects.get(role="HEAD OF DEPARTMENT").full_name
 
     # Other Competition
-    other = OtherComp.objects.filter(student=student, status=1)
+    other = OtherComp.objects.filter(student=student, status=1).order_by('year')
 
     context = {
         "student": student,
@@ -753,16 +753,16 @@ def generateTranscriptView(request, user_id):
     students = ""
     if request.user.role in 'LECTURER':
         lecturer = Lecturer.objects.get(user=request.user)
-        students = Student.objects.filter(lecturer=lecturer)
+        students = Student.objects.filter(lecturer=lecturer) 
 
     if Student.objects.filter(user_id=user_id).exists():
         student = Student.objects.get(user_id=user_id) 
 
         # Event Participation
-        event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__type')
-        event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__type')
-        arts = Article.objects.filter(student=student, status=1, award__isnull=True)
-        awarded_arts = Article.objects.filter(student=student, status=1, award__isnull=False)
+        event_pars_in = Event_Participants.objects.filter(student=student, attendance=1, event__internal=1).order_by('event__start','event__type')
+        event_pars_ex = Event_Participants.objects.filter(student=student, attendance=1, event__internal=0).order_by('event__start','event__type')
+        arts = Article.objects.filter(student=student, status=1, award__isnull=True).order_by('date')
+        awarded_arts = Article.objects.filter(student=student, status=1, award__isnull=False).order_by('date')
         
         # Event/Org Committee
         event_coms_in = Event_Participants.objects.filter(student=student, status=1, position__isnull=False, event__internal=1).order_by('event__start')
@@ -775,7 +775,7 @@ def generateTranscriptView(request, user_id):
         hod_name = User.objects.get(role="HEAD OF DEPARTMENT").full_name
 
         # Other Competition
-        other = OtherComp.objects.filter(student=student, status=1)
+        other = OtherComp.objects.filter(student=student, status=1).order_by('year')
         context = {
             "page_name": page_name,
             "icon": icon,
