@@ -4,6 +4,7 @@
 <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
 
 <br>
+<input id="active" value="{{active}}" hidden>
 <form method="POST">
     {% csrf_token %}
     <div id="selection" style="width:30%;">
@@ -84,7 +85,8 @@
         var data = document.getElementById("student_list");
         var academicYear = document.getElementById("academic_year").value;
         var semester = document.getElementById("semester").value;
-        console.log(data)
+        var active = document.getElementById("active").value;
+        console.log(active)
         var file = XLSX.utils.table_to_book(data, { sheet: "Sheet1" });
 
         XLSX.write(file, {
@@ -92,7 +94,14 @@
             bookSST: true,
             type: 'base64',
         });
-        XLSX.writeFile(file, academicYear + "_" + semester + "_" + "graduate" + ".xlsx");
+
+        if (active){
+            XLSX.writeFile(file, academicYear + "_" + semester + "_" + "active" + ".xlsx");
+        }
+        else {
+            XLSX.writeFile(file, academicYear + "_" + semester + "_" + "graduate" + ".xlsx");
+
+        }
     }
 </script>
 {% endblock %}
