@@ -64,7 +64,6 @@ def eventListView (request):
             attendance = 1 if 'enable' in request.POST else 0
             if 'poster' in request.FILES:
                 event.poster = request.FILES['poster']
-                event.filename = request.FILES['poster']
             event.attendance = attendance
             event.save()
 
@@ -154,7 +153,6 @@ def eventDetailView (request, id):
         
         elif "poster" in request.POST:
             event.poster = request.FILES['poster']
-            event.filename = request.FILES['poster']
             event.save()
             return redirect (request.get_full_path())
 
