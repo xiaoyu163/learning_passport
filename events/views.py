@@ -172,7 +172,7 @@ def takeAttendanceView (request):
         # To store event that attendance are currently available
         events = list()
         student = Student.objects.get(user=request.user.id)
-        parts = Event_Participants.objects.filter(student=student, registered=1)
+        parts = Event_Participants.objects.filter(student=student, registered=1).order_by("-event__start")
         # To store registered event that are currently not available for attendance
         reg_events = list()
         for part in parts:
