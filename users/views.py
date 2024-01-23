@@ -839,6 +839,7 @@ def generateTranscriptView(request, user_id):
 @login_required
 def dashboardView(request):
     current_date = datetime.now(malaysia_timezone)
+    current_year = Semester.objects.filter(end__gte=current_date, start__lte=current_date).first()
     if request.user.role in 'SUPER ADMIN':
 
         years = Semester.objects.values('academic_year').distinct().order_by('academic_year')
@@ -1004,11 +1005,11 @@ def dashboardView(request):
         print(lecturer)
         upcoming_events = Events.objects.filter(start__gte=current_date.replace(tzinfo=None)).order_by("start")[:2]
         announcements = Announcement.objects.order_by("-created_time")[:2]
-        students = Student.objects.filter(lecturer=lecturer)
-        undergrad_students = students.filter(program=1)
-        master_cw = students.filter(program=2)
-        master_re = students.filter(program=3)
-        phd_students = students.filter(program=4)
+        students = Student.objects.filter(lecturer=lecturer,user__is_active=1)
+        undergrad_students = students.filter(program=1).filter(enrol_sem__start__lte=current_year.start).exclude(grad_sem__end__lte=current_year.start)
+        master_cw = students.filter(program=2).filter(enrol_sem__start__lte=current_year.start).exclude(grad_sem__end__lte=current_year.start)
+        master_re = students.filter(program=3).filter(enrol_sem__start__lte=current_year.start).exclude(grad_sem__end__lte=current_year.start)
+        phd_students = students.filter(program=4).filter(enrol_sem__start__lte=current_year.start).exclude(grad_sem__end__lte=current_year.start)
         print("students: ",students)
         context = {
             "lecturer": lecturer,
