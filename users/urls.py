@@ -29,6 +29,7 @@ urlpatterns = [
      path('get-semester-details/<int:semester_id>/', views.get_semester_details, name='get-semester-details'),
      path('semester-dates', views.semesterDatesView, name="semesters"),
      path('graduate-report', views.graduateReportView, name="graduate-report"),
+     path('inquiry', views.inquiryView, name="inquiry"),
      path('active-report', views.activeReportView, name="active-report"),
      path('postgrad', views.postgradDetailsView, name="postgrad"),
      path('generate-pdf/<int:student_id>', views.generatePDF, name="generate-pdf"),

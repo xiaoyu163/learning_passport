@@ -1,0 +1,26 @@
+{% extends "sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<br>
+<form method="POST">
+    {% csrf_token %}
+    <div class="form-outline" style="width: 50%;">
+        <input type="text" id="inq_title" name="inq_title" class="form-control">
+        <label class="form-label" for="inq_title" style="margin-left: 0px;">Inquiry Title</label>
+        <div class="form-notch">
+            <div class="form-notch-leading" style="width: 9px;"></div>
+            <div class="form-notch-middle" style="width: 87.2px;"></div>
+            <div class="form-notch-trailing"></div>
+        </div>
+    </div>
+    <br><br>
+    <div class="form-floating mb-3">
+        <textarea class="form-control content" id="inq_content" name="inq_content" rows="5" style="height: auto; width:50%" required></textarea>
+        <label for="art_apa">Inquiry Content</label>
+      </div>
+    <button class="btn btn-primary" type="submit"> 
+        <i class="fa-solid fa-mail fa-lg"></i>&nbsp;&nbsp;Submit Inquiry
+    </button>
+</form>
+{% endblock %}

@@ -59,6 +59,9 @@ from django.template.loader import render_to_string
 import pytz
 from PIL import Image
 
+from utils.emails import inquiryEmail
+
+
 base_dir = str(settings.BASE_DIR).replace("\\", "/")
 # Set the time zone to Malaysia
 malaysia_timezone = pytz.timezone('Asia/Kuala_Lumpur')
@@ -1024,9 +1027,19 @@ def dashboardView(request):
         }
         return render (request, "dashboard_lecturer.html", context)
     
-
-
-
+def inquiryView(request):
+    student = Student.objects.get(user=request.user)
+    if request.method == 'POST':
+        inquiry_title = request.POST['inq_title']
+        inquiry_content = request.POST['inq_content']
+        admin = User.objects.get(role="SUPER ADMIN")
+        inquiryEmail(request,[admin],[],request.user.full_name, student.matric_no,inquiry_title, inquiry_content)
+        return redirect ("inquiry")
+    context = {
+        "page_name": "Inquiry",
+        "icon": "fa fa-question"
+    }
+    return render (request, "inquiry.html",context)
     
 def get_student_details(request, student_id):
     try:

@@ -16,7 +16,7 @@ from .models import Article
 from datetime import datetime
 from django.http import JsonResponse
 
-from utils.emails import noMatricEmail
+from utils.emails import noMatricEmail, approvedEmail
 
 # Create your views here.
 base_dir = str(settings.BASE_DIR).replace("\\", "/")
@@ -426,12 +426,12 @@ def verEventView(request):
                 student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
                 event = Events.objects.get(id=request.POST['approve_in'])
                 event.status = 1
-                
+    
                 file_url = event.file.url
                 file_path = base_dir + file_url
-
+                uploaded_by = event.file_by
                 com_df = pd.read_excel(file_path,  names=["position", "matric"])
-                
+                print(com_df)
                 for com in com_df.iterrows():
                     if not Student.objects.filter(
                         matric_no=str(com[1]['matric']).upper()).exists():
@@ -460,11 +460,12 @@ def verEventView(request):
                 print(student_df)
                 messages.error(request, "Invalid matric numbers exists in Excel file. Please check email for details.")
             event.save()
-
+            approvedEmail(request,[uploaded_by.user],[request.user], event.e_name)
         elif 'approve_ex' in request.POST:
             event_par = Event_Participants.objects.get(id=request.POST['approve_ex'])
             event_par.status = 1
             event_par.save()
+            approvedEmail(request,[event_par.student.user],[request.user], event_par.event.e_name)
                        
         elif 'internal_delete' in request.POST:
             event = Events.objects.get(id=request.POST['internal_delete'])
@@ -557,6 +558,7 @@ def verOrgView(request):
 
                     file_url = org.file.url
                     file_path = base_dir + file_url 
+                    uploaded_by = org.file_by
                     com_df = pd.read_excel(
                         file_path,  names=["position", "matric"])
                     student_df = pd.DataFrame(columns=['Matric Number', 'Position'])
@@ -585,11 +587,13 @@ def verOrgView(request):
                     noMatricEmail(request, [request.user], [request.user], student_df, org.name)
                     messages.error(request, f"Invalid matric number exists in the file. Please check email for details.")
                 org.save()
+                approvedEmail(request,[uploaded_by.user],[request.user], org.name)
 
             else:
                 org_com = OrgComittee.objects.get(id=request.POST['approve_ex'])
                 org_com.status = 1
                 org_com.save()
+                approvedEmail(request,[org_com.student.user],[request.user], org_com.org.name)
 
         elif 'delete_in' in request.POST:
             org = Organisation.objects.get(id=request.POST['delete_in'])
@@ -648,8 +652,10 @@ def verArtView(request):
             art.save()
         elif "art_approve" in request.POST:
             art = Article.objects.get(id=request.POST['art_approve'])
+            uploaded_by = art.student
             art.status = 1
             art.save()
+            approvedEmail(request,[uploaded_by.user],[request.user], art.title)
         elif "art_delete" in request.POST:
             art = Article.objects.get(id=request.POST['art_delete'])
             if art.file:
@@ -698,8 +704,10 @@ def verOtherView (request):
             comp.save()
         elif 'approve' in request.POST:
             comp = OtherComp.objects.get(id=request.POST['approve'])
+            uploaded_by = comp.student
             comp.status = 1
             comp.save()
+            approvedEmail(request,[uploaded_by.user],[request.user], comp.name)
 
         elif 'other_delete' in request.POST:
             comp = OtherComp.objects.get(id=request.POST['other_delete'])

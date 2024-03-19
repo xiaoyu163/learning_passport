@@ -26,7 +26,7 @@ CSRF_TRUSTED_ORIGINS = ['https://learning-passport-633550e98be1.herokuapp.com','
 SECRET_KEY = 'django-insecure-_980un8=9_qw*mx7y!_!lfk_2r_5)pw-mxu5_ad-9epj9wu(_0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["127.0.0.1","learningpassport.me", "learning-passport-633550e98be1.herokuapp.com"]
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'events.apps.EventsConfig',
     'articles.apps.ArticlesConfig',
     "whitenoise.runserver_nostatic",
+    "treblle",
 ]
 
 MIDDLEWARE = [
@@ -56,7 +57,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'treblle.middleware.TreblleMiddleware',
 ]
+
+TREBLLE_INFO = {
+'api_key': 'IIa01LOVTbUbGV7C64s8LWy86Wl4IWjs',
+'project_id': 'x2fN8KmD97cHQXPQ'
+}
 
 ROOT_URLCONF = 'learning_passport.urls'
 
@@ -86,7 +93,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        # 'NAME': BASE_DIR / 'newdb.sqlite3'
     }
 }
 
